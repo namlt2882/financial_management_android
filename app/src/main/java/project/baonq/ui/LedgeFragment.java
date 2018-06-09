@@ -11,16 +11,16 @@ import android.view.ViewGroup;
 import project.baonq.menu.R;
 
 
-public class MenuOneFragment extends Fragment {
+public class LedgeFragment extends Fragment {
 
 
-    public MenuOneFragment() {
+    public LedgeFragment() {
         // Required empty public constructor
     }
 
     // TODO: Rename and change types and number of parameters
-    public static MenuOneFragment newInstance() {
-        MenuOneFragment fragment = new MenuOneFragment();
+    public static LedgeFragment newInstance() {
+        LedgeFragment fragment = new LedgeFragment();
         return fragment;
     }
 
@@ -32,6 +32,6 @@ public class MenuOneFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_menu_one, container, false);
+        return inflater.inflate(R.layout.ledge_fragment_layout, container, false);
     }
 }

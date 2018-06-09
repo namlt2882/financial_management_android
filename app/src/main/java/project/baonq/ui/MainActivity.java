@@ -50,13 +50,13 @@ public class MainActivity extends AppCompatActivity {
                         Fragment selectedFragment = null;
                         switch (item.getItemId()) {
                             case R.id.action_item1:
-                                selectedFragment = MenuOneFragment.newInstance();
+                                selectedFragment = LedgeFragment.newInstance();
                                 break;
                             case R.id.action_item2:
-                                selectedFragment = MenuTwoFragment.newInstance();
+                                selectedFragment = ReportFragment.newInstance();
                                 break;
                             case R.id.action_item4:
-                                selectedFragment = MenuFourFragment.newInstance();
+                                selectedFragment = SettingFragment.newInstance();
                                 break;
                         }
                         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Manually displaying the first fragment - one time only
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_layout, MenuOneFragment.newInstance());
+        transaction.replace(R.id.frame_layout, LedgeFragment.newInstance());
         transaction.addToBackStack(null);
         transaction.commit();
 
