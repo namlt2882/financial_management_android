@@ -2,12 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/settings"
+        android:id="@+id/notification"
         android:icon="@drawable/ic_notifications_none_black_24dp"
-        android:title="Settings"
+        android:title="Notification"
         app:showAsAction="always" />
-    <item android:title="Share"
-        android:id="@+id/share"/>
-    <item android:title="Search"
-        android:id="@+id/search"/>
+    <item android:title="Quay về ngày hôm nay"
+        android:id="@+id/returnToday"/>
+    <item android:title="Chuyển tiền đến ví khác"
+        android:id="@+id/transfer"/>
+    <item android:title="Điều chỉnh số dư"
+        android:id="@+id/adjustedOverbalance"/>
+    <item android:title="Đồng bộ"
+        android:id="@+id/synchonized"/>
 </menu>
