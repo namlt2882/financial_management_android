@@ -2,30 +2,27 @@ package project.baonq.ui;
 
 
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 
 import com.savvi.rangedatepicker.CalendarPickerView;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -49,9 +46,23 @@ public class MainActivity extends AppCompatActivity {
         setActionBarLayout("Chọn ngày");
         //set date picker
         initDatepicker();
+        //set float action button
+        initFloatActionButton();
         //set botttom navigation bar activities
         setFragmentBottomNavigationBarActivities();
 
+
+    }
+
+    private void initFloatActionButton() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, LedgeChoosenActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void initDatepicker() {

@@ -9,13 +9,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="project.baonq.ui.MainActivity">
+        <activity android:name="project.baonq.ui.LedgeChoosenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="project.baonq.ui.AddLedgeActivity"></activity>
+        <activity android:name="project.baonq.ui.MainActivity"></activity>
     </application>
 
 </manifest>
