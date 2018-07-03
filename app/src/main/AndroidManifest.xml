@@ -19,9 +19,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="project.baonq.ui.LoginActivity">
 
+        <activity android:name="project.baonq.ui.LoginActivity">
         </activity>
+        <activity android:name="project.baonq.ui.AddLedgeActivity"></activity>
+        <activity android:name="project.baonq.ui.LedgeChoosenActivity"></activity>
+
     </application>
 
 </manifest>
