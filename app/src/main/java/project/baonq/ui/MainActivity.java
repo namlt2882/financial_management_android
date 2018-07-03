@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         calendar = (CalendarPickerView) mView.findViewById(R.id.calendar_view);
         button = (Button) mView.findViewById(R.id.get_selected_dates);
         ArrayList<Integer> list = new ArrayList<>();
-        list.add(1);
+        list.add(0);
 
         calendar.deactivateDates(list);
         //this array use for high line important date
