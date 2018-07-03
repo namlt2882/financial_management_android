@@ -5,6 +5,7 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToMany;
 
 import java.util.List;
+
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
 
@@ -33,18 +34,22 @@ public class Ledger {
     @ToMany(referencedJoinProperty = "ledger_id")
     private List<TransactionGroup> transactionGroup;
 
-    /** Used to resolve relations */
+    /**
+     * Used to resolve relations
+     */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
 
-    /** Used for active entity operations. */
+    /**
+     * Used for active entity operations.
+     */
     @Generated(hash = 330045250)
     private transient LedgerDao myDao;
 
     @Generated(hash = 1771250483)
     public Ledger(Long id, int server_id, String name, String currency,
-            boolean counted_on_report, String insert_date, String last_update,
-            int status) {
+                  boolean counted_on_report, String insert_date, String last_update,
+                  int status) {
         this.id = id;
         this.server_id = server_id;
         this.name = name;
@@ -146,7 +151,9 @@ public class Ledger {
         return transaction;
     }
 
-    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    /**
+     * Resets a to-many relationship, making the next get call to query for a fresh result.
+     */
     @Generated(hash = 727791598)
     public synchronized void resetTransaction() {
         transaction = null;
@@ -175,7 +182,9 @@ public class Ledger {
         return transactionGroup;
     }
 
-    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    /**
+     * Resets a to-many relationship, making the next get call to query for a fresh result.
+     */
     @Generated(hash = 1298992400)
     public synchronized void resetTransactionGroup() {
         transactionGroup = null;
