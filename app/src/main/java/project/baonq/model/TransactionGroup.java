@@ -1,4 +1,4 @@
-package project.baonq.ui.DBModel;
+package project.baonq.model;
 
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;

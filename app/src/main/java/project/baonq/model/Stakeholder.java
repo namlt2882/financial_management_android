@@ -1,4 +1,4 @@
-package project.baonq.ui.DBModel;
+package project.baonq.model;
 
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
@@ -8,8 +8,8 @@ import java.util.List;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
 
-@Entity(nameInDb = "ledger")
-public class Ledger {
+@Entity(nameInDb = "stakeholder")
+public class Stakeholder {
     @Id(autoincrement = true)
     private Long id;
 
@@ -17,46 +17,33 @@ public class Ledger {
 
     private String name;
 
-    private String currency;
-
-    private boolean counted_on_report;
-
-    private String insert_date;
+    private String call_number;
 
     private String last_update;
 
-    private int status;
-
-    @ToMany(referencedJoinProperty = "ledger_id")
+    @ToMany(referencedJoinProperty = "debtor")
     private List<Transaction> transaction;
-
-    @ToMany(referencedJoinProperty = "ledger_id")
-    private List<TransactionGroup> transactionGroup;
 
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
 
     /** Used for active entity operations. */
-    @Generated(hash = 330045250)
-    private transient LedgerDao myDao;
+    @Generated(hash = 2085601650)
+    private transient StakeholderDao myDao;
 
-    @Generated(hash = 1771250483)
-    public Ledger(Long id, int server_id, String name, String currency,
-            boolean counted_on_report, String insert_date, String last_update,
-            int status) {
+    @Generated(hash = 737514376)
+    public Stakeholder(Long id, int server_id, String name, String call_number,
+            String last_update) {
         this.id = id;
         this.server_id = server_id;
         this.name = name;
-        this.currency = currency;
-        this.counted_on_report = counted_on_report;
-        this.insert_date = insert_date;
+        this.call_number = call_number;
         this.last_update = last_update;
-        this.status = status;
     }
 
-    @Generated(hash = 749187879)
-    public Ledger() {
+    @Generated(hash = 1507418917)
+    public Stakeholder() {
     }
 
     public Long getId() {
@@ -83,28 +70,12 @@ public class Ledger {
         this.name = name;
     }
 
-    public String getCurrency() {
-        return this.currency;
+    public String getCall_number() {
+        return this.call_number;
     }
 
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
-    public boolean getCounted_on_report() {
-        return this.counted_on_report;
-    }
-
-    public void setCounted_on_report(boolean counted_on_report) {
-        this.counted_on_report = counted_on_report;
-    }
-
-    public String getInsert_date() {
-        return this.insert_date;
-    }
-
-    public void setInsert_date(String insert_date) {
-        this.insert_date = insert_date;
+    public void setCall_number(String call_number) {
+        this.call_number = call_number;
     }
 
     public String getLast_update() {
@@ -115,19 +86,11 @@ public class Ledger {
         this.last_update = last_update;
     }
 
-    public int getStatus() {
-        return this.status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
     /**
      * To-many relationship, resolved on first access (and after reset).
      * Changes to to-many relations are not persisted, make changes to the target entity.
      */
-    @Generated(hash = 874397327)
+    @Generated(hash = 797658282)
     public List<Transaction> getTransaction() {
         if (transaction == null) {
             final DaoSession daoSession = this.daoSession;
@@ -136,7 +99,7 @@ public class Ledger {
             }
             TransactionDao targetDao = daoSession.getTransactionDao();
             List<Transaction> transactionNew = targetDao
-                    ._queryLedger_Transaction(id);
+                    ._queryStakeholder_Transaction(id);
             synchronized (this) {
                 if (transaction == null) {
                     transaction = transactionNew;
@@ -150,35 +113,6 @@ public class Ledger {
     @Generated(hash = 727791598)
     public synchronized void resetTransaction() {
         transaction = null;
-    }
-
-    /**
-     * To-many relationship, resolved on first access (and after reset).
-     * Changes to to-many relations are not persisted, make changes to the target entity.
-     */
-    @Generated(hash = 140434134)
-    public List<TransactionGroup> getTransactionGroup() {
-        if (transactionGroup == null) {
-            final DaoSession daoSession = this.daoSession;
-            if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
-            }
-            TransactionGroupDao targetDao = daoSession.getTransactionGroupDao();
-            List<TransactionGroup> transactionGroupNew = targetDao
-                    ._queryLedger_TransactionGroup(id);
-            synchronized (this) {
-                if (transactionGroup == null) {
-                    transactionGroup = transactionGroupNew;
-                }
-            }
-        }
-        return transactionGroup;
-    }
-
-    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
-    @Generated(hash = 1298992400)
-    public synchronized void resetTransactionGroup() {
-        transactionGroup = null;
     }
 
     /**
@@ -218,9 +152,9 @@ public class Ledger {
     }
 
     /** called by internal mechanisms, do not call yourself. */
-    @Generated(hash = 689260878)
+    @Generated(hash = 1078832940)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
-        myDao = daoSession != null ? daoSession.getLedgerDao() : null;
+        myDao = daoSession != null ? daoSession.getStakeholderDao() : null;
     }
 }

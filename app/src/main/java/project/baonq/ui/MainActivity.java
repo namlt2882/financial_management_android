@@ -1,7 +1,7 @@
 package project.baonq.ui;
 
-
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import project.baonq.menu.R;
+import project.baonq.util.UserManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,13 +31,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        if (UserManager.getUser() == null) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(false);
+        LayoutInflater mInflater = LayoutInflater.from(this);
+        View mCustomView = mInflater.inflate(R.layout.activity_main_menu_layout, null);
+        TextView mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
+        TextView mCashTextView = (TextView) mCustomView.findViewById(R.id.txtCash);
+        mTitleTextView.setText("My money");
+        mCashTextView.setText("2,000,000 đ");
         //set action bar layout
         setActionBarLayout();
-
         //set date picker
         initDatePicker();
-
         //set botttom navigation bar activities
         setFragmentBottomNavigationBarActivities();
 
