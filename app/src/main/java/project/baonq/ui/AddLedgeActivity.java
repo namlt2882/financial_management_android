@@ -10,18 +10,30 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.greenrobot.greendao.database.Database;
+
 import project.baonq.menu.R;
+import project.baonq.model.DaoSession;
+import project.baonq.model.Ledger;
+import project.baonq.model.LedgerDao;
+import project.baonq.service.App;
 
 public class AddLedgeActivity extends AppCompatActivity {
+
+    private Ledger ledger;
+    private DaoSession daoSession;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.NormalSizeAppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_ledge_layout);
+        daoSession = ((App) getApplication()).getDaoSession();
 
         //init action bar
         initActionBar();
@@ -29,6 +41,7 @@ public class AddLedgeActivity extends AppCompatActivity {
         initSpiner();
         //init menu element
         initMenuElement();
+        //create database
     }
 
     private void initMenuElement() {
@@ -46,6 +59,18 @@ public class AddLedgeActivity extends AppCompatActivity {
         });
     }
 
+    private void addLedger(String name, String currency, String currentBalance, boolean isChecked) {
+        if (ledger == null) {
+            ledger = new Ledger();
+        }
+        ledger.setName(name);
+        ledger.setCurrency(currency);
+        ledger.setCurrentBalance(currentBalance);
+        ledger.setCounted_on_report(isChecked);
+        LedgerDao ledgerDao = daoSession.getLedgerDao();
+        ledgerDao.insert(ledger);
+    }
+
     private void initSubmitText() {
         TextView txtSubmit = (TextView) findViewById(R.id.submitAddLedge);
         txtSubmit.setOnClickListener(new View.OnClickListener() {
@@ -54,10 +79,16 @@ public class AddLedgeActivity extends AppCompatActivity {
                 EditText edtName = (EditText) findViewById(R.id.txtCash);
                 EditText edtCurrentBalance = (EditText) findViewById(R.id.txtCurrentBalance);
                 Spinner spCurrency = (Spinner) findViewById(R.id.spinerCurrency);
+                CheckBox cbReport = (CheckBox) findViewById(R.id.cb_report);
                 Intent intent = getIntent();
-                intent.putExtra("name", edtName.getText().toString());
-                intent.putExtra("currentBalance", edtCurrentBalance.getText().toString());
-                intent.putExtra("currency", spCurrency.getSelectedItem().toString());
+                String name = edtName.getText().toString();
+                String currentBalance = edtCurrentBalance.getText().toString();
+                String currency = spCurrency.getSelectedItem().toString();
+                boolean isChecked = cbReport.isChecked();
+                intent.putExtra("name", name);
+                intent.putExtra("currentBalance", currentBalance);
+                intent.putExtra("currency", currency);
+                addLedger(name, currency, currentBalance, isChecked);
                 setResult(RESULT_OK, intent);
                 finish();
             }

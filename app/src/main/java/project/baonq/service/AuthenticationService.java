@@ -73,7 +73,7 @@ public class AuthenticationService extends BaseAuthService {
                 context.openFileInput(authenticationFileName));) {
             properties.load(in);
             jwt = properties.getProperty("jwt");
-            if (jwt != null) {
+            if (jwt != null && !"".equals(jwt)) {
                 setJwt(jwt);
                 setUser(getUserFromToken(jwt));
             }
