@@ -20,6 +20,8 @@ public class Ledger {
 
     private String currency;
 
+    private String currentBalance;
+
     private boolean counted_on_report;
 
     private String insert_date;
@@ -46,14 +48,14 @@ public class Ledger {
     @Generated(hash = 330045250)
     private transient LedgerDao myDao;
 
-    @Generated(hash = 1771250483)
-    public Ledger(Long id, int server_id, String name, String currency,
-                  boolean counted_on_report, String insert_date, String last_update,
-                  int status) {
+    @Generated(hash = 1626100731)
+    public Ledger(Long id, int server_id, String name, String currency, String currentBalance,
+            boolean counted_on_report, String insert_date, String last_update, int status) {
         this.id = id;
         this.server_id = server_id;
         this.name = name;
         this.currency = currency;
+        this.currentBalance = currentBalance;
         this.counted_on_report = counted_on_report;
         this.insert_date = insert_date;
         this.last_update = last_update;
@@ -224,6 +226,14 @@ public class Ledger {
             throw new DaoException("Entity is detached from DAO context");
         }
         myDao.update(this);
+    }
+
+    public String getCurrentBalance() {
+        return this.currentBalance;
+    }
+
+    public void setCurrentBalance(String currentBalance) {
+        this.currentBalance = currentBalance;
     }
 
     /** called by internal mechanisms, do not call yourself. */
