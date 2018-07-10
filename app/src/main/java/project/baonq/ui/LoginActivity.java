@@ -1,5 +1,6 @@
 package project.baonq.ui;
 
+import android.content.Intent;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,7 +13,7 @@ import project.baonq.service.BaseAuthService;
 
 public class LoginActivity extends AppCompatActivity {
     TextView txtError;
-
+    TextView txtRegister;
     AuthenticationService authenticationService;
 
     @Override
@@ -32,6 +33,14 @@ public class LoginActivity extends AppCompatActivity {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
+        txtRegister = findViewById(R.id.txtViewRegister);
+        txtRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getBaseContext(), RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void setErrorMessage(String message) {
