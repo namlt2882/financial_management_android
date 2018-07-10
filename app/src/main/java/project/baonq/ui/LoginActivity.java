@@ -23,6 +23,7 @@ public class LoginActivity extends AppCompatActivity {
         if (BaseAuthService.getJwt() != null) {
             finish();
         }
+        System.out.println("Original JWT: " + BaseAuthService.getJwt());
         //if user has not been logged in
         setContentView(R.layout.activity_login);
         txtError = findViewById(R.id.txtLoginError);

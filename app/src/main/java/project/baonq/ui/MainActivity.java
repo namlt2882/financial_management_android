@@ -1,8 +1,11 @@
 package project.baonq.ui;
 
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -32,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 
 import project.baonq.menu.R;
+import project.baonq.service.AuthenticationService;
 import project.baonq.util.UserManager;
 
 public class MainActivity extends AppCompatActivity {
@@ -65,8 +69,14 @@ public class MainActivity extends AppCompatActivity {
         initFloatActionButton();
         //set botttom navigation bar activities
         setFragmentBottomNavigationBarActivities();
+    }
 
-
+    public void restartApp() {
+        AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000,
+                PendingIntent.getActivity(this.getBaseContext(),
+                        0, new Intent(getIntent()), getIntent().getFlags()));
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     private void initFloatActionButton() {

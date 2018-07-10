@@ -16,6 +16,7 @@ import project.baonq.menu.R;
 
 public class AuthenticationService extends BaseAuthService {
     private static String loginUrl;
+    private static String logoutUrl;
     private Context context;
     public static String authenticationFileName = "auth.properties";
 
@@ -24,6 +25,8 @@ public class AuthenticationService extends BaseAuthService {
         Resources resources = context.getResources();
         loginUrl = resources.getString(R.string.server_name)
                 + resources.getString(R.string.login_url);
+        logoutUrl = resources.getString(R.string.server_name)
+                + resources.getString(R.string.logout_url);
         if (getJwt() == null) {
             try {
                 loadAuthenticationInfo();
@@ -66,14 +69,39 @@ public class AuthenticationService extends BaseAuthService {
         return jwt;
     }
 
+    public void logout() throws Exception {
+//        URL url = new URL(logoutUrl);
+//        HttpURLConnection conn = buildBasicConnection(url, true);
+//        conn.setRequestMethod("POST");
+//        BufferedReader in = null;
+//        System.out.println(logoutUrl);
+//        try {
+//            //read response value
+//            if (conn.getResponseCode() == 200) {
+//                System.out.println("Logout successfully!");
+//                //invalidate jwt
+//            } else {
+//                in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+//                throw new Exception(read(in));
+//            }
+//        } finally {
+//            if (in != null) {
+//                in.close();
+//            }
+//        }
+        saveAuthenticationInfo("");
+    }
+
     private void loadAuthenticationInfo() throws Exception {
         String jwt = null;
+        setJwt(null);
+        setUser(null);
         Properties properties = new Properties();
         try (InputStreamReader in = new InputStreamReader(
                 context.openFileInput(authenticationFileName));) {
             properties.load(in);
             jwt = properties.getProperty("jwt");
-            if (jwt != null) {
+            if (jwt != null && !jwt.equals("")) {
                 setJwt(jwt);
                 setUser(getUserFromToken(jwt));
             }
@@ -81,11 +109,18 @@ public class AuthenticationService extends BaseAuthService {
     }
 
     private void saveAuthenticationInfo(String jwt) {
-        setJwt(jwt);
+        if ("".equals(jwt)) {
+            setJwt(null);
+        } else {
+            setJwt(jwt);
+        }
         Properties properties = new Properties();
-        properties.setProperty("jwt", jwt);
         try (OutputStreamWriter out = new OutputStreamWriter(
-                context.openFileOutput(authenticationFileName, Context.MODE_PRIVATE));) {
+                context.openFileOutput(authenticationFileName, Context.MODE_PRIVATE));
+             InputStreamReader in = new InputStreamReader(
+                     context.openFileInput(authenticationFileName));) {
+            properties.load(in);
+            properties.setProperty("jwt", jwt);
             properties.store(out, "");
         } catch (Exception e) {
             e.printStackTrace();
