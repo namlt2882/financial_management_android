@@ -29,6 +29,6 @@ public class SettingFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.menu_fragment_layout, container, false);
+        return inflater.inflate(R.layout.setting_fragment_layout, container, false);
     }
 }
