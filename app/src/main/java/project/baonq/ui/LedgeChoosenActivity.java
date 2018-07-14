@@ -9,19 +9,26 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import project.baonq.menu.R;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Ledger;
 import project.baonq.model.LedgerDao;
+import project.baonq.model.Transaction;
 import project.baonq.service.App;
+import project.baonq.service.LedgerService;
+import project.baonq.service.TransactionService;
+import project.baonq.util.ConvertUtil;
 
 public class LedgeChoosenActivity extends AppCompatActivity {
     private final static int LAYOUT_INFO = 1;
+    private final static int LAYOUT_UPDATE = 2;
 
     private Ledger ledger;
     private DaoSession daoSession;
@@ -40,30 +47,13 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         initLayout();
     }
 
-    private List<Ledger> getLedgerList() {
-        if (ledger == null) {
-            ledger = new Ledger();
-        }
-        LedgerDao ledgerDao = daoSession.getLedgerDao();
-        List<Ledger> ledgerList = ledgerDao.loadAll();
-        return ledgerList;
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == LAYOUT_INFO) {
+        if (requestCode == LAYOUT_INFO || requestCode == LAYOUT_UPDATE) {
             if (resultCode == RESULT_OK) {
-                View submitLayout = getLayoutInflater().inflate(R.layout.add_ledge_submit_layout, null);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                layoutParams.setMargins(0, 2, 0, 0);
-                submitLayout.setLayoutParams(layoutParams);
-                TextView txtTitle = submitLayout.findViewById(R.id.txtTittle);
-                TextView txtCash = submitLayout.findViewById(R.id.txtCash);
-                txtTitle.setText(data.getStringExtra("name"));
-                txtCash.setText(data.getStringExtra("currentBalance"));
-                LinearLayout contentLedgeChosenLayout = (LinearLayout) findViewById(R.id.contentLedgerChosen);
-                contentLedgeChosenLayout.addView(submitLayout);
+                finish();
+                startActivity(getIntent());
             }
         }
     }
@@ -86,22 +76,90 @@ public class LedgeChoosenActivity extends AppCompatActivity {
 
     private void loadDataFromSessionDao() {
         List<Ledger> ledgerList = getLedgerList();
-        for (Ledger ledger : ledgerList) {
-            createNewRowData(ledger.getName(), ledger.getCurrentBalance());
+        double totalLedgerCash = 0;
+        String currency = "";
+        //in case this is not have any ledger
+        if (ledgerList != null) {
+            currency = ConvertUtil.convertCurrency(ledgerList.get(0).getCurrency());
         }
+
+        for (Ledger ledger : ledgerList) {
+            List<Transaction> transactionList = getTransactionListById(ledger.getId());
+            double transactionSum = 0;
+            if (transactionList != null) {
+                transactionSum = sumOfTransaction(transactionList);
+            }
+            createNewRowData(ledger, transactionSum);
+            totalLedgerCash += transactionSum;
+        }
+        setTotalLedgerCash(totalLedgerCash, currency);
     }
 
-    private void createNewRowData(String title, String cash) {
+    private double sumOfTransaction(List<Transaction> transactionList) {
+        double sum = 0;
+        for (Transaction item : transactionList) {
+            sum += item.getBalance();
+        }
+        return sum;
+    }
+
+    private List<Ledger> getLedgerList() {
+        daoSession = ((App) getApplication()).getDaoSession();
+        LedgerService.setDaoSession(daoSession);
+        List<Ledger> ledgerList = LedgerService.getAll();
+        return ledgerList;
+    }
+
+    private List<Transaction> getTransactionListById(Long ledger_id) {
+        TransactionService.setDaoSession(daoSession);
+        return TransactionService.getTransactionByLedger_Id(ledger_id);
+    }
+
+    private void createNewRowData(final Ledger ledger, double sum) {
         View submitLayout = getLayoutInflater().inflate(R.layout.add_ledge_submit_layout, null);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         layoutParams.setMargins(0, 2, 0, 0);
         submitLayout.setLayoutParams(layoutParams);
         TextView txtTitle = submitLayout.findViewById(R.id.txtTittle);
         TextView txtCash = submitLayout.findViewById(R.id.txtCash);
-        txtTitle.setText(title);
-        txtCash.setText(cash);
+        txtTitle.setText(ledger.getName());
+        String currentBalanceFormat = ConvertUtil.convertCashFormat(sum);
+        txtCash.setText(currentBalanceFormat + ConvertUtil.convertCurrency(ledger.getCurrency()));
+
+        //create image button
+        createImageButton(ledger, sum, submitLayout);
+
         LinearLayout contentLedgeChosenLayout = (LinearLayout) findViewById(R.id.contentLedgerChosen);
         contentLedgeChosenLayout.addView(submitLayout);
+    }
+
+    private void setTotalLedgerCash(double totalLedgerCash, String currency) {
+        TextView txtLedgerCashSum = (TextView) findViewById(R.id.txtLedgerCashSum);
+        String totalCash = ConvertUtil.convertCashFormat(totalLedgerCash);
+        txtLedgerCashSum.setText(totalCash + currency);
+    }
+
+    private void createImageButton(final Ledger ledger, final double sum, View submitLayout) {
+        ImageButton imageButton = new ImageButton(this);
+        imageButton.setImageResource(R.drawable.ic_edit_black_24dp);
+        LinearLayout.LayoutParams imageButtonParam = new LinearLayout.LayoutParams(0, 45);
+        imageButtonParam.weight = 0.1f;
+        imageButtonParam.setMargins(0, 15, 0, 0);
+        imageButton.setLayoutParams(imageButtonParam);
+        imageButton.setBackground(getResources().getDrawable(R.color.colorWhite));
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LedgeChoosenActivity.this, AddLedgeActivity.class);
+                intent.putExtra("id", ledger.getId());
+                intent.putExtra("name", ledger.getName());
+                intent.putExtra("currency", ledger.getCurrency());
+                intent.putExtra("currentBalance", sum);
+                startActivityForResult(intent, LAYOUT_UPDATE);
+            }
+        });
+        LinearLayout submitLayOutLinear = submitLayout.findViewById(R.id.container);
+        submitLayOutLinear.addView(imageButton);
     }
 
     private void initActionBar() {

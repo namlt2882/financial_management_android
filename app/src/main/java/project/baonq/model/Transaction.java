@@ -33,7 +33,7 @@ public class Transaction {
     @ToOne(joinProperty = "debtor")
     private Stakeholder stakeholder;
 
-    private String insert_date;
+    private long insert_date;
 
     private String last_update;
 
@@ -47,10 +47,10 @@ public class Transaction {
     @Generated(hash = 947191939)
     private transient TransactionDao myDao;
 
-    @Generated(hash = 117320504)
+    @Generated(hash = 120528602)
     public Transaction(Long id, int server_id, Long ledger_id, Long group_id,
             double balance, String tdate, String note, int counted_on_report,
-            Long debtor, String insert_date, String last_update, int status) {
+            Long debtor, long insert_date, String last_update, int status) {
         this.id = id;
         this.server_id = server_id;
         this.ledger_id = ledger_id;
@@ -141,11 +141,11 @@ public class Transaction {
         this.debtor = debtor;
     }
 
-    public String getInsert_date() {
+    public long getInsert_date() {
         return this.insert_date;
     }
 
-    public void setInsert_date(String insert_date) {
+    public void setInsert_date(long insert_date) {
         this.insert_date = insert_date;
     }
 
@@ -305,4 +305,6 @@ public class Transaction {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getTransactionDao() : null;
     }
+
+   
 }

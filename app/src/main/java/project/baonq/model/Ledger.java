@@ -20,13 +20,11 @@ public class Ledger {
 
     private String currency;
 
-    private String currentBalance;
-
     private boolean counted_on_report;
 
-    private String insert_date;
+    private Long insert_date;
 
-    private String last_update;
+    private Long last_update;
 
     private int status;
 
@@ -36,26 +34,22 @@ public class Ledger {
     @ToMany(referencedJoinProperty = "ledger_id")
     private List<TransactionGroup> transactionGroup;
 
-    /**
-     * Used to resolve relations
-     */
+    /** Used to resolve relations */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
 
-    /**
-     * Used for active entity operations.
-     */
+    /** Used for active entity operations. */
     @Generated(hash = 330045250)
     private transient LedgerDao myDao;
 
-    @Generated(hash = 1626100731)
-    public Ledger(Long id, int server_id, String name, String currency, String currentBalance,
-            boolean counted_on_report, String insert_date, String last_update, int status) {
+    @Generated(hash = 2022160349)
+    public Ledger(Long id, int server_id, String name, String currency,
+            boolean counted_on_report, Long insert_date, Long last_update,
+            int status) {
         this.id = id;
         this.server_id = server_id;
         this.name = name;
         this.currency = currency;
-        this.currentBalance = currentBalance;
         this.counted_on_report = counted_on_report;
         this.insert_date = insert_date;
         this.last_update = last_update;
@@ -106,19 +100,19 @@ public class Ledger {
         this.counted_on_report = counted_on_report;
     }
 
-    public String getInsert_date() {
+    public Long getInsert_date() {
         return this.insert_date;
     }
 
-    public void setInsert_date(String insert_date) {
+    public void setInsert_date(Long insert_date) {
         this.insert_date = insert_date;
     }
 
-    public String getLast_update() {
+    public Long getLast_update() {
         return this.last_update;
     }
 
-    public void setLast_update(String last_update) {
+    public void setLast_update(Long last_update) {
         this.last_update = last_update;
     }
 
@@ -153,9 +147,7 @@ public class Ledger {
         return transaction;
     }
 
-    /**
-     * Resets a to-many relationship, making the next get call to query for a fresh result.
-     */
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
     @Generated(hash = 727791598)
     public synchronized void resetTransaction() {
         transaction = null;
@@ -184,9 +176,7 @@ public class Ledger {
         return transactionGroup;
     }
 
-    /**
-     * Resets a to-many relationship, making the next get call to query for a fresh result.
-     */
+    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
     @Generated(hash = 1298992400)
     public synchronized void resetTransactionGroup() {
         transactionGroup = null;
@@ -228,18 +218,12 @@ public class Ledger {
         myDao.update(this);
     }
 
-    public String getCurrentBalance() {
-        return this.currentBalance;
-    }
-
-    public void setCurrentBalance(String currentBalance) {
-        this.currentBalance = currentBalance;
-    }
-
     /** called by internal mechanisms, do not call yourself. */
     @Generated(hash = 689260878)
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getLedgerDao() : null;
     }
+    
+    
 }
