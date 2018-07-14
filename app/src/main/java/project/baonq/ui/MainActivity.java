@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import project.baonq.menu.R;
 import project.baonq.util.UserManager;
 
@@ -47,15 +48,6 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayShowTitleEnabled(false);
-        LayoutInflater mInflater = LayoutInflater.from(this);
-        View mCustomView = mInflater.inflate(R.layout.activity_main_menu_layout, null);
-        TextView mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
-        TextView mCashTextView = (TextView) mCustomView.findViewById(R.id.txtCash);
-        mTitleTextView.setText("My money");
-        mCashTextView.setText("2,000,000 đ");
-        //set action bar layout
 
         //set date picker
         setActionBarLayout("Chọn ngày");
@@ -69,15 +61,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void imageClick(View view) {
+        Intent intent = new Intent(MainActivity.this, LedgeChoosenActivity.class);
+        startActivity(intent);
+    }
+
     private void initFloatActionButton() {
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LedgeChoosenActivity.class);
-                startActivity(intent);
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(MainActivity.this, LedgeChoosenActivity.class);
+//                startActivity(intent);
+//            }
+//        });
     }
 
     private void initDatepicker() {
@@ -223,6 +220,14 @@ public class MainActivity extends AppCompatActivity {
         TextView mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
         TextView mCashTextView = (TextView) mCustomView.findViewById(R.id.txtCash);
         Button mEdtDate = (Button) mCustomView.findViewById(R.id.editDate);
+        CircleImageView circleImage = (CircleImageView) mCustomView.findViewById(R.id.circleImage);
+        circleImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, LedgeChoosenActivity.class);
+                startActivity(intent);
+            }
+        });
         mTitleTextView.setText("Tiền của tôi:");
         mCashTextView.setText("2,000,000 đ");
         mEdtDate.setText(edtDateText);
