@@ -28,11 +28,13 @@ import project.baonq.menu.R;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
+import project.baonq.service.TransactionService;
 import project.baonq.ui.MainActivity;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
 public class AddTransaction extends AppCompatActivity {
+    private DaoSession daoSession;
 
     final Calendar myCalendar = Calendar.getInstance();
 
@@ -41,6 +43,7 @@ public class AddTransaction extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_transaction);
 
+        daoSession = ((project.baonq.service.App) getApplication()).getDaoSession();
         Button btn = null;
 
         btn = (Button) findViewById(R.id.btnCategory);
@@ -89,7 +92,6 @@ public class AddTransaction extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Transaction currentTransaction = null;
                 EditText tmp = (EditText)findViewById(R.id.nmAmount);
                 String txtNote = findViewById(R.id.txtNote).toString();
                 String date = findViewById(R.id.txtDate).toString();
@@ -101,24 +103,17 @@ public class AddTransaction extends AppCompatActivity {
                             .setNegativeButton("OK", null)
                             .show();
                 } else {
-//                    double amount = Double.parseDouble(tmp.getText().toString());
-//
-//                    if (currentTransaction == null) {
-//                        currentTransaction = new Transaction();
-//                    }
-//                    currentTransaction.setBalance(amount);
-//                    currentTransaction.setNote(txtNote);
-//                    currentTransaction.setTdate(date);
-//                    currentTransaction.setInsert_date(LocalDate.now().toString());
-//                    App app = new App();
-//
-//                    TransactionDao transactionDao = app.getDaoSession().getTransactionDao();
-//                    transactionDao.insert(currentTransaction);
+                    daoSession = ((project.baonq.service.App) getApplication()).getDaoSession();
+                    TransactionService.setDaoSession(daoSession);
+
+                    double amount = Double.parseDouble(tmp.getText().toString());
+
+                    Intent intent = new Intent(AddTransaction.this, MainActivity.class);
+                    startActivity(intent);
                 }
 
 
-                Intent intent = new Intent(AddTransaction.this, MainActivity.class);
-                startActivity(intent);
+
             }
         });
     }

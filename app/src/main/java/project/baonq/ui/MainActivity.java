@@ -34,10 +34,10 @@ import java.util.Locale;
 import project.baonq.AddTransaction.AddTransaction;
 import project.baonq.App;
 import project.baonq.menu.R;
+import project.baonq.model.DaoSession;
 import project.baonq.util.UserManager;
 
 public class MainActivity extends AppCompatActivity {
-
     CalendarPickerView calendar;
     Button button;
 
