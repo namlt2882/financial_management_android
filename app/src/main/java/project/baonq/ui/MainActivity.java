@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Locale;
 
 import project.baonq.AddTransaction.AddTransaction;
-import project.baonq.App;
 import project.baonq.menu.R;
 import project.baonq.model.DaoSession;
 import project.baonq.model.LedgerDao;

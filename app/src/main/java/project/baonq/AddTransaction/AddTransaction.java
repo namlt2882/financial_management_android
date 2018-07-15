@@ -23,13 +23,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import project.baonq.App;
+import project.baonq.model.Ledger;
+import project.baonq.service.App;
 import project.baonq.menu.R;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
+import project.baonq.service.LedgerService;
 import project.baonq.service.TransactionService;
+import project.baonq.ui.LedgeChoosenActivity;
 import project.baonq.ui.MainActivity;
+import project.baonq.util.ConvertUtil;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
@@ -93,34 +97,35 @@ public class AddTransaction extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText tmp = (EditText)findViewById(R.id.nmAmount);
-                String txtNote = findViewById(R.id.txtNote).toString();
-                String date = findViewById(R.id.txtDate).toString();
-
-                if (tmp.getText().toString().isEmpty() || txtNote.isEmpty() || date.isEmpty()) {
-                    new AlertDialog.Builder(AddTransaction.this)
-                            .setTitle("Oops")
-                            .setMessage("Please fill all field")
-                            .setNegativeButton("OK", null)
-                            .show();
-                } else {
-                    daoSession = ((project.baonq.service.App) getApplication()).getDaoSession();
-                    TransactionService.setDaoSession(daoSession);
-
-
-                    double amount = Double.parseDouble(tmp.getText().toString());
-                    Transaction transaction = new Transaction();
-                    transaction.setBalance(amount);
-                    transaction.setNote(txtNote);
-                    transaction.setTdate(date);
-                    transaction.setInsert_date(LocalDate.now().toString());
-                    dao = daoSession.getTransactionDao();
-                    dao.insert(transaction);
-
-                    Intent intent = new Intent(AddTransaction.this, MainActivity.class);
+//                EditText tmp = (EditText)findViewById(R.id.nmAmount);
+//                String txtNote = findViewById(R.id.txtNote).toString();
+//                String date = findViewById(R.id.txtDate).toString();
+//
+//                if (tmp.getText().toString().isEmpty() || txtNote.isEmpty() || date.isEmpty()) {
+//                    new AlertDialog.Builder(AddTransaction.this)
+//                            .setTitle("Oops")
+//                            .setMessage("Please fill all field")
+//                            .setNegativeButton("OK", null)
+//                            .show();
+//                } else {
+//                    daoSession = ((project.baonq.service.App) getApplication()).getDaoSession();
+//                    TransactionService.setDaoSession(daoSession);
+//
+//
+//                    double amount = Double.parseDouble(tmp.getText().toString());
+//                    Transaction transaction = new Transaction();
+//                    transaction.setBalance(amount);
+//                    transaction.setNote(txtNote);
+//                    transaction.setTdate(date);
+//                    transaction.setInsert_date(LocalDate.now().toString());
+//                    dao = daoSession.getTransactionDao();
+//                    dao.insert(transaction);
+//
+//                    Intent intent = new Intent(AddTransaction.this, MainActivity.class);
+//                    startActivity(intent);
+//                }
+                Intent intent = new Intent(AddTransaction.this, ChooseLedger.class);
                     startActivity(intent);
-                }
-
 
 
             }
@@ -137,5 +142,15 @@ public class AddTransaction extends AppCompatActivity {
         EditText txt = (EditText) findViewById(R.id.txtDate);
         txt.setText(sdf.format(myCalendar.getTime()));
     }
+
+    public void generateLedger(){
+
+        daoSession = ((App) getApplication()).getDaoSession();
+        LedgerService.setDaoSession(daoSession);
+        List<Ledger> ledgerList = LedgerService.getAll();
+    }
+
+
+
 
 }
