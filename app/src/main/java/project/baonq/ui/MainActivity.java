@@ -31,6 +31,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import project.baonq.AddTransaction.AddTransaction;
+import project.baonq.App;
 import project.baonq.menu.R;
 import project.baonq.util.UserManager;
 
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         if (UserManager.getUser() == null) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
@@ -74,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LedgeChoosenActivity.class);
+                Intent intent = new Intent(MainActivity.this, AddTransaction.class);
                 startActivity(intent);
             }
         });
