@@ -1,6 +1,7 @@
 package project.baonq.service;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +24,6 @@ public class AuthenticationService extends BaseAuthService {
     private static String logoutUrl;
     private static String registerUrl;
     private Context context;
-    public static String authenticationFileName = "auth.properties";
 
     public AuthenticationService(Context context) {
         this.context = context;
@@ -35,13 +35,7 @@ public class AuthenticationService extends BaseAuthService {
         registerUrl = resources.getString(R.string.server_name)
                 + resources.getString(R.string.register_url);
         if (getJwt() == null) {
-            try {
-                loadAuthenticationInfo();
-            } catch (FileNotFoundException e) {
-                saveAuthenticationInfo("");
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage());
-            }
+            loadAuthenticationInfo();
         }
     }
 
@@ -81,7 +75,7 @@ public class AuthenticationService extends BaseAuthService {
         //build connection
         URL url = new URL(registerUrl);
         HttpURLConnection conn = buildBasicConnection(url);
-        conn.setRequestProperty("Content-Type","application/json; charset=UTF-8");
+        conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
         conn.setRequestMethod("POST");
         BufferedReader in = null;
         ObjectMapper om = new ObjectMapper();
@@ -104,7 +98,7 @@ public class AuthenticationService extends BaseAuthService {
         return result;
     }
 
-    public void logout() throws Exception {
+    public void logout() {
 //        URL url = new URL(logoutUrl);
 //        HttpURLConnection conn = buildBasicConnection(url, true);
 //        conn.setRequestMethod("POST");
@@ -127,39 +121,34 @@ public class AuthenticationService extends BaseAuthService {
         saveAuthenticationInfo("");
     }
 
-    private void loadAuthenticationInfo() throws Exception {
+    public boolean isLoggedIn() {
+        return getJwt() != null && !"".equals(getJwt());
+    }
+
+    private void loadAuthenticationInfo() {
         String jwt = null;
         setJwt(null);
         setUser(null);
-        Properties properties = new Properties();
-        try (InputStreamReader in = new InputStreamReader(
-                context.openFileInput(authenticationFileName));) {
-            properties.load(in);
-            jwt = properties.getProperty("jwt");
-            if (jwt != null && !jwt.equals("")) {
-                setJwt(jwt);
-                setUser(getUserFromToken(jwt));
-            }
+        SharedPreferences sharedPreferences =
+                context.getSharedPreferences("auth", Context.MODE_PRIVATE);
+        jwt = sharedPreferences.getString("jwt", null);
+        if (jwt != null && !"".equals(jwt)) {
+            setJwt(jwt);
+            setUser(getUserFromToken(jwt));
         }
     }
 
     private void saveAuthenticationInfo(String jwt) {
-        if ("".equals(jwt)) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("auth", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        if ("".equals(jwt) || jwt == null) {
             setJwt(null);
+            editor.remove("jwt");
         } else {
             setJwt(jwt);
+            editor.putString("jwt", jwt);
         }
-        Properties properties = new Properties();
-        try (OutputStreamWriter out = new OutputStreamWriter(
-                context.openFileOutput(authenticationFileName, Context.MODE_PRIVATE));
-             InputStreamReader in = new InputStreamReader(
-                     context.openFileInput(authenticationFileName));) {
-            properties.load(in);
-            properties.setProperty("jwt", jwt);
-            properties.store(out, "");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        editor.commit();
     }
 
 }

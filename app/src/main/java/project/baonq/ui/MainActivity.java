@@ -2,7 +2,6 @@ package project.baonq.ui;
 
 
 import android.app.AlarmManager;
-import android.app.DatePickerDialog;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -36,7 +35,6 @@ import java.util.Locale;
 
 import project.baonq.menu.R;
 import project.baonq.service.AuthenticationService;
-import project.baonq.util.UserManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (UserManager.getUser() == null) {
+        AuthenticationService authService = new AuthenticationService(this);
+        if (!authService.isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }

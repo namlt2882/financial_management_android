@@ -9,7 +9,7 @@
     <string name="item_4">Mở rộng</string>
 
     <!--Server info-->
-    <string name="server_name">http://192.168.0.176:9999/api</string>
+    <string name="server_name">http://192.168.0.100:9999/api</string>
     <string name="login_url">/login</string>
     <string name="logout_url">/logout</string>
     <string name="register_url">/register</string>
