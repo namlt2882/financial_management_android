@@ -35,12 +35,14 @@ import project.baonq.AddTransaction.AddTransaction;
 import project.baonq.App;
 import project.baonq.menu.R;
 import project.baonq.model.DaoSession;
+import project.baonq.model.LedgerDao;
+import project.baonq.model.Transaction;
+import project.baonq.model.TransactionDao;
 import project.baonq.util.UserManager;
 
 public class MainActivity extends AppCompatActivity {
     CalendarPickerView calendar;
     Button button;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         initFloatActionButton();
         //set botttom navigation bar activities
         setFragmentBottomNavigationBarActivities();
+
 
 
     }

@@ -35,6 +35,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 
 public class AddTransaction extends AppCompatActivity {
     private DaoSession daoSession;
+    private static TransactionDao dao;
 
     final Calendar myCalendar = Calendar.getInstance();
 
@@ -106,7 +107,15 @@ public class AddTransaction extends AppCompatActivity {
                     daoSession = ((project.baonq.service.App) getApplication()).getDaoSession();
                     TransactionService.setDaoSession(daoSession);
 
+
                     double amount = Double.parseDouble(tmp.getText().toString());
+                    Transaction transaction = new Transaction();
+                    transaction.setBalance(amount);
+                    transaction.setNote(txtNote);
+                    transaction.setTdate(date);
+                    transaction.setInsert_date(LocalDate.now().toString());
+                    dao = daoSession.getTransactionDao();
+                    dao.insert(transaction);
 
                     Intent intent = new Intent(AddTransaction.this, MainActivity.class);
                     startActivity(intent);
@@ -116,6 +125,9 @@ public class AddTransaction extends AppCompatActivity {
 
             }
         });
+        dao = daoSession.getTransactionDao();
+        List<Transaction> list =  dao.loadAll();
+        Log.i("Transaction",String.valueOf(list.size()));
     }
 
     private void updateLabel() {

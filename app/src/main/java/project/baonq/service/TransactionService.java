@@ -34,10 +34,7 @@ public class TransactionService {
         transactionDao.update(transactionForUpdate);
     }
 
-    public static List<Transaction> getTransactionByLedger_Id(Long ledger_id) {
-        transactionDao = daoSession.getTransactionDao();
-        return transactionDao.queryBuilder().where(TransactionDao.Properties.Ledger_id.eq(ledger_id)).list();
-    }
+
 
     private static Transaction getTransactionNeedForUpdate(Long ledger_id, Long group_id) {
         transactionDao = daoSession.getTransactionDao();
