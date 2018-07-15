@@ -1,11 +1,7 @@
 package project.baonq.AddTransaction;
 
 import android.app.DatePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,13 +9,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -30,9 +25,6 @@ import project.baonq.model.DaoSession;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
 import project.baonq.service.LedgerService;
-import project.baonq.service.TransactionService;
-import project.baonq.ui.LedgeChoosenActivity;
-import project.baonq.ui.MainActivity;
 import project.baonq.util.ConvertUtil;
 
 import static android.widget.Toast.LENGTH_SHORT;
@@ -51,9 +43,9 @@ public class AddTransaction extends AppCompatActivity {
         daoSession = ((project.baonq.service.App) getApplication()).getDaoSession();
         Button btn = null;
 
-        btn = (Button) findViewById(R.id.btnCategory);
+        btn = findViewById(R.id.btnCategory);
         btn.setText("Select category");
-        EditText txt = (EditText) findViewById(R.id.txtDate);
+        EditText txt = findViewById(R.id.txtDate);
 
 
         btn.setOnClickListener(new View.OnClickListener() {
@@ -65,7 +57,7 @@ public class AddTransaction extends AppCompatActivity {
         });
 
 
-        EditText edittext = (EditText) findViewById(R.id.txtDate);
+        EditText edittext = findViewById(R.id.txtDate);
         final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 
             @Override
@@ -93,7 +85,7 @@ public class AddTransaction extends AppCompatActivity {
 
 
 
-        btn = (Button) findViewById(R.id.btnWallet);
+        btn = findViewById(R.id.btnWallet);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,24 +125,33 @@ public class AddTransaction extends AppCompatActivity {
         dao = daoSession.getTransactionDao();
         List<Transaction> list =  dao.loadAll();
         Log.i("Transaction",String.valueOf(list.size()));
+        File dbFile = getDatabasePath("ledger");
+        Log.i("db:",dbFile.getAbsolutePath());
     }
 
     private void updateLabel() {
         String myFormat = "MM/dd/yy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-        EditText txt = (EditText) findViewById(R.id.txtDate);
+        EditText txt = findViewById(R.id.txtDate);
         txt.setText(sdf.format(myCalendar.getTime()));
     }
 
     public void generateLedger(){
 
+
         daoSession = ((App) getApplication()).getDaoSession();
+
         LedgerService.setDaoSession(daoSession);
+        Long i = LedgerService.addLedger("ABC","VND",true);
+        i = LedgerService.addLedger("Agribank","VND",true);
+        i=LedgerService.addLedger("Sacom","VND",true);
         List<Ledger> ledgerList = LedgerService.getAll();
+
+        }
     }
 
 
 
 
-}
+

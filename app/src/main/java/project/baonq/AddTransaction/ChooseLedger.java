@@ -6,6 +6,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -40,6 +41,7 @@ public class ChooseLedger extends AppCompatActivity {
         initActionBar();
         //set init for menu action
         initMenuAction();
+        getLedgerData();
     }
 
     @Override
@@ -83,23 +85,7 @@ public class ChooseLedger extends AppCompatActivity {
         return ledgerList;
     }
 
-    private void createNewRowData(final Ledger ledger, double sum) {
-        View submitLayout = getLayoutInflater().inflate(R.layout.add_ledge_submit_layout, null);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.setMargins(0, 2, 0, 0);
-        submitLayout.setLayoutParams(layoutParams);
-        TextView txtTitle = submitLayout.findViewById(R.id.txtTittle);
-        TextView txtCash = submitLayout.findViewById(R.id.txtCash);
-        txtTitle.setText(ledger.getName());
-        String currentBalanceFormat = ConvertUtil.convertCashFormat(sum);
-        txtCash.setText(currentBalanceFormat + ConvertUtil.convertCurrency(ledger.getCurrency()));
 
-        //create image button
-        createImageButton(ledger, sum, submitLayout);
-
-        LinearLayout contentLedgeChosenLayout = (LinearLayout) findViewById(R.id.contentLedgerChosen);
-        contentLedgeChosenLayout.addView(submitLayout);
-    }
 
     private void createImageButton(final Ledger ledger, final double sum, View submitLayout) {
         ImageButton imageButton = new ImageButton(this);
@@ -143,5 +129,42 @@ public class ChooseLedger extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    private void getLedgerData(){
+        daoSession = ((App) getApplication()).getDaoSession();
+
+        LedgerService.setDaoSession(daoSession);
+        List<Ledger> ledgerList = LedgerService.getAll();
+
+
+        for (Ledger ledger : ledgerList) {
+            createNewRowData(ledger, 0);
+        }
+
+    }
+
+
+    private void createNewRowData(final Ledger ledger, double sum) {
+        View submitLayout = getLayoutInflater().inflate(R.layout.add_ledge_submit_layout, null);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(0, 2, 0, 0);
+        submitLayout.setLayoutParams(layoutParams);
+        TextView txtTitle = submitLayout.findViewById(R.id.txtTittle);
+        TextView txtCash = submitLayout.findViewById(R.id.txtCash);
+        txtTitle.setText(ledger.getName());
+        String currentBalanceFormat = ConvertUtil.convertCashFormat(sum);
+        txtCash.setText(currentBalanceFormat + ConvertUtil.convertCurrency(ledger.getCurrency()));
+        submitLayout.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                Log.i("ledger id",String.valueOf(ledger.getId()));
+                                            }
+                                        });
+        //create image button
+
+        LinearLayout contentLedgeChosenLayout = (LinearLayout)findViewById(R.id.abcd);
+        Log.i("test",String.valueOf(contentLedgeChosenLayout));
+        contentLedgeChosenLayout.addView(submitLayout);
     }
 }
