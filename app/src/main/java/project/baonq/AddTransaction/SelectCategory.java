@@ -13,7 +13,6 @@ import java.util.List;
 
 import project.baonq.menu.R;
 import project.baonq.model.TransactionGroup;
-import project.baonq.model.TransactionGroupDao;
 
 public class SelectCategory extends AppCompatActivity {
 
@@ -26,8 +25,8 @@ public class SelectCategory extends AppCompatActivity {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         // Add Fragments to adapter one by one
-        adapter.addFragment(new FragmentOne(), "FRAG1");
-        adapter.addFragment(new FragmentTwo(), "FRAG2");
+        adapter.addFragment(new ExpenseFragment(), "FRAG1");
+        adapter.addFragment(new IncomeFragment(), "FRAG2");
         viewPager.setAdapter(adapter);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
