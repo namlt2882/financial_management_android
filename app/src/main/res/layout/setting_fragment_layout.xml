@@ -117,11 +117,12 @@
         android:layout_below="@id/settingGroup1">
 
         <Button
+            android:id="@+id/btnLogout"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:background="@color/colorWhite"
             android:text="Đăng xuất"
             android:textColor="@color/colorGreen"
-            android:textSize="25dp" />
+            android:textSize="25dp"/>
     </RelativeLayout>
 </RelativeLayout>

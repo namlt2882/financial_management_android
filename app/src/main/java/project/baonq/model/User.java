@@ -18,10 +18,26 @@ public class User implements java.io.Serializable {
     private Date birthday;
     private Date insertDate = new Date();
     private Date lastUpdate = new Date();
-//    private int status = UserStatus.ENABLE.getStatus();
-//    private UserSetting userSetting;
+    private int status;
+    private UserSetting userSetting;
 
     public User() {
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public UserSetting getUserSetting() {
+        return userSetting;
+    }
+
+    public void setUserSetting(UserSetting userSetting) {
+        this.userSetting = userSetting;
     }
 
     public String getUsername() {

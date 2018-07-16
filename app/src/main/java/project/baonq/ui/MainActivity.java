@@ -1,8 +1,10 @@
 package project.baonq.ui;
 
 
-import android.app.DatePickerDialog;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -33,7 +35,7 @@ import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import project.baonq.menu.R;
-import project.baonq.util.UserManager;
+import project.baonq.service.AuthenticationService;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (UserManager.getUser() == null) {
+        AuthenticationService authService = new AuthenticationService(this);
+        if (!authService.isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
@@ -57,8 +60,14 @@ public class MainActivity extends AppCompatActivity {
         initFloatActionButton();
         //set botttom navigation bar activities
         setFragmentBottomNavigationBarActivities();
+    }
 
-
+    public void restartApp() {
+        AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000,
+                PendingIntent.getActivity(this.getBaseContext(),
+                        0, new Intent(getIntent()), getIntent().getFlags()));
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     public void imageClick(View view) {
