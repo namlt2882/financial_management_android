@@ -105,14 +105,12 @@ public class LedgeChoosenActivity extends AppCompatActivity {
 
     private List<Ledger> getLedgerList() {
         daoSession = ((App) getApplication()).getDaoSession();
-        LedgerService.setDaoSession(daoSession);
-        List<Ledger> ledgerList = LedgerService.getAll();
+        List<Ledger> ledgerList = new LedgerService(daoSession).getAll();
         return ledgerList;
     }
 
     private List<Transaction> getTransactionListById(Long ledger_id) {
-        TransactionService.setDaoSession(daoSession);
-        return TransactionService.getTransactionByLedger_Id(ledger_id);
+        return new TransactionService(daoSession).getTransactionByLedger_Id(ledger_id);
     }
 
     private void createNewRowData(final Ledger ledger, double sum) {

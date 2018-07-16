@@ -1,5 +1,7 @@
 package project.baonq.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToOne;
@@ -9,9 +11,10 @@ import org.greenrobot.greendao.DaoException;
 @Entity(nameInDb = "transaction")
 public class Transaction {
     @Id(autoincrement = true)
+    @JsonProperty("local_id")
     private Long id;
-
-    private int server_id;
+    @JsonProperty("server_id")
+    private Long server_id;
 
     private Long ledger_id;
     @ToOne(joinProperty = "ledger_id")
@@ -29,28 +32,26 @@ public class Transaction {
 
     private int counted_on_report;
 
-    private Long debtor;
-    @ToOne(joinProperty = "debtor")
-    private Stakeholder stakeholder;
+    private Long insert_date;
 
-    private long insert_date;
-
-    private String last_update;
+    private Long last_update;
 
     private int status;
-
-    /** Used to resolve relations */
+    /**
+     * Used to resolve relations
+     */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
-
-    /** Used for active entity operations. */
+    /**
+     * Used for active entity operations.
+     */
     @Generated(hash = 947191939)
     private transient TransactionDao myDao;
 
-    @Generated(hash = 120528602)
-    public Transaction(Long id, int server_id, Long ledger_id, Long group_id,
-            double balance, String tdate, String note, int counted_on_report,
-            Long debtor, long insert_date, String last_update, int status) {
+    @Generated(hash = 1404437688)
+    public Transaction(Long id, Long server_id, Long ledger_id, Long group_id,
+                       double balance, String tdate, String note, int counted_on_report,
+                       Long insert_date, Long last_update, int status) {
         this.id = id;
         this.server_id = server_id;
         this.ledger_id = ledger_id;
@@ -59,7 +60,6 @@ public class Transaction {
         this.tdate = tdate;
         this.note = note;
         this.counted_on_report = counted_on_report;
-        this.debtor = debtor;
         this.insert_date = insert_date;
         this.last_update = last_update;
         this.status = status;
@@ -77,11 +77,11 @@ public class Transaction {
         this.id = id;
     }
 
-    public int getServer_id() {
+    public Long getServer_id() {
         return this.server_id;
     }
 
-    public void setServer_id(int server_id) {
+    public void setServer_id(Long server_id) {
         this.server_id = server_id;
     }
 
@@ -133,27 +133,19 @@ public class Transaction {
         this.counted_on_report = counted_on_report;
     }
 
-    public Long getDebtor() {
-        return this.debtor;
-    }
-
-    public void setDebtor(Long debtor) {
-        this.debtor = debtor;
-    }
-
-    public long getInsert_date() {
+    public Long getInsert_date() {
         return this.insert_date;
     }
 
-    public void setInsert_date(long insert_date) {
+    public void setInsert_date(Long insert_date) {
         this.insert_date = insert_date;
     }
 
-    public String getLast_update() {
+    public Long getLast_update() {
         return this.last_update;
     }
 
-    public void setLast_update(String last_update) {
+    public void setLast_update(Long last_update) {
         this.last_update = last_update;
     }
 
@@ -168,7 +160,9 @@ public class Transaction {
     @Generated(hash = 811996760)
     private transient Long ledger__resolvedKey;
 
-    /** To-one relationship, resolved on first access. */
+    /**
+     * To-one relationship, resolved on first access.
+     */
     @Generated(hash = 795162030)
     public Ledger getLedger() {
         Long __key = this.ledger_id;
@@ -187,7 +181,9 @@ public class Transaction {
         return ledger;
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 40980851)
     public void setLedger(Ledger ledger) {
         synchronized (this) {
@@ -200,7 +196,9 @@ public class Transaction {
     @Generated(hash = 921422356)
     private transient Long transactionGroup__resolvedKey;
 
-    /** To-one relationship, resolved on first access. */
+    /**
+     * To-one relationship, resolved on first access.
+     */
     @Generated(hash = 1803766632)
     public TransactionGroup getTransactionGroup() {
         Long __key = this.group_id;
@@ -220,46 +218,15 @@ public class Transaction {
         return transactionGroup;
     }
 
-    /** called by internal mechanisms, do not call yourself. */
+    /**
+     * called by internal mechanisms, do not call yourself.
+     */
     @Generated(hash = 1987925296)
     public void setTransactionGroup(TransactionGroup transactionGroup) {
         synchronized (this) {
             this.transactionGroup = transactionGroup;
             group_id = transactionGroup == null ? null : transactionGroup.getId();
             transactionGroup__resolvedKey = group_id;
-        }
-    }
-
-    @Generated(hash = 1155562071)
-    private transient Long stakeholder__resolvedKey;
-
-    /** To-one relationship, resolved on first access. */
-    @Generated(hash = 690488490)
-    public Stakeholder getStakeholder() {
-        Long __key = this.debtor;
-        if (stakeholder__resolvedKey == null
-                || !stakeholder__resolvedKey.equals(__key)) {
-            final DaoSession daoSession = this.daoSession;
-            if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
-            }
-            StakeholderDao targetDao = daoSession.getStakeholderDao();
-            Stakeholder stakeholderNew = targetDao.load(__key);
-            synchronized (this) {
-                stakeholder = stakeholderNew;
-                stakeholder__resolvedKey = __key;
-            }
-        }
-        return stakeholder;
-    }
-
-    /** called by internal mechanisms, do not call yourself. */
-    @Generated(hash = 1685709960)
-    public void setStakeholder(Stakeholder stakeholder) {
-        synchronized (this) {
-            this.stakeholder = stakeholder;
-            debtor = stakeholder == null ? null : stakeholder.getId();
-            stakeholder__resolvedKey = debtor;
         }
     }
 
@@ -306,5 +273,5 @@ public class Transaction {
         myDao = daoSession != null ? daoSession.getTransactionDao() : null;
     }
 
-   
+
 }

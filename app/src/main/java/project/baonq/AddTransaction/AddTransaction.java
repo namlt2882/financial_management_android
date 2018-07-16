@@ -2,6 +2,7 @@ package project.baonq.AddTransaction;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,7 +15,9 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -25,6 +28,7 @@ import project.baonq.model.DaoSession;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
 import project.baonq.service.LedgerService;
+import project.baonq.ui.MainActivity;
 import project.baonq.util.ConvertUtil;
 
 import static android.widget.Toast.LENGTH_SHORT;
@@ -84,49 +88,57 @@ public class AddTransaction extends AppCompatActivity {
         });
 
 
-
         btn = findViewById(R.id.btnWallet);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                EditText tmp = (EditText)findViewById(R.id.nmAmount);
-//                String txtNote = findViewById(R.id.txtNote).toString();
-//                String date = findViewById(R.id.txtDate).toString();
-//
-//                if (tmp.getText().toString().isEmpty() || txtNote.isEmpty() || date.isEmpty()) {
-//                    new AlertDialog.Builder(AddTransaction.this)
-//                            .setTitle("Oops")
-//                            .setMessage("Please fill all field")
-//                            .setNegativeButton("OK", null)
-//                            .show();
-//                } else {
-//                    daoSession = ((project.baonq.service.App) getApplication()).getDaoSession();
-//                    TransactionService.setDaoSession(daoSession);
-//
-//
-//                    double amount = Double.parseDouble(tmp.getText().toString());
-//                    Transaction transaction = new Transaction();
-//                    transaction.setBalance(amount);
-//                    transaction.setNote(txtNote);
-//                    transaction.setTdate(date);
-//                    transaction.setInsert_date(LocalDate.now().toString());
-//                    dao = daoSession.getTransactionDao();
-//                    dao.insert(transaction);
-//
-//                    Intent intent = new Intent(AddTransaction.this, MainActivity.class);
-//                    startActivity(intent);
-//                }
                 Intent intent = new Intent(AddTransaction.this, ChooseLedger.class);
-                    startActivity(intent);
+                startActivity(intent);
+            }
+        });
 
+        btn = findViewById(R.id.btnCurrency);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText tmp = (EditText) findViewById(R.id.nmAmount);
+                String txtNote = ((EditText) findViewById(R.id.txtNote))
+                        .getText().toString();
+                String date = ((EditText) findViewById(R.id.txtDate)).getText().toString();
+
+                if (tmp.getText().toString().isEmpty() || txtNote.isEmpty() || date.isEmpty()) {
+                    new AlertDialog.Builder(AddTransaction.this)
+                            .setTitle("Oops")
+                            .setMessage("Please fill all field")
+                            .setNegativeButton("OK", null)
+                            .show();
+                } else {
+                    daoSession = ((project.baonq.service.App) getApplication()).getDaoSession();
+
+                    double amount = Double.parseDouble(tmp.getText().toString());
+                    Transaction transaction = new Transaction();
+                    transaction.setBalance(amount);
+                    transaction.setNote(txtNote);
+                    transaction.setTdate(date);
+                    Date currentDate = new Date();
+                    transaction.setInsert_date(currentDate.getTime());
+                    transaction.setLast_update(currentDate.getTime());
+                    dao = daoSession.getTransactionDao();
+                    dao.insert(transaction);
+
+                    Intent intent = new Intent(AddTransaction.this, MainActivity.class);
+                    startActivity(intent);
+                }
 
             }
         });
+
+
         dao = daoSession.getTransactionDao();
-        List<Transaction> list =  dao.loadAll();
-        Log.i("Transaction",String.valueOf(list.size()));
+        List<Transaction> list = dao.loadAll();
+        Log.i("Transaction", String.valueOf(list.size()));
         File dbFile = getDatabasePath("ledger");
-        Log.i("db:",dbFile.getAbsolutePath());
+        Log.i("db:", dbFile.getAbsolutePath());
     }
 
     private void updateLabel() {
@@ -137,19 +149,7 @@ public class AddTransaction extends AppCompatActivity {
         txt.setText(sdf.format(myCalendar.getTime()));
     }
 
-    public void generateLedger(){
-
-
-        daoSession = ((App) getApplication()).getDaoSession();
-
-        LedgerService.setDaoSession(daoSession);
-        Long i = LedgerService.addLedger("ABC","VND",true);
-        i = LedgerService.addLedger("Agribank","VND",true);
-        i=LedgerService.addLedger("Sacom","VND",true);
-        List<Ledger> ledgerList = LedgerService.getAll();
-
-        }
-    }
+}
 
 
 

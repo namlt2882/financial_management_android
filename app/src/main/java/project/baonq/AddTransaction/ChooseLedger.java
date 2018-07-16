@@ -32,6 +32,7 @@ public class ChooseLedger extends AppCompatActivity {
 
     private Ledger ledger;
     private DaoSession daoSession;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,11 +81,9 @@ public class ChooseLedger extends AppCompatActivity {
 
     private List<Ledger> getLedgerList() {
         daoSession = ((App) getApplication()).getDaoSession();
-        LedgerService.setDaoSession(daoSession);
-        List<Ledger> ledgerList = LedgerService.getAll();
+        List<Ledger> ledgerList = new LedgerService(daoSession).getAll();
         return ledgerList;
     }
-
 
 
     private void createImageButton(final Ledger ledger, final double sum, View submitLayout) {
@@ -131,12 +130,10 @@ public class ChooseLedger extends AppCompatActivity {
         });
     }
 
-    private void getLedgerData(){
+    private void getLedgerData() {
         daoSession = ((App) getApplication()).getDaoSession();
 
-        LedgerService.setDaoSession(daoSession);
-        List<Ledger> ledgerList = LedgerService.getAll();
-
+        List<Ledger> ledgerList = new LedgerService(daoSession).getAll();
 
         for (Ledger ledger : ledgerList) {
             createNewRowData(ledger, 0);
@@ -156,15 +153,15 @@ public class ChooseLedger extends AppCompatActivity {
         String currentBalanceFormat = ConvertUtil.convertCashFormat(sum);
         txtCash.setText(currentBalanceFormat + ConvertUtil.convertCurrency(ledger.getCurrency()));
         submitLayout.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                Log.i("ledger id",String.valueOf(ledger.getId()));
-                                            }
-                                        });
+            @Override
+            public void onClick(View v) {
+                Log.i("ledger id", String.valueOf(ledger.getId()));
+            }
+        });
         //create image button
 
-        LinearLayout contentLedgeChosenLayout = (LinearLayout)findViewById(R.id.abcd);
-        Log.i("test",String.valueOf(contentLedgeChosenLayout));
+        LinearLayout contentLedgeChosenLayout = (LinearLayout) findViewById(R.id.abcd);
+        Log.i("test", String.valueOf(contentLedgeChosenLayout));
         contentLedgeChosenLayout.addView(submitLayout);
     }
 }

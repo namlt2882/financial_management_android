@@ -1,5 +1,7 @@
 package project.baonq.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToMany;
@@ -12,9 +14,10 @@ import org.greenrobot.greendao.DaoException;
 @Entity(nameInDb = "ledger")
 public class Ledger {
     @Id(autoincrement = true)
+    @JsonProperty("local_id")
     private Long id;
-
-    private int server_id;
+    @JsonProperty("server_id")
+    private Long server_id;
 
     private String name;
 
@@ -34,18 +37,22 @@ public class Ledger {
     @ToMany(referencedJoinProperty = "ledger_id")
     private List<TransactionGroup> transactionGroup;
 
-    /** Used to resolve relations */
+    /**
+     * Used to resolve relations
+     */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
 
-    /** Used for active entity operations. */
+    /**
+     * Used for active entity operations.
+     */
     @Generated(hash = 330045250)
     private transient LedgerDao myDao;
 
-    @Generated(hash = 2022160349)
-    public Ledger(Long id, int server_id, String name, String currency,
-            boolean counted_on_report, Long insert_date, Long last_update,
-            int status) {
+    @Generated(hash = 1629661636)
+    public Ledger(Long id, Long server_id, String name, String currency,
+                  boolean counted_on_report, Long insert_date, Long last_update,
+                  int status) {
         this.id = id;
         this.server_id = server_id;
         this.name = name;
@@ -68,11 +75,11 @@ public class Ledger {
         this.id = id;
     }
 
-    public int getServer_id() {
+    public Long getServer_id() {
         return this.server_id;
     }
 
-    public void setServer_id(int server_id) {
+    public void setServer_id(Long server_id) {
         this.server_id = server_id;
     }
 
@@ -147,7 +154,9 @@ public class Ledger {
         return transaction;
     }
 
-    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    /**
+     * Resets a to-many relationship, making the next get call to query for a fresh result.
+     */
     @Generated(hash = 727791598)
     public synchronized void resetTransaction() {
         transaction = null;
@@ -176,7 +185,9 @@ public class Ledger {
         return transactionGroup;
     }
 
-    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
+    /**
+     * Resets a to-many relationship, making the next get call to query for a fresh result.
+     */
     @Generated(hash = 1298992400)
     public synchronized void resetTransactionGroup() {
         transactionGroup = null;
@@ -224,6 +235,6 @@ public class Ledger {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getLedgerDao() : null;
     }
-    
-    
+
+
 }
