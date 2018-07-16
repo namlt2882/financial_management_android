@@ -1,10 +1,6 @@
 package project.baonq.service;
 
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 
-import java.util.Calendar;
 import java.util.List;
 
 import project.baonq.model.DaoSession;
@@ -32,6 +28,7 @@ public class LedgerService {
         ledger.setCounted_on_report(isReport);
         long now = System.currentTimeMillis();
         ledger.setInsert_date(now);
+        ledger.setLast_update(now);
         ledgerDao = daoSession.getLedgerDao();
         ledgerDao.insert(ledger);
         return ledgerDao.getKey(ledger);

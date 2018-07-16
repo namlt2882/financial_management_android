@@ -25,7 +25,9 @@
         <activity android:name="project.baonq.ui.AddLedgeActivity"></activity>
         <activity android:name="project.baonq.ui.LedgeChoosenActivity"></activity>
         <activity android:name="project.baonq.ui.RegisterActivity"></activity>
-
+        <activity android:name="project.baonq.AddTransaction.AddTransaction"></activity>
+        <activity android:name="project.baonq.AddTransaction.SelectCategory" />
+        <activity android:name="project.baonq.AddTransaction.ChooseLedger"></activity>
     </application>
 
 </manifest>

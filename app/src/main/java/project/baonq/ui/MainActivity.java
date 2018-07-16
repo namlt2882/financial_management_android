@@ -36,9 +36,15 @@ import java.util.Locale;
 import de.hdodenhof.circleimageview.CircleImageView;
 import project.baonq.menu.R;
 import project.baonq.service.AuthenticationService;
+import project.baonq.AddTransaction.AddTransaction;
+import project.baonq.model.DaoSession;
+import project.baonq.model.LedgerDao;
+import project.baonq.model.Transaction;
+import project.baonq.model.TransactionDao;
+import project.baonq.util.UserManager;
+
 
 public class MainActivity extends AppCompatActivity {
-
     CalendarPickerView calendar;
     Button button;
 
@@ -46,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         AuthenticationService authService = new AuthenticationService(this);
         if (!authService.isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
@@ -76,14 +83,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initFloatActionButton() {
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(MainActivity.this, LedgeChoosenActivity.class);
-//                startActivity(intent);
-//            }
-//        });
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AddTransaction.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void initDatepicker() {

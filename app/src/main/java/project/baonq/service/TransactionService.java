@@ -3,10 +3,9 @@ package project.baonq.service;
 import java.util.List;
 
 import project.baonq.model.DaoSession;
-import project.baonq.model.Ledger;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
-import project.baonq.model.TransactionGroup;
+
 
 public class TransactionService {
     private static DaoSession daoSession;
@@ -21,6 +20,7 @@ public class TransactionService {
         TransactionService.daoSession = daoSession;
     }
 
+
     public static Long addTransaction(Long ledger_id, Long group_id, double balance, long insert_date, int status) {
         transaction = new Transaction();
         transaction.setLedger_id(ledger_id);
@@ -33,6 +33,14 @@ public class TransactionService {
         return transactionDao.getKey(transaction);
     }
 
+    public static void addTransaction(double amount, String txtNote, String date) {
+//        transaction = new Transaction();
+//        transaction.setBalance(amount);
+//        transaction.setNote(txtNote);
+//        transaction.setTdate(date);
+//        transaction.setInsert_date(LocalDate.now().toString());
+    }
+
     public static void updateTransaction(Long ledger_id, Long group_id, double balance) {
         Transaction transactionForUpdate = getTransactionNeedForUpdate(ledger_id, group_id);
         transactionForUpdate.setBalance(balance);
@@ -43,6 +51,7 @@ public class TransactionService {
         transactionDao = daoSession.getTransactionDao();
         return transactionDao.queryBuilder().where(TransactionDao.Properties.Ledger_id.eq(ledger_id)).list();
     }
+
 
     private static Transaction getTransactionNeedForUpdate(Long ledger_id, Long group_id) {
         transactionDao = daoSession.getTransactionDao();
