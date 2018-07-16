@@ -35,7 +35,8 @@
             android:id="@+id/txtLoginUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="20dp"
+            android:inputType="text"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -60,6 +61,17 @@
             android:text="Login"
             android:textColor="@color/colorWhite"
             android:textSize="20dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:layout_marginBottom="30dp"/>
+
+        <TextView
+            android:id="@+id/txtViewRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đăng kí"
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:textColor="@color/colorGreen"
+            android:textAlignment="center"/>
     </LinearLayout>
 </RelativeLayout>

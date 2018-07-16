@@ -1,5 +1,7 @@
 package project.baonq.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.ToMany;
@@ -12,9 +14,10 @@ import org.greenrobot.greendao.DaoException;
 @Entity(nameInDb = "ledger")
 public class Ledger {
     @Id(autoincrement = true)
+    @JsonProperty("local_id")
     private Long id;
-
-    private int server_id;
+    @JsonProperty("server_id")
+    private Long server_id;
 
     private String name;
 
@@ -22,9 +25,9 @@ public class Ledger {
 
     private boolean counted_on_report;
 
-    private String insert_date;
+    private Long insert_date;
 
-    private String last_update;
+    private Long last_update;
 
     private int status;
 
@@ -46,9 +49,9 @@ public class Ledger {
     @Generated(hash = 330045250)
     private transient LedgerDao myDao;
 
-    @Generated(hash = 1771250483)
-    public Ledger(Long id, int server_id, String name, String currency,
-                  boolean counted_on_report, String insert_date, String last_update,
+    @Generated(hash = 1629661636)
+    public Ledger(Long id, Long server_id, String name, String currency,
+                  boolean counted_on_report, Long insert_date, Long last_update,
                   int status) {
         this.id = id;
         this.server_id = server_id;
@@ -72,11 +75,11 @@ public class Ledger {
         this.id = id;
     }
 
-    public int getServer_id() {
+    public Long getServer_id() {
         return this.server_id;
     }
 
-    public void setServer_id(int server_id) {
+    public void setServer_id(Long server_id) {
         this.server_id = server_id;
     }
 
@@ -104,19 +107,19 @@ public class Ledger {
         this.counted_on_report = counted_on_report;
     }
 
-    public String getInsert_date() {
+    public Long getInsert_date() {
         return this.insert_date;
     }
 
-    public void setInsert_date(String insert_date) {
+    public void setInsert_date(Long insert_date) {
         this.insert_date = insert_date;
     }
 
-    public String getLast_update() {
+    public Long getLast_update() {
         return this.last_update;
     }
 
-    public void setLast_update(String last_update) {
+    public void setLast_update(Long last_update) {
         this.last_update = last_update;
     }
 
@@ -232,4 +235,6 @@ public class Ledger {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getLedgerDao() : null;
     }
+
+
 }
