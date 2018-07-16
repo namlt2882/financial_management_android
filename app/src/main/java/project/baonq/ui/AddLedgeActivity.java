@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,12 +15,12 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import project.baonq.enumeration.Currency;
+import project.baonq.enumeration.TransactionGroupStatus;
+import project.baonq.enumeration.TransactionGroupType;
 import project.baonq.menu.R;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Ledger;
-import project.baonq.model.LedgerDao;
-import project.baonq.model.Transaction;
-import project.baonq.model.TransactionGroup;
 import project.baonq.service.App;
 import project.baonq.service.LedgerService;
 import project.baonq.service.TransactionGroupService;
@@ -56,7 +55,7 @@ public class AddLedgeActivity extends AppCompatActivity {
         Spinner spCurrency = (Spinner) findViewById(R.id.spinerCurrency);
         TextView txtCurrentBalance = (TextView) findViewById(R.id.txtCurrentBalance);
         txtCash.setText(name);
-        txtCurrentBalance.setText(ConvertUtil.convertCashFormat(currentBalance).replaceAll(",",""));
+        txtCurrentBalance.setText(ConvertUtil.convertCashFormat(currentBalance).replaceAll(",", ""));
         spCurrency.setSelection(getIndexOfSpinner(spCurrency, currency));
     }
 
@@ -91,8 +90,7 @@ public class AddLedgeActivity extends AppCompatActivity {
     }
 
     private Long addLedger(String name, String currency, boolean isChecked) {
-        LedgerService.setDaoSession(daoSession);
-        return LedgerService.addLedger(name, currency, isChecked);
+        return new LedgerService(daoSession).addLedger(name, currency, isChecked);
     }
 
     private void addDefaultTransactionGroup(Long ledgerId) {
@@ -100,34 +98,23 @@ public class AddLedgeActivity extends AppCompatActivity {
         Long index = 0L;
         for (String name : defaultIncomeName) {
             daoSession = ((App) getApplication()).getDaoSession();
-            TransactionGroupService.setDaoSession(daoSession);
-            TransactionGroupService.addTransactionGroup(ledgerId, name, 1, 1);
+            new TransactionGroupService(daoSession).addTransactionGroup(ledgerId, name, 1, 1);
         }
         String[] defaultPurchaseName = {"Ăn uống", "Hóa đơn", "Mua sắm", "Di chuyển", "Khác"};
         for (String name : defaultPurchaseName) {
             daoSession = ((App) getApplication()).getDaoSession();
-            TransactionGroupService.setDaoSession(daoSession);
-            TransactionGroupService.addTransactionGroup(ledgerId, name, 2, 1);
+            new TransactionGroupService(daoSession).addTransactionGroup(ledgerId, name, 2, 1);
         }
     }
 
 
-    private void addTransaction(Long ledger_id, Long group_id, double balance, int status) {
-        long now = System.currentTimeMillis();
-        TransactionService.setDaoSession(daoSession);
-        TransactionService.addTransaction(ledger_id, group_id, balance, now, status);
-    }
-
     private void updateLedger(Long id, String name, String currency, boolean isChecked) {
-        LedgerService.setDaoSession(daoSession);
-        LedgerService.updateLedger(id, name, currency, isChecked);
+        new LedgerService(daoSession).updateLedger(id, name, currency, isChecked);
     }
 
     private void updateTransaction(Long ledger_id, int transaction_Type, String name, double balance) {
-        TransactionGroupService.setDaoSession(daoSession);
-        Long group_id = TransactionGroupService.getTransactionGroupID(ledger_id, transaction_Type, name);
-        TransactionService.setDaoSession(daoSession);
-        TransactionService.updateTransaction(ledger_id, group_id, balance);
+        Long group_id = new TransactionGroupService(daoSession).getTransactionGroupID(ledger_id, transaction_Type, name);
+        new TransactionService(daoSession).updateTransaction(ledger_id, group_id, balance);
     }
 
     private void initSubmitText() {
@@ -149,19 +136,21 @@ public class AddLedgeActivity extends AppCompatActivity {
 //                    daoSession.getTransactionGroupDao().deleteAll();
                     String name = edtName.getText().toString();
                     String currentBalance = edtCurrentBalance.getText().toString();
-                    Long group_id = 0L;
+                    Long groupId = 0L;
                     double balance = Double.parseDouble(currentBalance);
                     String currency = spCurrency.getSelectedItem().toString();
                     boolean isChecked = cbReport.isChecked();
                     Long ledgerId = addLedger(name, currency, isChecked);
                     addDefaultTransactionGroup(ledgerId);
                     //in case current is > 0
+                    TransactionGroupService transactionGroupService = new TransactionGroupService(daoSession);
+                    TransactionService transactionService = new TransactionService(daoSession);
                     if (Double.parseDouble(currentBalance) > 0) {
-                        group_id = TransactionGroupService.getTransactionGroupID(ledgerId, 1, "Khác");
-                        addTransaction(ledgerId, group_id, balance, 1);
+                        groupId = transactionGroupService.getTransactionGroupID(ledgerId, TransactionGroupType.INCOME.getType(), "Khác");
+                        transactionService.addTransaction(ledgerId, groupId, balance);
                     } else if (Double.parseDouble(currentBalance) < 0) {
-                        group_id = TransactionGroupService.getTransactionGroupID(ledgerId, 2, "Khác");
-                        addTransaction(ledgerId, group_id, balance, 1);
+                        groupId = transactionGroupService.getTransactionGroupID(ledgerId, TransactionGroupType.EXPENSE.getType(), "Khác");
+                        transactionService.addTransaction(ledgerId, groupId, balance);
                     }
                     setResult(RESULT_OK, intent);
                     finish();
@@ -199,7 +188,10 @@ public class AddLedgeActivity extends AppCompatActivity {
 
     private void initSpiner() {
         Spinner spinner = (Spinner) findViewById(R.id.spinerCurrency);
-        String[] items = new String[]{"VNĐ", "Dollar", "Euro"};
+        String[] items = new String[Currency.values().length];
+        for (int i = 0; i < Currency.values().length; i++) {
+            items[i] = Currency.values()[i].name();
+        }
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(AddLedgeActivity.this, android.R.layout.simple_spinner_dropdown_item, items);
         spinner.setAdapter(arrayAdapter);
     }

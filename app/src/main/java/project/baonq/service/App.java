@@ -14,8 +14,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "ledger");
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "personal_finance.db");
         Database db = helper.getWritableDb();
         daoSession = new DaoMaster(db).newSession();
     }
