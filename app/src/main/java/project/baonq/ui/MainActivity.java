@@ -191,8 +191,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        final MenuItem btnViewNotification = menu.findItem(R.id.btnViewNotification);
+        btnViewNotification.getActionView().setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
+            startActivity(intent);
+        });
+        return true;
+    }
 
-        return super.onCreateOptionsMenu(menu);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.btnViewNotification:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void setFragmentBottomNavigationBarActivities() {

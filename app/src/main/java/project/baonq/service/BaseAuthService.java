@@ -1,5 +1,8 @@
 package project.baonq.service;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
@@ -14,16 +17,26 @@ public class BaseAuthService {
 
     private static String jwt = null;
     private static User user = null;
+    private Context context;
 
-    public HttpURLConnection buildBasicConnection(URL url) {
+    public BaseAuthService(Context context) {
+        this.context = context;
+        if (getJwt() == null) {
+            loadAuthenticationInfo();
+        }
+    }
+
+    public static HttpURLConnection buildBasicConnection(URL url) {
         return buildBasicConnection(url, false);
     }
 
-    public HttpURLConnection buildBasicConnection(URL url, boolean authenticated) {
+
+    public static HttpURLConnection buildBasicConnection(URL url, boolean authenticated) {
         HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
+            conn.setDoOutput(false);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -32,7 +45,6 @@ public class BaseAuthService {
         }
         conn.setReadTimeout(10000);
         conn.setConnectTimeout(15000);
-        conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
         conn.setRequestProperty("charset", "utf-8");
         return conn;
@@ -54,13 +66,39 @@ public class BaseAuthService {
         BaseAuthService.user = user;
     }
 
-    protected String read(BufferedReader br) throws IOException {
+    public static String read(BufferedReader br) throws IOException {
         StringBuilder sb = new StringBuilder();
         String line = null;
         while ((line = br.readLine()) != null) {
             sb.append(line);
         }
         return sb.toString();
+    }
+
+    protected void loadAuthenticationInfo() {
+        String jwt = null;
+        setJwt(null);
+        setUser(null);
+        SharedPreferences sharedPreferences =
+                context.getSharedPreferences("auth", Context.MODE_PRIVATE);
+        jwt = sharedPreferences.getString("jwt", null);
+        if (jwt != null && !"".equals(jwt)) {
+            setJwt(jwt);
+            setUser(getUserFromToken(jwt));
+        }
+    }
+
+    protected void saveAuthenticationInfo(String jwt) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("auth", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        if ("".equals(jwt) || jwt == null) {
+            setJwt(null);
+            editor.remove("jwt");
+        } else {
+            setJwt(jwt);
+            editor.putString("jwt", jwt);
+        }
+        editor.commit();
     }
 
     private JWTClaimsSet getClaimsFromToken(String token) {
@@ -86,7 +124,6 @@ public class BaseAuthService {
         }
         return username;
     }
-
 
     protected User getUserFromToken(String token) {
         User user = new User();

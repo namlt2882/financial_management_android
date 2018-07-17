@@ -2,10 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/notification"
+        android:id="@+id/btnViewNotification"
         app:actionLayout="@layout/menu_main_sub_item_layout"
         android:title="Thông báo"
-        app:showAsAction="always" />
+        app:showAsAction="always"/>
     <item android:title="Quay về ngày hôm nay"
         android:id="@+id/returnToday"/>
     <item android:title="Chuyển tiền đến ví khác"
