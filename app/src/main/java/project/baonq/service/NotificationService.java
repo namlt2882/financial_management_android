@@ -53,6 +53,16 @@ public class NotificationService {
         notificationDAO.insertOrUpdate(notifications);
     }
 
+    public void checkAllNotificationRead() {
+        List<Long> unreadNotificationIds = getUnreadNotifications().stream()
+                .map(notification -> notification.getId()).collect(Collectors.toList());
+        checkNotificationRead(unreadNotificationIds);
+    }
+
+    public List<Notification> getUnreadNotifications() {
+        return new NotificationDAO(application).findUnreadNotifications();
+    }
+
     public List<Notification> findAll() {
         return new NotificationDAO(application).findAll();
     }

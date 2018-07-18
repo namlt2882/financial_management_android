@@ -128,10 +128,12 @@ public class NotificationActivity extends AppCompatActivity {
     private void checkAll() {
         LinearLayout cardNotifications = findViewById(R.id.cardNotifications);
         int quantity = cardNotifications.getChildCount();
-
+        //ui
         for (int i = 0; i < quantity; i++) {
             LinearLayout childCard = (LinearLayout) cardNotifications.getChildAt(i);
             childCard.setBackgroundColor(Color.parseColor("#CCCCCC"));
         }
+        //db
+        notificationService.checkAllNotificationRead();
     }
 }

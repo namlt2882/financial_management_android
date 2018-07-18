@@ -77,6 +77,14 @@ public class NotificationDAO {
         return rs;
     }
 
+    public List<Notification> findUnreadNotifications() {
+        List<Notification> rs = getDaoSession()
+                .getNotificationDao().queryBuilder()
+                .where(NotificationDao.Properties.Is_readed.eq(false)
+                        , Status.eq(NotificationStatus.ENABLE.getStatus())).list();
+        return rs;
+    }
+
     public Long findLastUpdateTime() {
         Notification notification = getDaoSession()
                 .getNotificationDao().queryBuilder()
