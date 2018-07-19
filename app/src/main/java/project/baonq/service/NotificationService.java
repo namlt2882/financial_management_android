@@ -64,7 +64,6 @@ public class NotificationService implements Runnable {
             } else {
                 in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
                 throw new Exception(read(in));
-
             }
         } finally {
             if (in != null) {
@@ -131,13 +130,16 @@ public class NotificationService implements Runnable {
 
     @Override
     public void run() {
+        FetchNotificationAction fetchAction = new FetchNotificationAction(this);
+        CheckReadNotificationAction checkReadAction = new CheckReadNotificationAction(this);
         while (true) {
-            FetchNotificationAction fetchAction = new FetchNotificationAction(this);
-            CheckReadNotificationAction checkReadAction = new CheckReadNotificationAction(this);
             try {
-                fetchAction.doAction();
-                checkReadAction.doAction();
-                Thread.sleep(5000);
+                try {
+                    fetchAction.doAction();
+                    checkReadAction.doAction();
+                } finally {
+                    Thread.sleep(5000);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -221,24 +223,24 @@ public class NotificationService implements Runnable {
 
         @Override
         public Object synchronize() {
-            System.out.println("SENDING REQUEST TO URL:" + notificationService.checkreadNotificationUrl + ", method:POST");
             try {
                 Long lastUpdate = notificationService.getServerLastUpdate();
                 List<Notification> updatableRecords = notificationService.getUpdatableRecords(lastUpdate);
                 if (updatableRecords != null && !updatableRecords.isEmpty()) {
+                    System.out.println("SENDING REQUEST TO URL:" + notificationService.checkreadNotificationUrl + ", method:POST");
                     URL url = new URL(notificationService.checkreadNotificationUrl);
                     HttpURLConnection conn = buildBasicConnection(url, true);
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-
+                    conn.setRequestProperty("Accept", "application/json");
                     conn.setDoOutput(true);
                     BufferedReader in = null;
                     ObjectMapper om = new ObjectMapper();
-                    try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-                         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(wr, "UTF-8"));) {
+                    try (OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");) {
                         //write data to request
-                        String entity = om.writeValueAsString(updatableRecords);
-                        writer.write(entity);
+                        wr.write(om.writeValueAsString(updatableRecords));
+                        wr.flush();
+                        conn.connect();
                         //read response value
                         if (conn.getResponseCode() != 200) {
                             in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));

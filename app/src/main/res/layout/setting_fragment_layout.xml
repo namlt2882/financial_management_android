@@ -53,74 +53,74 @@
                 android:layout_marginBottom="20dp"
                 android:background="@color/colorWhite">
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                <!--<TableRow-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="match_parent">-->
 
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_margin="10dp"
-                        android:src="@mipmap/ic_usr" />
+                    <!--<ImageView-->
+                        <!--android:layout_width="30dp"-->
+                        <!--android:layout_height="30dp"-->
+                        <!--android:layout_margin="10dp"-->
+                        <!--android:src="@mipmap/ic_usr" />-->
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/avatar"
-                        android:layout_margin="10dp"
-                        android:gravity="center"
-                        android:text="Tài khoản của tôi"
-                        android:textAlignment="textStart"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="25dp"
-                        tools:ignore="RtlCompat" />
-                </TableRow>
+                    <!--<TextView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_below="@id/avatar"-->
+                        <!--android:layout_margin="10dp"-->
+                        <!--android:gravity="center"-->
+                        <!--android:text="Tài khoản của tôi"-->
+                        <!--android:textAlignment="textStart"-->
+                        <!--android:textColor="@color/colorBlack"-->
+                        <!--android:textSize="25dp"-->
+                        <!--tools:ignore="RtlCompat" />-->
+                <!--</TableRow>-->
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                <!--<TableRow-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="match_parent">-->
 
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_margin="10dp"
-                        android:src="@mipmap/ic_group" />
+                    <!--<ImageView-->
+                        <!--android:layout_width="40dp"-->
+                        <!--android:layout_height="40dp"-->
+                        <!--android:layout_margin="10dp"-->
+                        <!--android:src="@mipmap/ic_group" />-->
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/avatar"
-                        android:layout_margin="10dp"
-                        android:gravity="center"
-                        android:text="Nhóm"
-                        android:textAlignment="textStart"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="25dp"
-                        tools:ignore="RtlCompat" />
-                </TableRow>
+                    <!--<TextView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_below="@id/avatar"-->
+                        <!--android:layout_margin="10dp"-->
+                        <!--android:gravity="center"-->
+                        <!--android:text="Nhóm"-->
+                        <!--android:textAlignment="textStart"-->
+                        <!--android:textColor="@color/colorBlack"-->
+                        <!--android:textSize="25dp"-->
+                        <!--tools:ignore="RtlCompat" />-->
+                <!--</TableRow>-->
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                <!--<TableRow-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="match_parent">-->
 
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_margin="10dp"
-                        android:src="@mipmap/ic_so_no" />
+                    <!--<ImageView-->
+                        <!--android:layout_width="30dp"-->
+                        <!--android:layout_height="30dp"-->
+                        <!--android:layout_margin="10dp"-->
+                        <!--android:src="@mipmap/ic_so_no" />-->
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/avatar"
-                        android:layout_margin="10dp"
-                        android:gravity="center"
-                        android:text="Sổ nợ"
-                        android:textAlignment="textStart"
-                        android:textColor="@color/colorBlack"
-                        android:textSize="25dp"
-                        tools:ignore="RtlCompat" />
-                </TableRow>
+                    <!--<TextView-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_below="@id/avatar"-->
+                        <!--android:layout_margin="10dp"-->
+                        <!--android:gravity="center"-->
+                        <!--android:text="Sổ nợ"-->
+                        <!--android:textAlignment="textStart"-->
+                        <!--android:textColor="@color/colorBlack"-->
+                        <!--android:textSize="25dp"-->
+                        <!--tools:ignore="RtlCompat" />-->
+                <!--</TableRow>-->
             </TableLayout>
 
             <RelativeLayout

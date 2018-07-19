@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (authService.isLoggedIn() && notificationService == null) {
+            System.out.println("INIT NOTIFICATION SERVICE-------");
             notificationService = new Thread(new NotificationService(getApplication()));
             notificationService.start();
         }
