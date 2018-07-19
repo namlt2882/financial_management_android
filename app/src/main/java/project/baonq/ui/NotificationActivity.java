@@ -77,9 +77,7 @@ public class NotificationActivity extends AppCompatActivity {
 
     private List<Notification> getNofitications() {
         List<Notification> rs = null;
-        SyncActionImpl action = new FetchNotificationAction(notificationService);
         try {
-            action.doAction();
             rs = notificationService.findAll();
         } catch (Exception e) {
             e.printStackTrace();

@@ -41,24 +41,25 @@ import project.baonq.model.DaoSession;
 import project.baonq.model.LedgerDao;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
+import project.baonq.service.NotificationService;
 import project.baonq.util.UserManager;
 
 
 public class MainActivity extends AppCompatActivity {
     CalendarPickerView calendar;
     Button button;
+    AuthenticationService authService;
+    Thread notificationService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        AuthenticationService authService = new AuthenticationService(this);
+        authService = new AuthenticationService(this);
         if (!authService.isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
-
         //set date picker
         setActionBarLayout("Chọn ngày");
         //set date picker
@@ -68,6 +69,16 @@ public class MainActivity extends AppCompatActivity {
         //set botttom navigation bar activities
         setFragmentBottomNavigationBarActivities();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (authService.isLoggedIn() && notificationService == null) {
+            notificationService = new Thread(new NotificationService(getApplication()));
+            notificationService.start();
+        }
+    }
+
 
     public void restartApp() {
         AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
