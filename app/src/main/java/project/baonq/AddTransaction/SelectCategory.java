@@ -64,14 +64,4 @@ public class SelectCategory extends AppCompatActivity {
         }
     }
 
-    private void genereateTransactionGroup(){
-        TransactionGroup group = new TransactionGroup();
-        group.setName("restaurant");
-        group.setTransaction_type(1);
-        group.update();
-        group = new TransactionGroup();
-        group.setName("salary");
-        group.setTransaction_type(2);
-        group.update();
-    }
 }

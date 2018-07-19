@@ -155,7 +155,9 @@ public class ChooseLedger extends AppCompatActivity {
         submitLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("ledger id", String.valueOf(ledger.getId()));
+                Intent intent = new Intent(ChooseLedger.this,AddTransaction.class);
+                intent.putExtra("LedgerId",ledger.getId());
+                startActivity(intent);
             }
         });
         //create image button

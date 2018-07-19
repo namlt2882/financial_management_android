@@ -2,9 +2,13 @@ package project.baonq.service;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
+import java.util.List;
+
 import project.baonq.enumeration.TransactionGroupStatus;
 import project.baonq.enumeration.TransactionStatus;
 import project.baonq.model.DaoSession;
+import project.baonq.model.Ledger;
+import project.baonq.model.LedgerDao;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionGroup;
 import project.baonq.model.TransactionGroupDao;
@@ -37,5 +41,10 @@ public class TransactionGroupService {
                 TransactionGroupDao.Properties.Name.eq(name))
                 .unique()
                 .getId();
+    }
+
+    public List<TransactionGroup> getAll() {
+        TransactionGroupDao transactionGroupDao = daoSession.getTransactionGroupDao();
+        return transactionGroupDao.loadAll();
     }
 }
