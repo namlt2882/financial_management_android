@@ -27,7 +27,8 @@
         <activity android:name="project.baonq.AddTransaction.AddTransaction" />
         <activity android:name="project.baonq.AddTransaction.SelectCategory" />
         <activity android:name="project.baonq.AddTransaction.ChooseLedger" />
-        <activity android:name="project.baonq.ui.NotificationActivity"></activity>
+        <activity android:name="project.baonq.ui.NotificationActivity" />
+        <activity android:name="project.baonq.ui.NotificationDetailActivity"></activity>
     </application>
 
 </manifest>

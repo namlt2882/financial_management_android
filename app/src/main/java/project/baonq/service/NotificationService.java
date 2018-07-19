@@ -1,7 +1,9 @@
 package project.baonq.service;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -77,10 +79,17 @@ public class NotificationService implements Runnable {
         NotificationDAO notificationDAO = new NotificationDAO(application);
         List<Notification> notifications = notificationDAO.findByIds(ids);
         long currentTime = System.currentTimeMillis();
-        notifications.forEach(notification -> {
-            notification.setIs_readed(true);
-            notification.setLast_update(currentTime);
-        });
+        //filter read notifications
+        notifications = notifications.stream()
+                .filter(notification -> {
+                    if (!notification.getIs_readed()) {
+                        notification.setIs_readed(true);
+                        notification.setLast_update(currentTime);
+                        return true;
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
         notificationDAO.insertOrUpdate(notifications);
     }
 
@@ -128,16 +137,29 @@ public class NotificationService implements Runnable {
         });
     }
 
+    ConnectivityManager cm;
+
+    public boolean isNetworkConnected() {
+        if (cm == null) {
+            cm = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
+        }
+        return cm.getActiveNetworkInfo() != null;
+    }
+
     @Override
     public void run() {
         FetchNotificationAction fetchAction = new FetchNotificationAction(this);
         CheckReadNotificationAction checkReadAction = new CheckReadNotificationAction(this);
         while (true) {
             try {
-                try {
-                    fetchAction.doAction();
-                    checkReadAction.doAction();
-                } finally {
+                if (isNetworkConnected()) {
+                    try {
+                        fetchAction.doAction();
+                        checkReadAction.doAction();
+                    } finally {
+                        Thread.sleep(5000);
+                    }
+                } else {
                     Thread.sleep(5000);
                 }
             } catch (Exception e) {

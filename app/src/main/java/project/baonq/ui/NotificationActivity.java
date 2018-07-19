@@ -1,6 +1,7 @@
 package project.baonq.ui;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -38,10 +39,6 @@ public class NotificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         notificationService = new NotificationService(getApplication());
         setContentView(R.layout.activity_notification);
-        if (android.os.Build.VERSION.SDK_INT > 9) {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-        }
         initActionBar();
         initMenuActivities();
         loadNotification();
@@ -108,6 +105,7 @@ public class NotificationActivity extends AppCompatActivity {
         title.setTextSize(18);
         title.setGravity(Gravity.CENTER);
         title.setTypeface(Typeface.DEFAULT_BOLD);
+        title.setSingleLine(false);
 
         TextView content = new TextView(this);
         content.setText(notification.getContent());
@@ -115,12 +113,27 @@ public class NotificationActivity extends AppCompatActivity {
         content.setTextSize(15);
         content.setGravity(Gravity.CENTER);
         content.setTypeface(Typeface.DEFAULT);
+        content.setSingleLine(false);
+        content.setMaxLines(5);
 
         notiView.addView(title);
         notiView.addView(content);
 
         LinearLayout contentLedgeChosenLayout = (LinearLayout) findViewById(R.id.cardNotifications);
         contentLedgeChosenLayout.addView(notiView);
+        notiView.setOnClickListener(v -> {
+            //check view
+            List<Long> tmp = new ArrayList<>();
+            tmp.add(notification.getId());
+            notificationService.checkNotificationRead(tmp);
+            //show
+            Intent intent = new Intent(this, NotificationDetailActivity.class);
+            Bundle b = new Bundle();
+            b.putString("title",notification.getTitle());
+            b.putString("content",notification.getContent());
+            intent.putExtras(b);
+            startActivity(intent);
+        });
     }
 
     private void checkAll() {
