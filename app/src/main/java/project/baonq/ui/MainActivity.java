@@ -41,6 +41,8 @@ import project.baonq.model.DaoSession;
 import project.baonq.model.LedgerDao;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
+import project.baonq.service.LedgerService;
+import project.baonq.service.LedgerSyncService;
 import project.baonq.service.NotificationService;
 import project.baonq.util.UserManager;
 
@@ -50,12 +52,14 @@ public class MainActivity extends AppCompatActivity {
     Button button;
     AuthenticationService authService;
     Thread notificationService;
+    LedgerSyncService ledgerSyncService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         authService = new AuthenticationService(this);
+        ledgerSyncService = new LedgerSyncService(getApplication());
         if (!authService.isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
@@ -213,7 +217,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.btnViewNotification:
+            case R.id.btnSynchonize:
+                new Thread(ledgerSyncService).start();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

@@ -16,5 +16,6 @@
     <string name="get_notification_url">/noti</string>
     <string name="get_notification_lastUpdate_url">/noti/lastUpdate</string>
     <string name="check_read_notification_url">/noti/read</string>
+    <string name="get_create_update_ledger_url">/ledger</string>
 
 </resources>

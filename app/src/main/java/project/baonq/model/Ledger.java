@@ -23,10 +23,13 @@ public class Ledger {
 
     private String currency;
 
+    @JsonProperty("countedOnReport")
     private boolean counted_on_report;
 
+    @JsonProperty("insertDate")
     private Long insert_date;
 
+    @JsonProperty("lastUpdate")
     private Long last_update;
 
     private int status;

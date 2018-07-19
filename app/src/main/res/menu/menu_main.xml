@@ -7,11 +7,11 @@
         android:title="Thông báo"
         app:showAsAction="always"/>
     <item android:title="Quay về ngày hôm nay"
-        android:id="@+id/returnToday"/>
+        android:id="@+id/btnReturnToday"/>
     <item android:title="Chuyển tiền đến ví khác"
-        android:id="@+id/transfer"/>
+        android:id="@+id/btnTransfer"/>
     <item android:title="Điều chỉnh số dư"
-        android:id="@+id/adjustedOverbalance"/>
+        android:id="@+id/btnAdjustedOverbalance"/>
     <item android:title="Đồng bộ"
-        android:id="@+id/synchonized"/>
+        android:id="@+id/btnSynchonize"/>
 </menu>
