@@ -6,8 +6,10 @@ import android.content.res.Resources;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -77,9 +79,10 @@ public class AuthenticationService extends BaseAuthService {
         conn.setDoOutput(true);
         BufferedReader in = null;
         ObjectMapper om = new ObjectMapper();
-        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream());) {
+        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(wr, "UTF-8"));) {
             //write parameter to request
-            wr.writeBytes(om.writeValueAsString(user));
+            writer.write(om.writeValueAsString(user));
             //read response value
             if (conn.getResponseCode() == 200) {
                 in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
