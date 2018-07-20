@@ -38,11 +38,6 @@ public class LedgerDAO {
         }
     }
 
-    public List<Ledger> getUpdatableLedgers(Long date) {
-        return getDaoSession().getLedgerDao().queryBuilder()
-                .where(LedgerDao.Properties.Last_update.gt(date)).list();
-    }
-
     public List<Ledger> findByServerId(List<Long> ids) {
         if (ids != null && !ids.isEmpty()) {
             return getDaoSession().getLedgerDao().queryBuilder()
@@ -50,5 +45,30 @@ public class LedgerDAO {
         } else {
             return new LinkedList<>();
         }
+    }
+
+    public List<Ledger> findByIds(List<Long> ids) {
+        if (ids != null && !ids.isEmpty()) {
+            return getDaoSession().getLedgerDao().queryBuilder()
+                    .where(LedgerDao.Properties.Id.in(ids)).list();
+        } else {
+            return new LinkedList<>();
+        }
+    }
+
+    public Ledger findLastUpdateLedger(){
+        return getDaoSession().getLedgerDao().queryBuilder()
+                .orderDesc(LedgerDao.Properties.Last_update).limit(1).unique();
+    }
+
+    public List<Ledger> findCreatableLedgers() {
+        return getDaoSession().getLedgerDao().queryBuilder()
+                .where(LedgerDao.Properties.Server_id.isNull()).list();
+    }
+
+    public List<Ledger> findUpdatableLedgers(Long lastUpdate) {
+        return getDaoSession().getLedgerDao().queryBuilder()
+                .where(LedgerDao.Properties.Server_id.isNotNull(),
+                        LedgerDao.Properties.Last_update.gt(lastUpdate)).list();
     }
 }

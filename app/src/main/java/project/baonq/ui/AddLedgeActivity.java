@@ -109,7 +109,20 @@ public class AddLedgeActivity extends AppCompatActivity {
 
 
     private void updateLedger(Long id, String name, String currency, boolean isChecked) {
-        new LedgerService(daoSession).updateLedger(id, name, currency, isChecked);
+        LedgerService ledgerService = new LedgerService(daoSession);
+        boolean isChanged = false;
+        name = name != null ? name.trim() : null;
+        Ledger ledger = ledgerService.findById(id);
+        if (!ledger.getName().equals(name)
+                || !ledger.getCurrency().equals(currency) || ledger.getCounted_on_report() && isChecked) {
+            System.out.println("UPDATE LEDGER WITH ID:" + id);
+            Ledger ledger1 = new Ledger();
+            ledger1.setId(id);
+            ledger1.setName(name);
+            ledger1.setCurrency(currency);
+            ledger1.setCounted_on_report(isChecked);
+            ledgerService.updateLedger(ledger1);
+        }
     }
 
     private void updateTransaction(Long ledger_id, int transaction_Type, String name, double balance) {
@@ -167,7 +180,7 @@ public class AddLedgeActivity extends AppCompatActivity {
                     String currency = spCurrency.getSelectedItem().toString();
                     boolean isChecked = cbReport.isChecked();
                     updateLedger(id, name, currency, isChecked);
-                    updateTransaction(id, 1, "Khác", Double.parseDouble(currentBalance));
+//                    updateTransaction(id, 1, "Khác", Double.parseDouble(currentBalance));
                     setResult(RESULT_OK, intent);
                     finish();
                 }

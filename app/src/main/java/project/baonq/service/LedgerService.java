@@ -16,6 +16,11 @@ public class LedgerService {
         this.daoSession = daoSession;
     }
 
+    public Ledger findById(Long id){
+        return daoSession.getLedgerDao().queryBuilder()
+                .where(LedgerDao.Properties.Id.eq(id)).unique();
+    }
+
     public Long addLedger(String name, String currency, boolean isReport) {
         Ledger ledger = new Ledger();
         ledger.setName(name);
@@ -30,16 +35,15 @@ public class LedgerService {
         return ledgerDao.getKey(ledger);
     }
 
-    public void updateLedger(Long id, String name, String currency, boolean isChecked) {
-        Ledger ledger = new Ledger();
-        ledger.setId(id);
-        ledger.setName(name);
-        ledger.setCurrency(currency);
-        ledger.setCounted_on_report(isChecked);
-        long now = System.currentTimeMillis();
-        ledger.setLast_update(now);
+    public void updateLedger(Ledger ledger) {
+        Ledger origin = findById(ledger.getId());
+        origin.setStatus(ledger.getStatus());
+        origin.setCurrency(ledger.getCurrency());
+        origin.setName(ledger.getName());
+        origin.setCounted_on_report(ledger.getCounted_on_report());
+        origin.setLast_update(System.currentTimeMillis());
         LedgerDao ledgerDao = daoSession.getLedgerDao();
-        ledgerDao.update(ledger);
+        ledgerDao.update(origin);
     }
 
     public List<Ledger> getAll() {

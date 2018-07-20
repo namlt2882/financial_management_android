@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
@@ -41,6 +42,12 @@ public class LedgerSyncService implements Runnable {
     public void run() {
         try {
             FetchLedgerAction fetchLedgerAction = new FetchLedgerAction(this);
+            CreateNewLedgerAction createNewLedgerAction = new CreateNewLedgerAction(this);
+            UpdateLedgerAction updateLedgerAction = new UpdateLedgerAction(this);
+            //update first
+            createNewLedgerAction.doAction();
+            updateLedgerAction.doAction();
+            //fetch after
             fetchLedgerAction.doAction();
         } catch (Exception e) {
             e.printStackTrace();
@@ -52,6 +59,15 @@ public class LedgerSyncService implements Runnable {
         return sharedPreferences.getLong(LEDGER_LASTUPDATE, Long.parseLong("0"));
     }
 
+    public Long getLastUpdateTimeFromDb() {
+        Ledger ledger = new LedgerDAO(application).findLastUpdateLedger();
+        if (ledger != null) {
+            return ledger.getLast_update();
+        } else {
+            return Long.parseLong("0");
+        }
+    }
+
     public void insertOrUpdate(List<Ledger> ledgers) {
         new LedgerDAO(application).insertOrUpdate(ledgers);
     }
@@ -60,8 +76,9 @@ public class LedgerSyncService implements Runnable {
         LedgerDAO ledgerDAO = new LedgerDAO(application);
         //get origin ledger from db
         List<Ledger> origin = ledgerDAO.findByServerId(ledgers.stream()
+                .filter(ledger -> ledger.getServer_id() != null && ledger.getId() == null)
                 .map(ledger -> ledger.getServer_id()).collect(Collectors.toList()));
-        //update local id
+        //update local id (for fetch and update action)
         Map<Long, Ledger> tmp = new HashMap<>();
         ledgers.forEach(ledger -> tmp.put(ledger.getServer_id(), ledger));
         origin.forEach(org -> {
@@ -70,6 +87,33 @@ public class LedgerSyncService implements Runnable {
         });
         //insert or update
         ledgerDAO.insertOrUpdate(ledgers);
+    }
+
+    public List<Ledger> findCreatableLedgers() {
+        return new LedgerDAO(application).findCreatableLedgers();
+    }
+
+    public List<Ledger> findUpdatableLedgers() {
+        Long lastUpdate = getLastUpdateTime();
+        return new LedgerDAO(application).findUpdatableLedgers(lastUpdate);
+    }
+
+    public void sync(List<Ledger> ledgers) {
+        sync(ledgers, false);
+    }
+
+    public void sync(List<Ledger> ledgers, boolean isFetch) {
+        syncWithLocal(ledgers);
+        insertOrUpdate(ledgers);
+        //save last update time to preference
+        if (isFetch) {
+            Long lastUpdate = getLastUpdateTimeFromDb();
+            SharedPreferences sharedPreferences = application
+                    .getSharedPreferences("sync", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putLong(LedgerSyncService.LEDGER_LASTUPDATE, lastUpdate);
+            editor.commit();
+        }
     }
 
     public static class FetchLedgerAction extends SyncActionImpl {
@@ -87,15 +131,7 @@ public class LedgerSyncService implements Runnable {
         public void afterSynchronize() {
             Ledger[] syncData = (Ledger[]) getSyncData();
             List<Ledger> syncDataList = Arrays.asList(syncData);
-            ledgerSyncService.syncWithLocal(syncDataList);
-            ledgerSyncService.insertOrUpdate(syncDataList);
-            //save last update time to preference
-            Long lastUpdate = ledgerSyncService.getLastUpdateTime();
-            SharedPreferences sharedPreferences = ledgerSyncService.application
-                    .getSharedPreferences("sync", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putLong(LedgerSyncService.LEDGER_LASTUPDATE, lastUpdate);
-            editor.commit();
+            ledgerSyncService.sync(syncDataList, true);
         }
 
         @Override
@@ -125,6 +161,121 @@ public class LedgerSyncService implements Runnable {
                     }
                 }
                 return result;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public static class CreateNewLedgerAction extends SyncActionImpl {
+        LedgerSyncService ledgerSyncService;
+
+        public CreateNewLedgerAction(LedgerSyncService ledgerSyncService) {
+            this.ledgerSyncService = ledgerSyncService;
+        }
+
+        @Override
+        public void beforeSynchronize() {
+
+        }
+
+        @Override
+        public void afterSynchronize() {
+            Ledger[] syncData = (Ledger[]) getSyncData();
+            List<Ledger> syncDataList = Arrays.asList(syncData);
+            ledgerSyncService.sync(syncDataList);
+        }
+
+        @Override
+        public Object synchronize() {
+            Ledger[] result = new Ledger[]{};
+            List<Ledger> creatableRecords = ledgerSyncService.findCreatableLedgers();
+            try {
+                if (creatableRecords != null && !creatableRecords.isEmpty()) {
+                    System.out.println("SENDING REQUEST TO URL:" + ledgerSyncService.ledgerUrl + ", method:POST");
+                    URL url = new URL(ledgerSyncService.ledgerUrl);
+                    HttpURLConnection conn = buildBasicConnection(url, true);
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setDoOutput(true);
+                    BufferedReader in = null;
+                    ObjectMapper om = new ObjectMapper();
+                    try (OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");) {
+                        //write to request body
+                        wr.write(om.writeValueAsString(creatableRecords));
+                        wr.flush();
+                        conn.connect();
+                        //read response value
+                        if (conn.getResponseCode() == 200) {
+                            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                            String tmp = read(in);
+                            result = om.readValue(tmp, new Ledger[]{}.getClass());
+                        } else {
+                            in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                            throw new Exception(read(in));
+                        }
+                    } finally {
+                        if (in != null) {
+                            in.close();
+                        }
+                    }
+                }
+                return result;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public static class UpdateLedgerAction extends SyncActionImpl {
+        LedgerSyncService ledgerSyncService;
+
+        public UpdateLedgerAction(LedgerSyncService ledgerSyncService) {
+            this.ledgerSyncService = ledgerSyncService;
+        }
+
+        @Override
+        public void beforeSynchronize() {
+
+        }
+
+        @Override
+        public void afterSynchronize() {
+        }
+
+        @Override
+        public Object synchronize() {
+            List<Ledger> updatableLedgers = ledgerSyncService.findUpdatableLedgers();
+            try {
+                if (updatableLedgers != null && !updatableLedgers.isEmpty()) {
+                    System.out.println("SENDING REQUEST TO URL:" + ledgerSyncService.ledgerUrl + ", method:PUT");
+                    URL url = new URL(ledgerSyncService.ledgerUrl);
+                    HttpURLConnection conn = buildBasicConnection(url, true);
+                    conn.setRequestMethod("PUT");
+                    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setDoOutput(true);
+                    BufferedReader in = null;
+                    ObjectMapper om = new ObjectMapper();
+                    try (OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");) {
+                        //write to request body
+                        String entity = om.writeValueAsString(updatableLedgers);
+                        wr.write(entity);
+                        wr.flush();
+                        conn.connect();
+                        //read response value
+                        if (conn.getResponseCode() != 200) {
+                            in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                            throw new Exception(read(in));
+                        }
+                    } finally {
+                        if (in != null) {
+                            in.close();
+                        }
+                    }
+                }
+                return null;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
