@@ -44,8 +44,8 @@ public class AddTransaction extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_transaction);
         daoSession = ((project.baonq.service.App) getApplication()).getDaoSession();
-        Button btn = null;
 
+        Button btn = null;
         btn = findViewById(R.id.btnCategory);
         btn.setText("Select category");
         EditText txt = findViewById(R.id.txtDate);
@@ -127,6 +127,7 @@ public class AddTransaction extends AppCompatActivity {
                     transaction.setNote(txtNote);
                     transaction.setTdate(date);
                     transaction.setLedger_id(ledgerId);
+                    transaction.setGroup_id(catId);
                     Date currentDate = new Date();
                     transaction.setInsert_date(currentDate.getTime());
                     transaction.setLast_update(currentDate.getTime());

@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
@@ -88,11 +89,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AddTransaction.class);
+                removeData();
                 startActivity(intent);
             }
         });
     }
-
+    public void removeData(){
+        SharedPreferences pre=getSharedPreferences("transaction_data", MODE_PRIVATE);
+        SharedPreferences.Editor editor =pre.edit();
+        editor.remove("Note");
+        editor.remove("Date");
+        editor.remove("balance");
+        editor.remove("catId");
+        editor.remove("walletId");
+        editor.commit();
+    }
     private void initDatepicker() {
         final Button edtDate = (Button) findViewById(R.id.editDate);
         edtDate.getBackground().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
