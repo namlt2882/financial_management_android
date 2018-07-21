@@ -29,6 +29,10 @@ public class TransactionGroupService extends Service {
     }
 
     public Long getTransactionGroupID(Long ledger_id, int transaction_type, String name) {
-       return new TransactionGroupDAO(application).getTransactionGroupID(ledger_id, transaction_type, name);
+        return new TransactionGroupDAO(application).getTransactionGroupID(ledger_id, transaction_type, name);
+    }
+
+    public TransactionGroup getTransactionGroupByID(Long id) {
+        return new TransactionGroupDAO(application).getTransactionGroupByID(id);
     }
 }

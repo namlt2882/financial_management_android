@@ -31,4 +31,10 @@ public class TransactionGroupDAO extends  DAO {
                 .unique()
                 .getId();
     }
+
+    public TransactionGroup getTransactionGroupByID(Long id) {
+        DaoSession daoSession = getDaoSession();
+        TransactionGroupDao transactionGroupDao = daoSession.getTransactionGroupDao();
+        return transactionGroupDao.load(id);
+    }
 }

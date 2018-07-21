@@ -133,7 +133,7 @@
                         android:id="@+id/txtCurrentBalance"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:inputType="number" />
+                        android:inputType="none|number|numberSigned" />
                 </LinearLayout>
             </LinearLayout>
         </android.support.v7.widget.CardView>

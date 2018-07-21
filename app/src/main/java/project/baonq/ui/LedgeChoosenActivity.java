@@ -22,8 +22,10 @@ import project.baonq.model.DaoSession;
 import project.baonq.model.Ledger;
 import project.baonq.model.LedgerDao;
 import project.baonq.model.Transaction;
+import project.baonq.model.TransactionGroup;
 import project.baonq.service.App;
 import project.baonq.service.LedgerService;
+import project.baonq.service.TransactionGroupService;
 import project.baonq.service.TransactionService;
 import project.baonq.util.ConvertUtil;
 
@@ -101,7 +103,15 @@ public class LedgeChoosenActivity extends AppCompatActivity {
     private double sumOfTransaction(List<Transaction> transactionList) {
         double sum = 0;
         for (Transaction item : transactionList) {
-            sum += item.getBalance();
+            TransactionGroup transactionGroup = new TransactionGroupService(application).getTransactionGroupByID(item.getGroup_id());
+            int transactionGrouptype = transactionGroup.getTransaction_type();
+            if (transactionGrouptype == 1) {
+                sum += item.getBalance();
+            }
+
+            if (transactionGrouptype == 2) {
+                sum -= item.getBalance();
+            }
         }
         return sum;
     }
@@ -123,6 +133,10 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         submitLayout.setLayoutParams(layoutParams);
         TextView txtTitle = submitLayout.findViewById(R.id.txtTittle);
         TextView txtCash = submitLayout.findViewById(R.id.txtCash);
+        if (sum < 0) {
+            txtCash.setTextColor(Color.RED);
+            sum = Math.abs(sum);
+        }
         txtTitle.setText(ledger.getName());
         String currentBalanceFormat = ConvertUtil.convertCashFormat(sum);
         txtCash.setText(currentBalanceFormat + ConvertUtil.convertCurrency(ledger.getCurrency()));
@@ -136,6 +150,10 @@ public class LedgeChoosenActivity extends AppCompatActivity {
 
     private void setTotalLedgerCash(double totalLedgerCash, String currency) {
         TextView txtLedgerCashSum = (TextView) findViewById(R.id.txtLedgerCashSum);
+        if (totalLedgerCash < 0) {
+            txtLedgerCashSum.setTextColor(Color.RED);
+            totalLedgerCash = Math.abs(totalLedgerCash);
+        }
         String totalCash = ConvertUtil.convertCashFormat(totalLedgerCash);
         txtLedgerCashSum.setText(totalCash + currency);
     }
