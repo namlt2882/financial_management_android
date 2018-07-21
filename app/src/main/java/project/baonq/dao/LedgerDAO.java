@@ -47,6 +47,11 @@ public class LedgerDAO {
         }
     }
 
+    public Ledger findByServerId(Long id) {
+        return getDaoSession().getLedgerDao().queryBuilder()
+                .where(LedgerDao.Properties.Server_id.eq(id)).unique();
+    }
+
     public List<Ledger> findByIds(List<Long> ids) {
         if (ids != null && !ids.isEmpty()) {
             return getDaoSession().getLedgerDao().queryBuilder()
@@ -56,7 +61,7 @@ public class LedgerDAO {
         }
     }
 
-    public Ledger findLastUpdateLedger(){
+    public Ledger findLastUpdateLedger() {
         return getDaoSession().getLedgerDao().queryBuilder()
                 .orderDesc(LedgerDao.Properties.Last_update).limit(1).unique();
     }

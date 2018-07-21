@@ -24,6 +24,9 @@ public class TransactionGroupService {
         transactionGroup.setTransaction_type(transactionType);
         transactionGroup.setStatus(status);
         transactionGroup.setStatus(TransactionGroupStatus.ENABLE.getStatus());
+        Long lastUpdate = System.currentTimeMillis();
+        transactionGroup.setInsert_date(lastUpdate);
+        transactionGroup.setLast_update(lastUpdate);
         TransactionGroupDao transactionGroupDao = daoSession.getTransactionGroupDao();
         transactionGroupDao.insert(transactionGroup);
         return transactionGroupDao.getKey(transactionGroup);

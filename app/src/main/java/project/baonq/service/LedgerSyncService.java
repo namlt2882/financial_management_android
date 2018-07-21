@@ -49,6 +49,7 @@ public class LedgerSyncService implements Runnable {
             updateLedgerAction.doAction();
             //fetch after
             fetchLedgerAction.doAction();
+            new TransactionGroupSyncService(application).run();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -72,6 +73,10 @@ public class LedgerSyncService implements Runnable {
         new LedgerDAO(application).insertOrUpdate(ledgers);
     }
 
+    public Ledger findByServerId(Long id){
+        return new LedgerDAO(application).findByServerId(id);
+    }
+
     public void syncWithLocal(List<Ledger> ledgers) {
         LedgerDAO ledgerDAO = new LedgerDAO(application);
         //get origin ledger from db
@@ -85,8 +90,6 @@ public class LedgerSyncService implements Runnable {
             Ledger tmpLedger = tmp.get(org.getServer_id());
             tmpLedger.setId(org.getId());
         });
-        //insert or update
-        ledgerDAO.insertOrUpdate(ledgers);
     }
 
     public List<Ledger> findCreatableLedgers() {
