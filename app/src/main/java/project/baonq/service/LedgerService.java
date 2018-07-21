@@ -1,19 +1,30 @@
 package project.baonq.service;
 
 
+import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import java.util.List;
 
+import project.baonq.dao.LedgerDAO;
 import project.baonq.enumeration.LedgerStatus;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Ledger;
 import project.baonq.model.LedgerDao;
 
-public class LedgerService {
+public class LedgerService extends Service {
 
-    private DaoSession daoSession;
+    private LedgerDAO ledgerDAO;
 
-    public LedgerService(DaoSession daoSession) {
-        this.daoSession = daoSession;
+    public LedgerService(Application application) {
+        super(application);
+        ledgerDAO = new LedgerDAO(application);
+    }
+
+
+    public Ledger findById(Long id) {
+        return new LedgerDAO(application).findById(id);
     }
 
     public Long addLedger(String name, String currency, boolean isReport) {
@@ -25,25 +36,42 @@ public class LedgerService {
         long now = System.currentTimeMillis();
         ledger.setInsert_date(now);
         ledger.setLast_update(now);
-        LedgerDao ledgerDao = daoSession.getLedgerDao();
-        ledgerDao.insert(ledger);
-        return ledgerDao.getKey(ledger);
+        return ledgerDAO.addLedger(ledger);
     }
 
-    public void updateLedger(Long id, String name, String currency, boolean isChecked) {
-        Ledger ledger = new Ledger();
-        ledger.setId(id);
-        ledger.setName(name);
-        ledger.setCurrency(currency);
-        ledger.setCounted_on_report(isChecked);
-        long now = System.currentTimeMillis();
-        ledger.setLast_update(now);
-        LedgerDao ledgerDao = daoSession.getLedgerDao();
-        ledgerDao.update(ledger);
+    public void updateLedger(Ledger ledger) {
+        Ledger origin = findById(ledger.getId());
+        origin.setStatus(ledger.getStatus());
+        origin.setCurrency(ledger.getCurrency());
+        origin.setName(ledger.getName());
+        origin.setCounted_on_report(ledger.getCounted_on_report());
+        origin.setLast_update(System.currentTimeMillis());
+        ledgerDAO.updateLedger(ledger);
     }
 
     public List<Ledger> getAll() {
-        LedgerDao ledgerDao = daoSession.getLedgerDao();
-        return ledgerDao.loadAll();
+        return ledgerDAO.getAll();
+    }
+
+    public Ledger findByServerId(Long id) {
+        return ledgerDAO.findByServerId(id);
+    }
+
+    public Long getLastUpdateTime() {
+        SharedPreferences sharedPreferences = application.getSharedPreferences("sync", Context.MODE_PRIVATE);
+        return sharedPreferences.getLong(LedgerSyncService.LEDGER_LASTUPDATE, Long.parseLong("0"));
+    }
+
+    public Long getLastUpdateTimeFromDb() {
+        Ledger ledger = ledgerDAO.findLastUpdateLedger();
+        if (ledger != null) {
+            return ledger.getLast_update();
+        } else {
+            return Long.parseLong("0");
+        }
+    }
+
+    public void insertOrUpdate(List<Ledger> ledgers) {
+        ledgerDAO.insertOrUpdate(ledgers);
     }
 }

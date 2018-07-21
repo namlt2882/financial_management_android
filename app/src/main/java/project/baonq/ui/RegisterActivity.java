@@ -1,16 +1,17 @@
 package project.baonq.ui;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 
 import project.baonq.dto.UserDto;
 import project.baonq.menu.R;
-import project.baonq.model.User;
+import project.baonq.service.App;
 import project.baonq.service.AuthenticationService;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -22,6 +23,7 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        getSupportActionBar().hide();
         emptyError();
         authenticationService = new AuthenticationService(this);
     }
@@ -39,12 +41,16 @@ public class RegisterActivity extends AppCompatActivity {
         System.out.println(user.getUsername());
         System.out.println(user.getPassword());
         if (validateInfo(user)) {
-            try {
-                authenticationService.register(user);
-                finish();
-            } catch (Exception e) {
-                e.printStackTrace();
-                ((TextView) findViewById(R.id.txtUsernameError)).setText("This username is already existed!");
+            if (((App) getApplication()).isNetworkConnected()) {
+                try {
+                    authenticationService.register(user);
+                    finish();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    ((TextView) findViewById(R.id.txtUsernameError)).setText("This username is already existed!");
+                }
+            } else {
+                Toast.makeText(this, "Network is not available!", Toast.LENGTH_SHORT).show();
             }
         }
     }

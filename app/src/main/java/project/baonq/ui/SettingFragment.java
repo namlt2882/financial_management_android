@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,11 +15,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import project.baonq.menu.R;
+import project.baonq.service.App;
 import project.baonq.service.AuthenticationService;
+import project.baonq.service.LedgerSyncService;
 
 public class SettingFragment extends Fragment {
+    AuthenticationService authenticationService;
     public SettingFragment() {
-        // Required empty public constructor
     }
 
     // TODO: Rename and change types and number of parameters
@@ -30,6 +33,11 @@ public class SettingFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
+        authenticationService = new AuthenticationService(getContext());
     }
 
     @Nullable
@@ -41,7 +49,9 @@ public class SettingFragment extends Fragment {
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                new LedgerSyncService(getActivity().getApplication()).run();
                 clickToLogout();
+                ((App) getActivity().getApplication()).removeDb();
                 ((MainActivity) getActivity()).restartApp();
             }
         });
@@ -49,7 +59,6 @@ public class SettingFragment extends Fragment {
     }
 
     public void clickToLogout() {
-        AuthenticationService authenticationService = new AuthenticationService(getContext());
         try {
             authenticationService.logout();
         } catch (Exception e) {

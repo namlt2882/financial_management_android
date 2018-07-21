@@ -13,32 +13,31 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.text.DecimalFormat;
 import java.util.List;
 
 import project.baonq.menu.R;
-import project.baonq.model.DaoSession;
 import project.baonq.model.Ledger;
-import project.baonq.model.LedgerDao;
 import project.baonq.model.Transaction;
-import project.baonq.service.App;
+import project.baonq.model.TransactionGroup;
 import project.baonq.service.LedgerService;
+import project.baonq.service.TransactionGroupService;
 import project.baonq.service.TransactionService;
 import project.baonq.util.ConvertUtil;
 
 public class LedgeChoosenActivity extends AppCompatActivity {
     private final static int LAYOUT_INFO = 1;
     private final static int LAYOUT_UPDATE = 2;
-
-    private Ledger ledger;
-    private DaoSession daoSession;
-
+    TransactionGroupService transactionGroupService;
+    LedgerService ledgerService;
+    TransactionService transactionService;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.NormalSizeAppTheme);
         super.onCreate(savedInstanceState);
-        daoSession = ((App) getApplication()).getDaoSession();
         setContentView(R.layout.ledge_choosen_layout);
+        transactionGroupService = new TransactionGroupService(getApplication());
+        ledgerService = new LedgerService(getApplication());
+        transactionService = new TransactionService(getApplication());
         //set init for action bar
         initActionBar();
         //set init for menu action
@@ -98,19 +97,26 @@ public class LedgeChoosenActivity extends AppCompatActivity {
     private double sumOfTransaction(List<Transaction> transactionList) {
         double sum = 0;
         for (Transaction item : transactionList) {
-            sum += item.getBalance();
+            TransactionGroup transactionGroup = transactionGroupService.getTransactionGroupByID(item.getGroup_id());
+            int transactionGrouptype = transactionGroup.getTransaction_type();
+            if (transactionGrouptype == 1) {
+                sum += item.getBalance();
+            }
+
+            if (transactionGrouptype == 2) {
+                sum -= item.getBalance();
+            }
         }
         return sum;
     }
 
     private List<Ledger> getLedgerList() {
-        daoSession = ((App) getApplication()).getDaoSession();
-        List<Ledger> ledgerList = new LedgerService(daoSession).getAll();
+        List<Ledger> ledgerList = ledgerService.getAll();
         return ledgerList;
     }
 
     private List<Transaction> getTransactionListById(Long ledger_id) {
-        return new TransactionService(daoSession).getTransactionByLedger_Id(ledger_id);
+        return transactionService.getByLedgerId(ledger_id);
     }
 
     private void createNewRowData(final Ledger ledger, double sum) {
@@ -120,6 +126,10 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         submitLayout.setLayoutParams(layoutParams);
         TextView txtTitle = submitLayout.findViewById(R.id.txtTittle);
         TextView txtCash = submitLayout.findViewById(R.id.txtCash);
+        if (sum < 0) {
+            txtCash.setTextColor(Color.RED);
+            sum = Math.abs(sum);
+        }
         txtTitle.setText(ledger.getName());
         String currentBalanceFormat = ConvertUtil.convertCashFormat(sum);
         txtCash.setText(currentBalanceFormat + ConvertUtil.convertCurrency(ledger.getCurrency()));
@@ -133,6 +143,10 @@ public class LedgeChoosenActivity extends AppCompatActivity {
 
     private void setTotalLedgerCash(double totalLedgerCash, String currency) {
         TextView txtLedgerCashSum = (TextView) findViewById(R.id.txtLedgerCashSum);
+        if (totalLedgerCash < 0) {
+            txtLedgerCashSum.setTextColor(Color.RED);
+            totalLedgerCash = Math.abs(totalLedgerCash);
+        }
         String totalCash = ConvertUtil.convertCashFormat(totalLedgerCash);
         txtLedgerCashSum.setText(totalCash + currency);
     }

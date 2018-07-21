@@ -1,59 +1,43 @@
 package project.baonq.service;
 
+import android.app.Application;
+
 import java.util.List;
 
+import project.baonq.dao.TransactionDAO;
 import project.baonq.enumeration.TransactionStatus;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
 
 
-public class TransactionService {
-    private DaoSession daoSession;
+public class TransactionService extends Service {
 
-    public TransactionService(DaoSession daoSession) {
-        this.daoSession = daoSession;
+    private TransactionDAO transactionDAO;
+
+    public TransactionService(Application application) {
+        super(application);
+        transactionDAO = new TransactionDAO(application);
     }
 
-    public Long addTransaction(Long ledger_id, Long group_id, double balance) {
-        long insert_date = System.currentTimeMillis();
+    public Long addTransaction(Long ledger_id, Long group_id, double balance, String tdate, String note) {
         Transaction transaction = new Transaction();
         transaction.setLedger_id(ledger_id);
         transaction.setGroup_id(group_id);
         transaction.setBalance(balance);
+        transaction.setNote(note);
+        transaction.setTdate(tdate);
+        //insert date and last update time
+        long insert_date = System.currentTimeMillis();
         transaction.setInsert_date(insert_date);
         transaction.setLast_update(insert_date);
+        //status
         transaction.setStatus(TransactionStatus.ENABLE.getStatus());
-        TransactionDao transactionDao = daoSession.getTransactionDao();
-        transactionDao.insert(transaction);
-        return transactionDao.getKey(transaction);
+        return transactionDAO.addTransaction(transaction);
     }
 
-    public void addTransaction(double amount, String txtNote, String date) {
-//        transaction = new Transaction();
-//        transaction.setBalance(amount);
-//        transaction.setNote(txtNote);
-//        transaction.setTdate(date);
-//        transaction.setInsert_date(LocalDate.now().toString());
+    public List<Transaction> getByLedgerId(Long ledger_id) {
+        return transactionDAO.getTransactionByLedgerId(ledger_id);
     }
 
-    public void updateTransaction(Long ledger_id, Long group_id, double balance) {
-        Transaction transactionForUpdate = getTransactionNeedForUpdate(ledger_id, group_id);
-        transactionForUpdate.setBalance(balance);
-        TransactionDao transactionDao = daoSession.getTransactionDao();
-        transactionDao.update(transactionForUpdate);
-    }
-
-    public List<Transaction> getTransactionByLedger_Id(Long ledger_id) {
-        TransactionDao transactionDao = daoSession.getTransactionDao();
-        return transactionDao.queryBuilder().where(TransactionDao.Properties.Ledger_id.eq(ledger_id)).list();
-    }
-
-
-    private Transaction getTransactionNeedForUpdate(Long ledger_id, Long group_id) {
-        TransactionDao transactionDao = daoSession.getTransactionDao();
-        return transactionDao.queryBuilder()
-                .where(TransactionDao.Properties.Ledger_id.eq(ledger_id), TransactionDao.Properties.Group_id.eq(group_id))
-                .unique();
-    }
 }

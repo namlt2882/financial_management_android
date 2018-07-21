@@ -6,23 +6,25 @@ import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.widget.Toast;
 
 import com.savvi.rangedatepicker.CalendarPickerView;
 
@@ -34,31 +36,32 @@ import java.util.List;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import project.baonq.menu.R;
-import project.baonq.service.AuthenticationService;
 import project.baonq.AddTransaction.AddTransaction;
-import project.baonq.model.DaoSession;
-import project.baonq.model.LedgerDao;
-import project.baonq.model.Transaction;
-import project.baonq.model.TransactionDao;
-import project.baonq.util.UserManager;
+import project.baonq.menu.R;
+import project.baonq.service.App;
+import project.baonq.service.AuthenticationService;
+import project.baonq.service.LedgerSyncService;
+import project.baonq.service.NotificationService;
 
 
 public class MainActivity extends AppCompatActivity {
     CalendarPickerView calendar;
     Button button;
+    AuthenticationService authService;
+    Thread notificationService;
+    LedgerSyncService ledgerSyncService;
+    public static final boolean GET_NOTIFICATION = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        AuthenticationService authService = new AuthenticationService(this);
+        authService = new AuthenticationService(this);
+        ledgerSyncService = new LedgerSyncService(getApplication());
         if (!authService.isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
-
         //set date picker
         setActionBarLayout("Chọn ngày");
         //set date picker
@@ -68,6 +71,19 @@ public class MainActivity extends AppCompatActivity {
         //set botttom navigation bar activities
         setFragmentBottomNavigationBarActivities();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (GET_NOTIFICATION) {
+            if (authService.isLoggedIn() && notificationService == null) {
+                System.out.println("INIT NOTIFICATION SERVICE-------");
+                notificationService = new Thread(new NotificationService(getApplication()));
+                notificationService.start();
+            }
+        }
+    }
+
 
     public void restartApp() {
         AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -88,9 +104,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AddTransaction.class);
+                removeData();
                 startActivity(intent);
             }
         });
+    }
+
+    public void removeData() {
+        SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pre.edit();
+        editor.remove("Note");
+        editor.remove("Date");
+        editor.remove("balance");
+        editor.remove("catId");
+        editor.remove("walletId");
+        editor.commit();
     }
 
     private void initDatepicker() {
@@ -191,8 +219,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        final MenuItem btnViewNotification = menu.findItem(R.id.btnViewNotification);
+        btnViewNotification.getActionView().setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
+            startActivity(intent);
+        });
+        return true;
+    }
 
-        return super.onCreateOptionsMenu(menu);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.btnSynchonize:
+                if (((App) getApplication()).isNetworkConnected()) {
+                    new Thread(ledgerSyncService).start();
+                } else {
+                    Toast.makeText(this, "Network is not available to sync!", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void setFragmentBottomNavigationBarActivities() {
