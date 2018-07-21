@@ -1,8 +1,11 @@
 package project.baonq.service;
 
 
+import android.app.Application;
+
 import java.util.List;
 
+import project.baonq.dao.LedgerDAO;
 import project.baonq.enumeration.LedgerStatus;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Ledger;
@@ -10,11 +13,12 @@ import project.baonq.model.LedgerDao;
 
 public class LedgerService {
 
-    private DaoSession daoSession;
+    private Application application;
 
-    public LedgerService(DaoSession daoSession) {
-        this.daoSession = daoSession;
+    public LedgerService(Application application) {
+        this.application = application;
     }
+
 
     public Long addLedger(String name, String currency, boolean isReport) {
         Ledger ledger = new Ledger();
@@ -25,9 +29,7 @@ public class LedgerService {
         long now = System.currentTimeMillis();
         ledger.setInsert_date(now);
         ledger.setLast_update(now);
-        LedgerDao ledgerDao = daoSession.getLedgerDao();
-        ledgerDao.insert(ledger);
-        return ledgerDao.getKey(ledger);
+        return new LedgerDAO(application).addLedger(ledger);
     }
 
     public void updateLedger(Long id, String name, String currency, boolean isChecked) {
@@ -38,12 +40,10 @@ public class LedgerService {
         ledger.setCounted_on_report(isChecked);
         long now = System.currentTimeMillis();
         ledger.setLast_update(now);
-        LedgerDao ledgerDao = daoSession.getLedgerDao();
-        ledgerDao.update(ledger);
+        new LedgerDAO(application).updateLedger(ledger);
     }
 
     public List<Ledger> getAll() {
-        LedgerDao ledgerDao = daoSession.getLedgerDao();
-        return ledgerDao.loadAll();
+        return new LedgerDAO(application).getAll();
     }
 }

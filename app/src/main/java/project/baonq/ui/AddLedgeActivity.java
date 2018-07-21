@@ -1,5 +1,6 @@
 package project.baonq.ui;
 
+import android.app.Application;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -30,7 +31,7 @@ import project.baonq.util.ConvertUtil;
 public class AddLedgeActivity extends AppCompatActivity {
 
     private Ledger ledger;
-    private DaoSession daoSession;
+    private Application application;
     private boolean isUpdate = false;
     private Long id = null;
 
@@ -39,7 +40,7 @@ public class AddLedgeActivity extends AppCompatActivity {
         setTheme(R.style.NormalSizeAppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_ledge_layout);
-        daoSession = ((App) getApplication()).getDaoSession();
+        application = getApplication();
         //init action bar
         initActionBar();
         //init spiner
@@ -90,31 +91,29 @@ public class AddLedgeActivity extends AppCompatActivity {
     }
 
     private Long addLedger(String name, String currency, boolean isChecked) {
-        return new LedgerService(daoSession).addLedger(name, currency, isChecked);
+        return new LedgerService(application).addLedger(name, currency, isChecked);
     }
 
     private void addDefaultTransactionGroup(Long ledgerId) {
         String[] defaultIncomeName = {"Lương", "Tiền chuyển đến", "Được tặng", "Lãi ngân hàng", "Khác"};
         Long index = 0L;
         for (String name : defaultIncomeName) {
-            daoSession = ((App) getApplication()).getDaoSession();
-            new TransactionGroupService(daoSession).addTransactionGroup(ledgerId, name, 1, 1);
+            new TransactionGroupService(application).addTransactionGroup(ledgerId, name, 1, 1);
         }
         String[] defaultPurchaseName = {"Ăn uống", "Hóa đơn", "Mua sắm", "Di chuyển", "Khác"};
         for (String name : defaultPurchaseName) {
-            daoSession = ((App) getApplication()).getDaoSession();
-            new TransactionGroupService(daoSession).addTransactionGroup(ledgerId, name, 2, 1);
+            new TransactionGroupService(application).addTransactionGroup(ledgerId, name, 2, 1);
         }
     }
 
 
     private void updateLedger(Long id, String name, String currency, boolean isChecked) {
-        new LedgerService(daoSession).updateLedger(id, name, currency, isChecked);
+        new LedgerService(application).updateLedger(id, name, currency, isChecked);
     }
 
     private void updateTransaction(Long ledger_id, int transaction_Type, String name, double balance) {
-        Long group_id = new TransactionGroupService(daoSession).getTransactionGroupID(ledger_id, transaction_Type, name);
-        new TransactionService(daoSession).updateTransaction(ledger_id, group_id, balance);
+        Long group_id = new TransactionGroupService(application).getTransactionGroupID(ledger_id, transaction_Type, name);
+        new TransactionService(application).updateTransaction(ledger_id, group_id, balance);
     }
 
     private void initSubmitText() {
@@ -143,8 +142,8 @@ public class AddLedgeActivity extends AppCompatActivity {
                     Long ledgerId = addLedger(name, currency, isChecked);
                     addDefaultTransactionGroup(ledgerId);
                     //in case current is > 0
-                    TransactionGroupService transactionGroupService = new TransactionGroupService(daoSession);
-                    TransactionService transactionService = new TransactionService(daoSession);
+                    TransactionGroupService transactionGroupService = new TransactionGroupService(application);
+                    TransactionService transactionService = new TransactionService(application);
                     if (Double.parseDouble(currentBalance) > 0) {
                         groupId = transactionGroupService.getTransactionGroupID(ledgerId, TransactionGroupType.INCOME.getType(), "Khác");
                         transactionService.addTransaction(ledgerId, groupId, balance);

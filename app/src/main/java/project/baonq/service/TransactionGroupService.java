@@ -1,7 +1,10 @@
 package project.baonq.service;
 
+import android.app.Application;
+
 import org.greenrobot.greendao.query.QueryBuilder;
 
+import project.baonq.dao.TransactionGroupDAO;
 import project.baonq.enumeration.TransactionGroupStatus;
 import project.baonq.enumeration.TransactionStatus;
 import project.baonq.model.DaoSession;
@@ -9,12 +12,10 @@ import project.baonq.model.Transaction;
 import project.baonq.model.TransactionGroup;
 import project.baonq.model.TransactionGroupDao;
 
-public class TransactionGroupService {
+public class TransactionGroupService extends Service {
 
-    private DaoSession daoSession;
-
-    public TransactionGroupService(DaoSession daoSession) {
-        this.daoSession = daoSession;
+    public TransactionGroupService(Application application) {
+        super(application);
     }
 
     public Long addTransactionGroup(Long ledgerId, String name, int transactionType, int status) {
@@ -24,18 +25,10 @@ public class TransactionGroupService {
         transactionGroup.setTransaction_type(transactionType);
         transactionGroup.setStatus(status);
         transactionGroup.setStatus(TransactionGroupStatus.ENABLE.getStatus());
-        TransactionGroupDao transactionGroupDao = daoSession.getTransactionGroupDao();
-        transactionGroupDao.insert(transactionGroup);
-        return transactionGroupDao.getKey(transactionGroup);
+        return new TransactionGroupDAO(application).addTransactionGroup(transactionGroup);
     }
 
     public Long getTransactionGroupID(Long ledger_id, int transaction_type, String name) {
-        TransactionGroupDao transactionGroupDao = daoSession.getTransactionGroupDao();
-        QueryBuilder<TransactionGroup> queryBuilder = transactionGroupDao.queryBuilder();
-        return queryBuilder.where(TransactionGroupDao.Properties.Ledger_id.eq(ledger_id),
-                TransactionGroupDao.Properties.Transaction_type.eq(transaction_type),
-                TransactionGroupDao.Properties.Name.eq(name))
-                .unique()
-                .getId();
+       return new TransactionGroupDAO(application).getTransactionGroupID(ledger_id, transaction_type, name);
     }
 }

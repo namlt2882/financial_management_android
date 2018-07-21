@@ -1,5 +1,6 @@
 package project.baonq.AddTransaction;
 
+import android.app.Application;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -32,12 +33,14 @@ public class ChooseLedger extends AppCompatActivity {
 
     private Ledger ledger;
     private DaoSession daoSession;
+    private Application application;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_ledger);
         daoSession = ((App) getApplication()).getDaoSession();
+        application = getApplication();
         //set init for action bar
         initActionBar();
         //set init for menu action
@@ -81,7 +84,7 @@ public class ChooseLedger extends AppCompatActivity {
 
     private List<Ledger> getLedgerList() {
         daoSession = ((App) getApplication()).getDaoSession();
-        List<Ledger> ledgerList = new LedgerService(daoSession).getAll();
+        List<Ledger> ledgerList = new LedgerService(application).getAll();
         return ledgerList;
     }
 
@@ -133,7 +136,7 @@ public class ChooseLedger extends AppCompatActivity {
     private void getLedgerData() {
         daoSession = ((App) getApplication()).getDaoSession();
 
-        List<Ledger> ledgerList = new LedgerService(daoSession).getAll();
+        List<Ledger> ledgerList = new LedgerService(application).getAll();
 
         for (Ledger ledger : ledgerList) {
             createNewRowData(ledger, 0);

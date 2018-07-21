@@ -1,5 +1,6 @@
 package project.baonq.ui;
 
+import android.app.Application;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -32,12 +33,14 @@ public class LedgeChoosenActivity extends AppCompatActivity {
 
     private Ledger ledger;
     private DaoSession daoSession;
+    private Application application;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.NormalSizeAppTheme);
         super.onCreate(savedInstanceState);
         daoSession = ((App) getApplication()).getDaoSession();
+        application = getApplication();
         setContentView(R.layout.ledge_choosen_layout);
         //set init for action bar
         initActionBar();
@@ -105,12 +108,12 @@ public class LedgeChoosenActivity extends AppCompatActivity {
 
     private List<Ledger> getLedgerList() {
         daoSession = ((App) getApplication()).getDaoSession();
-        List<Ledger> ledgerList = new LedgerService(daoSession).getAll();
+        List<Ledger> ledgerList = new LedgerService(application).getAll();
         return ledgerList;
     }
 
     private List<Transaction> getTransactionListById(Long ledger_id) {
-        return new TransactionService(daoSession).getTransactionByLedger_Id(ledger_id);
+        return new TransactionService(application).getTransactionByLedgerId(ledger_id);
     }
 
     private void createNewRowData(final Ledger ledger, double sum) {
