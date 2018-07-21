@@ -20,14 +20,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name="project.baonq.ui.LoginActivity"></activity>
-        <activity android:name="project.baonq.ui.AddLedgeActivity"></activity>
-        <activity android:name="project.baonq.ui.LedgeChoosenActivity"></activity>
-        <activity android:name="project.baonq.ui.RegisterActivity"></activity>
-        <activity android:name="project.baonq.AddTransaction.AddTransaction"></activity>
+        <activity android:name="project.baonq.ui.LoginActivity" />
+        <activity android:name="project.baonq.ui.AddLedgeActivity" />
+        <activity android:name="project.baonq.ui.LedgeChoosenActivity" />
+        <activity android:name="project.baonq.ui.RegisterActivity"/>
+        <activity android:name="project.baonq.AddTransaction.AddTransaction" />
         <activity android:name="project.baonq.AddTransaction.SelectCategory" />
-        <activity android:name="project.baonq.AddTransaction.ChooseLedger"></activity>
+        <activity android:name="project.baonq.AddTransaction.ChooseLedger" />
+        <activity android:name="project.baonq.ui.NotificationActivity" />
+        <activity android:name="project.baonq.ui.NotificationDetailActivity"></activity>
     </application>
 
 </manifest>

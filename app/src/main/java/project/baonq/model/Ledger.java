@@ -1,5 +1,6 @@
 package project.baonq.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.greenrobot.greendao.annotation.Entity;
@@ -23,17 +24,22 @@ public class Ledger {
 
     private String currency;
 
+    @JsonProperty("countedOnReport")
     private boolean counted_on_report;
 
+    @JsonProperty("insertDate")
     private Long insert_date;
 
+    @JsonProperty("lastUpdate")
     private Long last_update;
 
     private int status;
 
+    @JsonIgnore
     @ToMany(referencedJoinProperty = "ledger_id")
     private List<Transaction> transaction;
 
+    @JsonIgnore
     @ToMany(referencedJoinProperty = "ledger_id")
     private List<TransactionGroup> transactionGroup;
 
