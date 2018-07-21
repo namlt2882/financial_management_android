@@ -2,6 +2,7 @@ package project.baonq.AddTransaction;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,35 +29,45 @@ import project.baonq.model.DaoSession;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
 import project.baonq.service.LedgerService;
+import project.baonq.service.TransactionService;
 import project.baonq.ui.MainActivity;
 import project.baonq.util.ConvertUtil;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
 public class AddTransaction extends AppCompatActivity {
-    private DaoSession daoSession;
-    private static TransactionDao dao;
-
     final Calendar myCalendar = Calendar.getInstance();
+    private TransactionService transactionService;
+    private String txtNote;
+    private String txtDate;
+    private String balance;
+    private Long ledgerId;
+    private Long catId;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_transaction);
+        transactionService = new TransactionService(getApplication());
 
-        daoSession = ((project.baonq.service.App) getApplication()).getDaoSession();
         Button btn = null;
-
         btn = findViewById(R.id.btnCategory);
         btn.setText("Select category");
         EditText txt = findViewById(R.id.txtDate);
-
-
+        txt.setFocusable(false);
+        txt.setBackgroundResource(android.R.color.transparent);
+        ((EditText) findViewById(R.id.nmAmount)).setBackgroundResource(android.R.color.transparent);
+        ((EditText) findViewById(R.id.nmAmount)).setTextSize(50);
+        ((EditText) findViewById(R.id.txtNote)).setBackgroundResource(android.R.color.transparent);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(AddTransaction.this, SelectCategory.class);
-                startActivity(intent);
+                if (ledgerId != null) {
+                    Intent intent = new Intent(AddTransaction.this, SelectCategory.class);
+                    intent.putExtra("ledgerId", ledgerId);
+                    saveData();
+                    startActivity(intent);
+                }
             }
         });
 
@@ -89,11 +100,13 @@ public class AddTransaction extends AppCompatActivity {
 
 
         btn = findViewById(R.id.btnWallet);
+        btn.setText("Select wallet");
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(AddTransaction.this, ChooseLedger.class);
                 startActivity(intent);
+                saveData();
             }
         });
 
@@ -113,32 +126,27 @@ public class AddTransaction extends AppCompatActivity {
                             .setNegativeButton("OK", null)
                             .show();
                 } else {
-                    daoSession = ((project.baonq.service.App) getApplication()).getDaoSession();
-
                     double amount = Double.parseDouble(tmp.getText().toString());
-                    Transaction transaction = new Transaction();
-                    transaction.setBalance(amount);
-                    transaction.setNote(txtNote);
-                    transaction.setTdate(date);
-                    Date currentDate = new Date();
-                    transaction.setInsert_date(currentDate.getTime());
-                    transaction.setLast_update(currentDate.getTime());
-                    dao = daoSession.getTransactionDao();
-                    dao.insert(transaction);
-
-                    Intent intent = new Intent(AddTransaction.this, MainActivity.class);
-                    startActivity(intent);
+                    transactionService.addTransaction(ledgerId, catId, amount, date, txtNote);
+                    finish();
                 }
-
+                removeData();
             }
         });
 
+        loadData();
+        Intent intent = AddTransaction.this.getIntent();
+        Long number = intent.getLongExtra("LedgerId", 0);
+        if (number != 0) {
+            ((Button) findViewById(R.id.btnWallet)).setText(String.valueOf(number));
+            ledgerId = number;
+        }
+        number = intent.getLongExtra("catId", 0);
+        if (number != 0) {
+            ((Button) findViewById(R.id.btnCategory)).setText(String.valueOf(number));
+            catId = number;
+        }
 
-        dao = daoSession.getTransactionDao();
-        List<Transaction> list = dao.loadAll();
-        Log.i("Transaction", String.valueOf(list.size()));
-        File dbFile = getDatabasePath("ledger");
-        Log.i("db:", dbFile.getAbsolutePath());
     }
 
     private void updateLabel() {
@@ -149,6 +157,61 @@ public class AddTransaction extends AppCompatActivity {
         txt.setText(sdf.format(myCalendar.getTime()));
     }
 
+
+    public void saveData() {
+        SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pre.edit();
+
+        EditText tmp = (EditText) findViewById(R.id.nmAmount);
+        txtNote = ((EditText) findViewById(R.id.txtNote))
+                .getText().toString();
+        if (txtNote != null) {
+            editor.putString("Note", txtNote);
+        }
+        txtDate = ((EditText) findViewById(R.id.txtDate)).getText().toString();
+        if (txtDate != null) editor.putString("Date", txtDate);
+
+        if (tmp.getText().toString() != null && tmp.getText().toString() != "") {
+            editor.putString("balance", tmp.getText().toString());
+        }
+        String text = ((Button) findViewById(R.id.btnWallet)).getText().toString();
+        editor.putString("walletId", text);
+        text = ((Button) findViewById(R.id.btnCategory)).getText().toString();
+        editor.putString("catId", text);
+        editor.commit();
+    }
+
+    public void loadData() {
+        SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pre.edit();
+        txtNote = pre.getString("Note", "");
+        ((EditText) findViewById(R.id.txtNote)).setText(txtNote);
+        txtDate = pre.getString("Date", "");
+        ((EditText) findViewById(R.id.txtDate)).setText(txtDate);
+        balance = pre.getString("balance", "0");
+        ((EditText) findViewById(R.id.nmAmount)).setText(balance);
+        if (pre.getString("walletId", "") != "Select wallet" && pre.getString("walletId", "") != "") {
+            ledgerId = Long.parseLong(pre.getString("walletId", "0"));
+            ((Button) findViewById(R.id.btnWallet)).setText(pre.getString("walletId", ""));
+            Log.i("Ledger", pre.getString("walletId", "0"));
+        }
+        if (pre.getString("catId", "") != "Select category" && pre.getString("catId", "") != "") {
+            catId = Long.parseLong(pre.getString("catId", "0"));
+            ((Button) findViewById(R.id.btnCategory)).setText(pre.getString("catId", ""));
+            Log.i("Cat", pre.getString("catId", "0"));
+        }
+    }
+
+    public void removeData() {
+        SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pre.edit();
+        editor.remove("Note");
+        editor.remove("Date");
+        editor.remove("balance");
+        editor.remove("catId");
+        editor.remove("walletId");
+        editor.commit();
+    }
 }
 
 

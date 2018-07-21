@@ -23,12 +23,13 @@
         <activity android:name="project.baonq.ui.LoginActivity" />
         <activity android:name="project.baonq.ui.AddLedgeActivity" />
         <activity android:name="project.baonq.ui.LedgeChoosenActivity" />
-        <activity android:name="project.baonq.ui.RegisterActivity"/>
+        <activity android:name="project.baonq.ui.RegisterActivity" />
         <activity android:name="project.baonq.AddTransaction.AddTransaction" />
         <activity android:name="project.baonq.AddTransaction.SelectCategory" />
         <activity android:name="project.baonq.AddTransaction.ChooseLedger" />
         <activity android:name="project.baonq.ui.NotificationActivity" />
         <activity android:name="project.baonq.ui.NotificationDetailActivity"></activity>
+        <activity android:name="project.baonq.AddTransaction.AddCategory"></activity>
     </application>
 
 </manifest>

@@ -23,7 +23,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //check if user is logged in
         authenticationService = new AuthenticationService(this);
-        if (BaseAuthService.getJwt() != null) {
+        if (authenticationService.isLoggedIn()) {
             finish();
         }
         System.out.println("Original JWT: " + BaseAuthService.getJwt());

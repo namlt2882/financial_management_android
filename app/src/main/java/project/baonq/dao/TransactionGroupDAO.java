@@ -7,6 +7,7 @@ import org.greenrobot.greendao.query.QueryBuilder;
 import java.util.LinkedList;
 import java.util.List;
 
+import project.baonq.enumeration.TransactionGroupType;
 import project.baonq.model.DaoSession;
 import project.baonq.model.TransactionGroup;
 import project.baonq.model.TransactionGroupDao;
@@ -85,5 +86,19 @@ public class TransactionGroupDAO extends DAO {
         return getDaoSession().getTransactionGroupDao().queryBuilder()
                 .where(TransactionGroupDao.Properties.Server_id.isNotNull(),
                         TransactionGroupDao.Properties.Last_update.gt(lastUpdate)).list();
+    }
+
+    public List<TransactionGroup> findExpenseGroupByLedgerId(Long id) {
+        return getDaoSession().getTransactionGroupDao().queryBuilder()
+                .where(TransactionGroupDao.Properties.Ledger_id.eq(id),
+                        TransactionGroupDao.Properties.Transaction_type.eq(TransactionGroupType.EXPENSE.getType()))
+                .list();
+    }
+
+    public List<TransactionGroup> findIncomeGroupByLedgerId(Long id) {
+        return getDaoSession().getTransactionGroupDao().queryBuilder()
+                .where(TransactionGroupDao.Properties.Ledger_id.eq(id),
+                        TransactionGroupDao.Properties.Transaction_type.eq(TransactionGroupType.INCOME.getType()))
+                .list();
     }
 }

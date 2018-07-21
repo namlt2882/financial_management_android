@@ -7,6 +7,8 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,23 +18,28 @@ import project.baonq.model.TransactionGroup;
 
 public class SelectCategory extends AppCompatActivity {
 
+    private Long ledgerId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_category);
-
+        ledgerId = getIntent().getLongExtra("ledgerId", 0);
         ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         // Add Fragments to adapter one by one
-        adapter.addFragment(new ExpenseFragment(), "FRAG1");
-        adapter.addFragment(new IncomeFragment(), "FRAG2");
+        adapter.addFragment(new ExpenseFragment(), "Expense1");
+        adapter.addFragment(new IncomeFragment(), "Expense2");
         viewPager.setAdapter(adapter);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+
         tabLayout.setupWithViewPager(viewPager);
+    }
 
-
+    public Long getLedgerId() {
+        return ledgerId;
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
@@ -55,23 +62,23 @@ public class SelectCategory extends AppCompatActivity {
 
         public void addFragment(Fragment fragment, String title) {
             mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
+            mFragmentTitleList.add("income");
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
+//            if (position == 0) {
+//                return String.valueOf("Expense1");
+//            } else  {
+//                return String.valueOf("Expense1");
+//            }
+//            Log.i("title",String.valueOf(position));
+//            String txt = .toString();
+//            if (txt.equals("Expense1")) return "Expense";
+//                return  mFragmentTitleList.get(position);
+//            if (position ==0) return "income";
+            return "expense";
         }
     }
 
-    private void genereateTransactionGroup(){
-        TransactionGroup group = new TransactionGroup();
-        group.setName("restaurant");
-        group.setTransaction_type(1);
-        group.update();
-        group = new TransactionGroup();
-        group.setName("salary");
-        group.setTransaction_type(2);
-        group.update();
-    }
 }

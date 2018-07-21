@@ -28,9 +28,11 @@ public class NotificationService extends Service implements Runnable {
     public String getNotificationUrl;
     public String getNotificationLastUpdateUrl;
     public String checkreadNotificationUrl;
+    private NotificationDAO notificationDAO;
 
     public NotificationService(Application application) {
         super(application);
+        notificationDAO = new NotificationDAO(application);
         Resources resources = application.getBaseContext().getResources();
         getNotificationUrl = resources.getString(R.string.server_name)
                 + resources.getString(R.string.get_notification_url);
@@ -65,7 +67,6 @@ public class NotificationService extends Service implements Runnable {
     }
 
     public void checkNotificationRead(List<Long> ids) {
-        NotificationDAO notificationDAO = new NotificationDAO(application);
         List<Notification> notifications = notificationDAO.findByIds(ids);
         long currentTime = System.currentTimeMillis();
         //filter read notifications
@@ -89,15 +90,15 @@ public class NotificationService extends Service implements Runnable {
     }
 
     public List<Notification> getUnreadNotifications() {
-        return new NotificationDAO(application).findUnreadNotifications();
+        return notificationDAO.findUnreadNotifications();
     }
 
     public List<Notification> findAll() {
-        return new NotificationDAO(application).findAll();
+        return notificationDAO.findAll();
     }
 
     public Long getLastUpdateTime() {
-        Long result = new NotificationDAO(application).findLastUpdateTime();
+        Long result = notificationDAO.findLastUpdateTime();
         if (result == null) {
             result = Long.valueOf(0);
         }
@@ -105,17 +106,16 @@ public class NotificationService extends Service implements Runnable {
     }
 
     public List<Notification> getUpdatableRecords(Long lastUpdate) {
-        return new NotificationDAO(application).findByLastUpdate(lastUpdate);
+        return notificationDAO.findByLastUpdate(lastUpdate);
     }
 
     public void syncWithLocal(List<Notification> syncData) {
-        NotificationDAO dao = new NotificationDAO(application);
         //get server id
         List<Long> serverIds = syncData.stream()
                 .filter(notification -> notification.getServer_id() != null)
                 .map(notification -> notification.getServer_id()).collect(Collectors.toList());
         //get local data
-        List<Notification> localData = dao.findByServerIds(serverIds);
+        List<Notification> localData = notificationDAO.findByServerIds(serverIds);
         Map<Long, Notification> map = new HashMap<>();
         //add sync data to map
         syncData.forEach(notification -> map.put(notification.getServer_id(), notification));

@@ -33,9 +33,13 @@ import static project.baonq.service.BaseAuthService.read;
 public class TransactionGroupSyncService extends TransactionGroupService implements Runnable {
     public String groupUrl;
     public static final String TRANC_GROUP_LASTUPDATE = "tranc_group_lastUpdate";
+    private TransactionGroupDAO groupDAO;
+    LedgerSyncService ledgerSyncService;
 
     public TransactionGroupSyncService(Application application) {
         super(application);
+        groupDAO = new TransactionGroupDAO(application);
+        ledgerSyncService = new LedgerSyncService(application);
         Resources resources = application.getBaseContext().getResources();
         groupUrl = resources.getString(R.string.server_name)
                 + resources.getString(R.string.get_create_update_tranc_group_url);
@@ -58,8 +62,6 @@ public class TransactionGroupSyncService extends TransactionGroupService impleme
     }
 
     public void syncWithLocal(List<TransactionGroup> groups) {
-        TransactionGroupDAO groupDAO = new TransactionGroupDAO(application);
-        LedgerSyncService ledgerSyncService = new LedgerSyncService(application);
         //--SYNC LOCAL ID
         //get origin group from db
         List<TransactionGroup> origin = groupDAO.findByServerId(groups.stream()
@@ -88,12 +90,12 @@ public class TransactionGroupSyncService extends TransactionGroupService impleme
     }
 
     public List<TransactionGroup> findCreatableGroups() {
-        return new TransactionGroupDAO(application).findCreatableGroups();
+        return groupDAO.findCreatableGroups();
     }
 
     public List<TransactionGroup> findUpdatableGroups() {
         Long lastUpdate = getLastUpdateTime();
-        return new TransactionGroupDAO(application).findUpdatableGroups(lastUpdate);
+        return groupDAO.findUpdatableGroups(lastUpdate);
     }
 
     public void sync(List<TransactionGroup> groups) {

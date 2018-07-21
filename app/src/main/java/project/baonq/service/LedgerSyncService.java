@@ -28,11 +28,13 @@ import static project.baonq.service.BaseAuthService.buildBasicConnection;
 import static project.baonq.service.BaseAuthService.read;
 
 public class LedgerSyncService extends LedgerService implements Runnable {
+    private LedgerDAO ledgerDAO;
     public String ledgerUrl;
     public static final String LEDGER_LASTUPDATE = "ledger_lastUpdate";
 
     public LedgerSyncService(Application application) {
         super(application);
+        ledgerDAO = new LedgerDAO(application);
         Resources resources = application.getBaseContext().getResources();
         ledgerUrl = resources.getString(R.string.server_name)
                 + resources.getString(R.string.get_create_update_ledger_url);
@@ -74,12 +76,12 @@ public class LedgerSyncService extends LedgerService implements Runnable {
     }
 
     public List<Ledger> findCreatableLedgers() {
-        return new LedgerDAO(application).findCreatableLedgers();
+        return ledgerDAO.findCreatableLedgers();
     }
 
     public List<Ledger> findUpdatableLedgers() {
         Long lastUpdate = getLastUpdateTime();
-        return new LedgerDAO(application).findUpdatableLedgers(lastUpdate);
+        return ledgerDAO.findUpdatableLedgers(lastUpdate);
     }
 
     public void sync(List<Ledger> ledgers) {

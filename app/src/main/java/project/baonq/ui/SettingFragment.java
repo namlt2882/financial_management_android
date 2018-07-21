@@ -20,8 +20,8 @@ import project.baonq.service.AuthenticationService;
 import project.baonq.service.LedgerSyncService;
 
 public class SettingFragment extends Fragment {
+    AuthenticationService authenticationService;
     public SettingFragment() {
-        // Required empty public constructor
     }
 
     // TODO: Rename and change types and number of parameters
@@ -37,6 +37,7 @@ public class SettingFragment extends Fragment {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
+        authenticationService = new AuthenticationService(getContext());
     }
 
     @Nullable
@@ -58,7 +59,6 @@ public class SettingFragment extends Fragment {
     }
 
     public void clickToLogout() {
-        AuthenticationService authenticationService = new AuthenticationService(getContext());
         try {
             authenticationService.logout();
         } catch (Exception e) {

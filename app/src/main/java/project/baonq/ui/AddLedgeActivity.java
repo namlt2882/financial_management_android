@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
@@ -17,6 +18,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Date;
 
 import project.baonq.enumeration.Currency;
 import project.baonq.enumeration.TransactionGroupStatus;
@@ -32,16 +35,21 @@ import project.baonq.util.ConvertUtil;
 
 public class AddLedgeActivity extends AppCompatActivity {
 
-    private Application application;
     private boolean isUpdate = false;
     private Long id = null;
+    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+    TransactionGroupService transactionGroupService;
+    TransactionService transactionService;
+    LedgerService ledgerService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.NormalSizeAppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_ledge_layout);
-        application = getApplication();
+        transactionGroupService = new TransactionGroupService(getApplication());
+        transactionService = new TransactionService(getApplication());
+        ledgerService = new LedgerService(getApplication());
         //init action bar
         initActionBar();
         //init spiner
@@ -99,23 +107,22 @@ public class AddLedgeActivity extends AppCompatActivity {
     }
 
     private Long addLedger(String name, String currency, boolean isChecked) {
-        return new LedgerService(application).addLedger(name, currency, isChecked);
+        return ledgerService.addLedger(name, currency, isChecked);
     }
 
     private void addDefaultTransactionGroup(Long ledgerId) {
         String[] defaultIncomeName = {"Lương", "Tiền chuyển đến", "Được tặng", "Lãi ngân hàng", "Khác"};
         for (String name : defaultIncomeName) {
-            new TransactionGroupService(application).addTransactionGroup(ledgerId, name, TransactionGroupType.INCOME.getType());
+            transactionGroupService.addTransactionGroup(ledgerId, name, TransactionGroupType.INCOME.getType());
         }
         String[] defaultPurchaseName = {"Ăn uống", "Hóa đơn", "Mua sắm", "Di chuyển", "Khác"};
         for (String name : defaultPurchaseName) {
-            new TransactionGroupService(application).addTransactionGroup(ledgerId, name, TransactionGroupType.EXPENSE.getType());
+            transactionGroupService.addTransactionGroup(ledgerId, name, TransactionGroupType.EXPENSE.getType());
         }
     }
 
 
     private void updateLedger(Long id, String name, String currency, boolean isChecked) {
-        LedgerService ledgerService = new LedgerService(application);
         boolean isChanged = false;
         name = name != null ? name.trim() : null;
         Ledger ledger = ledgerService.findById(id);
@@ -129,11 +136,6 @@ public class AddLedgeActivity extends AppCompatActivity {
             ledger1.setCounted_on_report(isChecked);
             ledgerService.updateLedger(ledger1);
         }
-    }
-
-    private void updateTransaction(Long ledger_id, int transaction_Type, String name, double balance) {
-        Long group_id = new TransactionGroupService(application).getTransactionGroupID(ledger_id, transaction_Type, name);
-        new TransactionService(application).updateTransaction(ledger_id, group_id, balance);
     }
 
     private void initSubmitText() {
@@ -150,9 +152,6 @@ public class AddLedgeActivity extends AppCompatActivity {
             txtSubmit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    daoSession.getLedgerDao().deleteAll();
-//                    daoSession.getTransactionDao().deleteAll();
-//                    daoSession.getTransactionGroupDao().deleteAll();
                     boolean isValidate;
                     String name = edtName.getText().toString();
                     isValidate = validate(name, "Tên ví không được để trống");
@@ -170,15 +169,15 @@ public class AddLedgeActivity extends AppCompatActivity {
                         //add default transaction group
                         addDefaultTransactionGroup(ledgerId);
                         //in case current is > 0
-                        TransactionGroupService transactionGroupService = new TransactionGroupService(application);
-                        TransactionService transactionService = new TransactionService(application);
+                        String tdate = sdf.format(new Date());
+                        String note = "Điều chỉnh số dư";
                         if (balance > 0) {
                             groupId = transactionGroupService.getTransactionGroupID(ledgerId, TransactionGroupType.INCOME.getType(), "Khác");
-                            transactionService.addTransaction(ledgerId, groupId, balance);
+                            transactionService.addTransaction(ledgerId, groupId, balance, tdate, note);
                         } else if (balance < 0) {
                             groupId = transactionGroupService.getTransactionGroupID(ledgerId, TransactionGroupType.EXPENSE.getType(), "Khác");
                             balance = Math.abs(balance);
-                            transactionService.addTransaction(ledgerId, groupId, balance);
+                            transactionService.addTransaction(ledgerId, groupId, balance, tdate, note);
                         }
                         setResult(RESULT_OK, intent);
                         finish();

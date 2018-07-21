@@ -15,9 +15,11 @@ import project.baonq.model.LedgerDao;
 
 public class LedgerService extends Service {
 
+    private LedgerDAO ledgerDAO;
 
     public LedgerService(Application application) {
         super(application);
+        ledgerDAO = new LedgerDAO(application);
     }
 
 
@@ -34,7 +36,7 @@ public class LedgerService extends Service {
         long now = System.currentTimeMillis();
         ledger.setInsert_date(now);
         ledger.setLast_update(now);
-        return new LedgerDAO(application).addLedger(ledger);
+        return ledgerDAO.addLedger(ledger);
     }
 
     public void updateLedger(Ledger ledger) {
@@ -44,15 +46,15 @@ public class LedgerService extends Service {
         origin.setName(ledger.getName());
         origin.setCounted_on_report(ledger.getCounted_on_report());
         origin.setLast_update(System.currentTimeMillis());
-        new LedgerDAO(application).updateLedger(ledger);
+        ledgerDAO.updateLedger(ledger);
     }
 
     public List<Ledger> getAll() {
-        return new LedgerDAO(application).getAll();
+        return ledgerDAO.getAll();
     }
 
     public Ledger findByServerId(Long id) {
-        return new LedgerDAO(application).findByServerId(id);
+        return ledgerDAO.findByServerId(id);
     }
 
     public Long getLastUpdateTime() {
@@ -61,7 +63,7 @@ public class LedgerService extends Service {
     }
 
     public Long getLastUpdateTimeFromDb() {
-        Ledger ledger = new LedgerDAO(application).findLastUpdateLedger();
+        Ledger ledger = ledgerDAO.findLastUpdateLedger();
         if (ledger != null) {
             return ledger.getLast_update();
         } else {
@@ -70,6 +72,6 @@ public class LedgerService extends Service {
     }
 
     public void insertOrUpdate(List<Ledger> ledgers) {
-        new LedgerDAO(application).insertOrUpdate(ledgers);
+        ledgerDAO.insertOrUpdate(ledgers);
     }
 }

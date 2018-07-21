@@ -12,7 +12,7 @@ public class DAO {
         this.application = application;
     }
 
-    protected DaoSession getDaoSession() {
+    public DaoSession getDaoSession() {
         return ((App) application).getDaoSession();
     }
 }
