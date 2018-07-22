@@ -47,6 +47,8 @@ import project.baonq.util.UserManager;
 public class MainActivity extends AppCompatActivity {
     CalendarPickerView calendar;
     Button button;
+    public static Long startTime;
+    public static Long endTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(MainActivity.this);
         mDialogBuilder.setView(mView);
         final AlertDialog dialog = mDialogBuilder.create();
-        testDatePicker(mView, dialog);
+        createDatePicker(mView, dialog);
         edtDate.clearFocus();
         edtDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void testDatePicker(final View mView, final AlertDialog dialog) {
+    private void createDatePicker(final View mView, final AlertDialog dialog) {
         final Calendar nextYear = Calendar.getInstance();
         nextYear.add(Calendar.YEAR, 10);
 
@@ -127,16 +129,6 @@ public class MainActivity extends AppCompatActivity {
         //this array use for high line important date
         ArrayList<Date> arrayList = new ArrayList<>();
         final SimpleDateFormat dateformat = new SimpleDateFormat("dd-MM-yyyy");
-//        try {
-//            String strdate = "";
-//            String strdate2 = "";
-//            Date newdate = dateformat.parse(strdate);
-//            Date newdate2 = dateformat.parse(strdate2);
-//            arrayList.add(newdate);
-//            arrayList.add(newdate2);
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
         calendar.init(lastYear.getTime(), nextYear.getTime(), new SimpleDateFormat("MM, YYYY", Locale.getDefault())) //
                 .inMode(CalendarPickerView.SelectionMode.RANGE) //
                 .withSelectedDate(new Date())
@@ -150,43 +142,13 @@ public class MainActivity extends AppCompatActivity {
                 List<Date> dateList = calendar.getSelectedDates();
                 setActionBarLayout("Từ : " + dateformat.format(dateList.get(0)) + " đến  " + dateformat.format(dateList.get(dateList.size() - 1)));
                 initDatepicker();
+                startTime = atStartOfDay(dateList.get(0));
+                endTime = atEndOfDay(dateList.get(dateList.size() - 1));
                 dialog.hide();
             }
         });
 
     }
-
-//    private void initDatePicker() {
-//        final EditText datePicker = (EditText) findViewById(R.id.editDate);
-//        final Calendar calendar = Calendar.getInstance();
-//        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-//
-//        //set date picker event
-//        datePicker.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                setdatePickerDialog(datePicker, calendar, simpleDateFormat);
-//            }
-//        });
-//        //set date when load page in first time
-//        datePicker.setText(simpleDateFormat.format(calendar.getTime()));
-//
-//    }
-//
-//    private void setdatePickerDialog(final EditText datePicker, final Calendar calendar, final SimpleDateFormat simpleDateFormat) {
-//        int day = calendar.get(Calendar.DATE);
-//        int month = calendar.get(Calendar.MONTH);
-//        int year = calendar.get(Calendar.YEAR);
-//
-//        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-//            @Override
-//            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-//                calendar.set(year, month, dayOfMonth);
-//                datePicker.setText(simpleDateFormat.format(calendar.getTime()));
-//            }
-//        }, year, month, day);
-//        datePickerDialog.show();
-//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -251,5 +213,25 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setCustomView(mCustomView);
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FFFFFF")));
+    }
+
+    private Long atStartOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+    }
+
+    private Long atEndOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        return calendar.getTimeInMillis();
     }
 }

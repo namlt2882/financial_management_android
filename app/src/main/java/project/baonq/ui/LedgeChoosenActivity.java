@@ -117,7 +117,6 @@ public class LedgeChoosenActivity extends AppCompatActivity {
     }
 
     private List<Ledger> getLedgerList() {
-        daoSession = ((App) getApplication()).getDaoSession();
         List<Ledger> ledgerList = new LedgerService(application).getAll();
         return ledgerList;
     }

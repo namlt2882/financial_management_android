@@ -9,7 +9,7 @@ import project.baonq.model.Ledger;
 import project.baonq.model.LedgerDao;
 import project.baonq.service.App;
 
-public class LedgerDAO extends DAO{
+public class LedgerDAO extends DAO {
 
 
     public LedgerDAO(Application application) {
@@ -29,9 +29,15 @@ public class LedgerDAO extends DAO{
         ledgerDao.update(ledger);
     }
 
-    public List<Ledger> getAll(){
+    public List<Ledger> getAll() {
         DaoSession daoSession = getDaoSession();
         LedgerDao ledgerDao = daoSession.getLedgerDao();
         return ledgerDao.loadAll();
+    }
+
+    public Ledger getledgerById(Long id) {
+        DaoSession daoSession = getDaoSession();
+        LedgerDao ledgerDao = daoSession.getLedgerDao();
+        return ledgerDao.load(id);
     }
 }

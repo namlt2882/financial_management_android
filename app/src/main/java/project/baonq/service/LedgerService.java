@@ -46,4 +46,8 @@ public class LedgerService {
     public List<Ledger> getAll() {
         return new LedgerDAO(application).getAll();
     }
+
+    public Ledger getLedgerById(Long id) {
+        return new LedgerDAO(application).getledgerById(id);
+    }
 }
