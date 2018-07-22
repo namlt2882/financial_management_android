@@ -74,4 +74,9 @@ public class LedgerService extends Service {
     public void insertOrUpdate(List<Ledger> ledgers) {
         ledgerDAO.insertOrUpdate(ledgers);
     }
+
+    public List<Ledger> loadAll() {
+        return ((App) application).getDaoSession().getLedgerDao().loadAll();
+    }
+
 }

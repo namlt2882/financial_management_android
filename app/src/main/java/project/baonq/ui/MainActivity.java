@@ -38,10 +38,14 @@ import java.util.Locale;
 import de.hdodenhof.circleimageview.CircleImageView;
 import project.baonq.AddTransaction.AddTransaction;
 import project.baonq.menu.R;
+import project.baonq.model.Ledger;
+import project.baonq.model.Transaction;
 import project.baonq.service.App;
 import project.baonq.service.AuthenticationService;
 import project.baonq.service.LedgerSyncService;
 import project.baonq.service.NotificationService;
+import project.baonq.service.TransactionService;
+import project.baonq.util.ConvertUtil;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -51,6 +55,10 @@ public class MainActivity extends AppCompatActivity {
     Thread notificationService;
     LedgerSyncService ledgerSyncService;
     public static final boolean GET_NOTIFICATION = false;
+    private TransactionService transactionService;
+    private Ledger ledger;
+    private double sumledgerMoney = 0;
+    private View mCustomView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         authService = new AuthenticationService(this);
         ledgerSyncService = new LedgerSyncService(getApplication());
+        transactionService = new TransactionService(getApplication());
         if (!authService.isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
@@ -82,6 +91,10 @@ public class MainActivity extends AppCompatActivity {
                 notificationService.start();
             }
         }
+        TextView mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
+        TextView mCashTextView = (TextView) mCustomView.findViewById(R.id.txtCash);
+        mTitleTextView.setText(getLedgerName());
+        mCashTextView.setText(getLedgerSum());
     }
 
 
@@ -275,13 +288,12 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
+
     private void setActionBarLayout(String edtDateText) {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         LayoutInflater mInflater = LayoutInflater.from(this);
-        View mCustomView = mInflater.inflate(R.layout.activity_main_menu_layout, null);
-        TextView mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
-        TextView mCashTextView = (TextView) mCustomView.findViewById(R.id.txtCash);
+        mCustomView = mInflater.inflate(R.layout.activity_main_menu_layout, null);
         Button mEdtDate = (Button) mCustomView.findViewById(R.id.editDate);
         CircleImageView circleImage = (CircleImageView) mCustomView.findViewById(R.id.circleImage);
         circleImage.setOnClickListener(new View.OnClickListener() {
@@ -291,12 +303,54 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        mTitleTextView.setText("Tiền của tôi:");
-        mCashTextView.setText("2,000,000 đ");
         mEdtDate.setText(edtDateText);
 
         actionBar.setCustomView(mCustomView);
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FFFFFF")));
     }
+
+    public String formatMoney(double amount) {
+        return (amount < 0 ? "-" : "") + ConvertUtil.convertCashFormat(Math.abs(amount));
+    }
+
+    private String getLedgerName() {
+        return ledger != null ? ledger.getName() : "Tổng cộng";
+    }
+
+    private String getLedgerSum() {
+        if (getLedger() == null) {
+            List<Ledger> ledgerList = ledgerSyncService.loadAll();
+            double total = 0;
+            if (ledgerList != null && !ledgerList.isEmpty()) {
+            }
+
+            for (Ledger ledger : ledgerList) {
+                List<Transaction> transactionList = transactionService.getByLedgerId(ledger.getId());
+                double transactionSum = 0;
+                if (transactionList != null) {
+                    transactionSum = LedgeChoosenActivity.sumOfTransaction(transactionList);
+                }
+                total += transactionSum;
+            }
+            sumledgerMoney = total;
+        } else {
+            List<Transaction> l = transactionService.getByLedgerId(ledger.getId());
+            sumledgerMoney = LedgeChoosenActivity.sumOfTransaction(l);
+        }
+        return formatMoney(sumledgerMoney);
+    }
+
+    public Ledger getLedger() {
+        SharedPreferences sharedPreferences = getSharedPreferences(LedgeChoosenActivity.MAIN_PREFERENCE, MODE_PRIVATE);
+        Long id = sharedPreferences.getLong("curLedgerId", Long.parseLong("0"));
+        if (id != 0) {
+            ledger = ledgerSyncService.findById(id);
+        } else {
+            ledger = null;
+        }
+        return ledger;
+    }
+
+
 }

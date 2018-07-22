@@ -27,14 +27,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="horizontal"
-                    android:weightSum="10">
-
-                    <RadioButton
-                        android:id="@+id/radioButton2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1" />
+                    android:weightSum="10"
+                    android:id="@+id/cardSumLayout">
 
                     <ImageView
                         android:id="@+id/imageView"
