@@ -19,29 +19,34 @@ public class AddCategory extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_category);
 
-        Button btn = (Button)findViewById(R.id.btnSelectWallet);
+        Button btn = (Button) findViewById(R.id.btnSelectWallet);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(AddCategory.this, ChooseLedger.class);
-                startActivity(intent);}});
+                startActivity(intent);
+            }
+        });
 
 
     }
+
     public void saveData() {
         SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
         SharedPreferences.Editor editor = pre.edit();
 
         EditText tmp = (EditText) findViewById(R.id.editText);
-        editor.putString("name",tmp.getText().toString());
-        Switch sw = (Switch)findViewById(R.id.switch2);
-        editor.putBoolean("sw",sw.isChecked());
+        editor.putString("name", tmp.getText().toString());
+        Switch sw = (Switch) findViewById(R.id.switch2);
+        editor.putBoolean("sw", sw.isChecked());
         editor.commit();
     }
+
     public void loadData() {
         SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
         SharedPreferences.Editor editor = pre.edit();
-        ((EditText)findViewById(R.id.editText)).setText(pre.getString("name",""));
-        ((Switch)findViewById(R.id.switch2)).setChecked(pre.getBoolean("sw",false));
+        ((EditText) findViewById(R.id.editText)).setText(pre.getString("name", ""));
+        ((Switch) findViewById(R.id.switch2)).setChecked(pre.getBoolean("sw", false));
+
     }
 }

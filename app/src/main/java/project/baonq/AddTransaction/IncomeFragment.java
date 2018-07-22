@@ -1,6 +1,8 @@
 package project.baonq.AddTransaction;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import project.baonq.enumeration.TransactionGroupType;
 import project.baonq.menu.R;
 import project.baonq.model.DaoSession;
 import project.baonq.model.TransactionGroup;
@@ -24,7 +27,6 @@ public class IncomeFragment extends Fragment {
     public IncomeFragment() {
         // Required empty public constructor
     }
-    private DaoSession daoSession;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,16 +36,17 @@ public class IncomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        daoSession = ((App) getActivity().getApplication()).getDaoSession();
-        final List<TransactionGroup> list = new TransactionGroupService(daoSession).getAll();
+        final SelectCategory activity = (SelectCategory) getActivity();
+        final List<TransactionGroup> list =
+                new TransactionGroupService(activity.getApplication())
+                        .findIncomeGroupByLedgerId(activity.getLedgerId());
 
-        View view = inflater.inflate(R.layout.fragment_income,null);
+        View view = inflater.inflate(R.layout.fragment_income, null);
 
-        LinearLayout layout = (LinearLayout)view.findViewById(R.id.linear_layout);
+        LinearLayout layout = (LinearLayout) view.findViewById(R.id.linear_layout);
         layout.setBackgroundColor(Color.parseColor("#FFFFFF"));
-        for (int i = 0; i < list.size();i++)
-            if (list.get(i).getTransaction_type() == 2)
-            {
+        for (int i = 0; i < list.size(); i++)
+            if (list.get(i).getTransaction_type() == TransactionGroupType.INCOME.getType()) {
                 Button txt = new Button(getActivity());
                 txt.setText(list.get(i).getName());
                 txt.setTextColor(Color.parseColor("#000000"));
@@ -52,9 +55,11 @@ public class IncomeFragment extends Fragment {
                 txt.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(getActivity(),AddTransaction.class);
-                        intent.putExtra("catId",list.get(finalI).getId());
-                        startActivity(intent);
+                        SharedPreferences pre = getActivity().getSharedPreferences("transaction_data", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = pre.edit();
+                        editor.putString("catId", list.get(finalI).getId() + "");
+                        editor.commit();
+                        getActivity().finish();
                     }
                 });
                 layout.addView(txt);

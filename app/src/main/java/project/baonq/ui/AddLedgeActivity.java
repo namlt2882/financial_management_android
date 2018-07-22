@@ -1,12 +1,15 @@
 package project.baonq.ui;
 
+import android.app.Application;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -14,6 +17,9 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.Date;
 
 import project.baonq.enumeration.Currency;
 import project.baonq.enumeration.TransactionGroupStatus;
@@ -29,17 +35,21 @@ import project.baonq.util.ConvertUtil;
 
 public class AddLedgeActivity extends AppCompatActivity {
 
-    private Ledger ledger;
-    private DaoSession daoSession;
     private boolean isUpdate = false;
     private Long id = null;
+    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+    TransactionGroupService transactionGroupService;
+    TransactionService transactionService;
+    LedgerService ledgerService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.NormalSizeAppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_ledge_layout);
-        daoSession = ((App) getApplication()).getDaoSession();
+        transactionGroupService = new TransactionGroupService(getApplication());
+        transactionService = new TransactionService(getApplication());
+        ledgerService = new LedgerService(getApplication());
         //init action bar
         initActionBar();
         //init spiner
@@ -48,6 +58,8 @@ public class AddLedgeActivity extends AppCompatActivity {
         loadUpdateForm();
         //init menu element
         initMenuElement();
+        //init form element
+        initFormElement();
     }
 
     private void initBodyElement(String name, String currency, double currentBalance) {
@@ -74,6 +86,11 @@ public class AddLedgeActivity extends AppCompatActivity {
         });
     }
 
+    private void initFormElement() {
+        final TextView txtCurentBalance = findViewById(R.id.txtCurrentBalance);
+        txtCurentBalance.setText("0");
+    }
+
     private void loadUpdateForm() {
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
@@ -90,31 +107,35 @@ public class AddLedgeActivity extends AppCompatActivity {
     }
 
     private Long addLedger(String name, String currency, boolean isChecked) {
-        return new LedgerService(daoSession).addLedger(name, currency, isChecked);
+        return ledgerService.addLedger(name, currency, isChecked);
     }
 
     private void addDefaultTransactionGroup(Long ledgerId) {
         String[] defaultIncomeName = {"Lương", "Tiền chuyển đến", "Được tặng", "Lãi ngân hàng", "Khác"};
-        Long index = 0L;
         for (String name : defaultIncomeName) {
-            daoSession = ((App) getApplication()).getDaoSession();
-            new TransactionGroupService(daoSession).addTransactionGroup(ledgerId, name, 1, 1);
+            transactionGroupService.addTransactionGroup(ledgerId, name, TransactionGroupType.INCOME.getType());
         }
         String[] defaultPurchaseName = {"Ăn uống", "Hóa đơn", "Mua sắm", "Di chuyển", "Khác"};
         for (String name : defaultPurchaseName) {
-            daoSession = ((App) getApplication()).getDaoSession();
-            new TransactionGroupService(daoSession).addTransactionGroup(ledgerId, name, 2, 1);
+            transactionGroupService.addTransactionGroup(ledgerId, name, TransactionGroupType.EXPENSE.getType());
         }
     }
 
 
     private void updateLedger(Long id, String name, String currency, boolean isChecked) {
-        new LedgerService(daoSession).updateLedger(id, name, currency, isChecked);
-    }
-
-    private void updateTransaction(Long ledger_id, int transaction_Type, String name, double balance) {
-        Long group_id = new TransactionGroupService(daoSession).getTransactionGroupID(ledger_id, transaction_Type, name);
-        new TransactionService(daoSession).updateTransaction(ledger_id, group_id, balance);
+        boolean isChanged = false;
+        name = name != null ? name.trim() : null;
+        Ledger ledger = ledgerService.findById(id);
+        if (!ledger.getName().equals(name)
+                || !ledger.getCurrency().equals(currency) || ledger.getCounted_on_report() && isChecked) {
+            System.out.println("UPDATE LEDGER WITH ID:" + id);
+            Ledger ledger1 = new Ledger();
+            ledger1.setId(id);
+            ledger1.setName(name);
+            ledger1.setCurrency(currency);
+            ledger1.setCounted_on_report(isChecked);
+            ledgerService.updateLedger(ledger1);
+        }
     }
 
     private void initSubmitText() {
@@ -131,29 +152,36 @@ public class AddLedgeActivity extends AppCompatActivity {
             txtSubmit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    daoSession.getLedgerDao().deleteAll();
-//                    daoSession.getTransactionDao().deleteAll();
-//                    daoSession.getTransactionGroupDao().deleteAll();
+                    boolean isValidate;
                     String name = edtName.getText().toString();
+                    isValidate = validate(name, "Tên ví không được để trống");
+                    //in case name is empty
+                    if (!isValidate) {
+                        edtName.requestFocus();
+                    }
                     String currentBalance = edtCurrentBalance.getText().toString();
                     Long groupId = 0L;
-                    double balance = Double.parseDouble(currentBalance);
+                    double balance = Double.parseDouble(!currentBalance.isEmpty() ? currentBalance : "0");
                     String currency = spCurrency.getSelectedItem().toString();
                     boolean isChecked = cbReport.isChecked();
-                    Long ledgerId = addLedger(name, currency, isChecked);
-                    addDefaultTransactionGroup(ledgerId);
-                    //in case current is > 0
-                    TransactionGroupService transactionGroupService = new TransactionGroupService(daoSession);
-                    TransactionService transactionService = new TransactionService(daoSession);
-                    if (Double.parseDouble(currentBalance) > 0) {
-                        groupId = transactionGroupService.getTransactionGroupID(ledgerId, TransactionGroupType.INCOME.getType(), "Khác");
-                        transactionService.addTransaction(ledgerId, groupId, balance);
-                    } else if (Double.parseDouble(currentBalance) < 0) {
-                        groupId = transactionGroupService.getTransactionGroupID(ledgerId, TransactionGroupType.EXPENSE.getType(), "Khác");
-                        transactionService.addTransaction(ledgerId, groupId, balance);
+                    if (isValidate) {
+                        Long ledgerId = addLedger(name, currency, isChecked);
+                        //add default transaction group
+                        addDefaultTransactionGroup(ledgerId);
+                        //in case current is > 0
+                        String tdate = sdf.format(new Date());
+                        String note = "Điều chỉnh số dư";
+                        if (balance > 0) {
+                            groupId = transactionGroupService.getTransactionGroupID(ledgerId, TransactionGroupType.INCOME.getType(), "Khác");
+                            transactionService.addTransaction(ledgerId, groupId, balance, tdate, note);
+                        } else if (balance < 0) {
+                            groupId = transactionGroupService.getTransactionGroupID(ledgerId, TransactionGroupType.EXPENSE.getType(), "Khác");
+                            balance = Math.abs(balance);
+                            transactionService.addTransaction(ledgerId, groupId, balance, tdate, note);
+                        }
+                        setResult(RESULT_OK, intent);
+                        finish();
                     }
-                    setResult(RESULT_OK, intent);
-                    finish();
                 }
             });
         } else {
@@ -167,7 +195,7 @@ public class AddLedgeActivity extends AppCompatActivity {
                     String currency = spCurrency.getSelectedItem().toString();
                     boolean isChecked = cbReport.isChecked();
                     updateLedger(id, name, currency, isChecked);
-                    updateTransaction(id, 1, "Khác", Double.parseDouble(currentBalance));
+//                    updateTransaction(id, 1, "Khác", Double.parseDouble(currentBalance));
                     setResult(RESULT_OK, intent);
                     finish();
                 }
@@ -206,4 +234,11 @@ public class AddLedgeActivity extends AppCompatActivity {
         return 0;
     }
 
+    private boolean validate(String value, String message) {
+        if (value.isEmpty()) {
+            Toast.makeText(getBaseContext(), message, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
 }
