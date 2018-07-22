@@ -6,6 +6,8 @@ import project.baonq.enumeration.TransactionStatus;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
+import project.baonq.model.TransactionGroup;
+import project.baonq.model.TransactionGroupDao;
 
 
 public class TransactionService {
@@ -55,5 +57,10 @@ public class TransactionService {
         return transactionDao.queryBuilder()
                 .where(TransactionDao.Properties.Ledger_id.eq(ledger_id), TransactionDao.Properties.Group_id.eq(group_id))
                 .unique();
+    }
+
+    public List<Transaction> getAll() {
+        TransactionDao transactionDao = daoSession.getTransactionDao();
+        return transactionDao.loadAll();
     }
 }

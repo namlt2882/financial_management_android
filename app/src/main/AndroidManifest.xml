@@ -27,7 +27,9 @@
         <activity android:name="project.baonq.AddTransaction.AddTransaction" />
         <activity android:name="project.baonq.AddTransaction.SelectCategory" />
         <activity android:name="project.baonq.AddTransaction.ChooseLedger" />
-        <activity android:name="project.baonq.AddTransaction.AddCategory"></activity>
+        <activity android:name="project.baonq.AddTransaction.AddCategory">
+
+        </activity>
     </application>
 
 </manifest>

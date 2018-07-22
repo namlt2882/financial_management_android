@@ -37,6 +37,7 @@ import static android.widget.Toast.LENGTH_SHORT;
 public class AddTransaction extends AppCompatActivity {
     private DaoSession daoSession;
     private static TransactionDao dao;
+
     final Calendar myCalendar = Calendar.getInstance();
 
     @Override
