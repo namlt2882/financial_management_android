@@ -8,8 +8,15 @@ import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
+import project.baonq.dto.TransactionDto;
+
 @Entity(nameInDb = "transaction")
 public class Transaction {
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+
     @Id(autoincrement = true)
     @JsonProperty("local_id")
     private Long id;
@@ -30,27 +37,56 @@ public class Transaction {
 
     private String note;
 
-    private int counted_on_report;
+    private boolean counted_on_report;
 
     private Long insert_date;
 
     private Long last_update;
 
     private int status;
+
+    public Ledger ledgerWithoutContext() {
+        return ledger;
+    }
+
+    public TransactionGroup groupWithoutContext() {
+        return transactionGroup;
+    }
+
+    public TransactionDto dto() {
+        TransactionDto dto = new TransactionDto();
+        dto.setId(id);
+        dto.setServerId(server_id);
+        dto.setLedger(getLedger());
+        dto.setTransactionGroup(getTransactionGroup());
+        dto.setBalance(balance);
+        try {
+            dto.setDate(sdf.parse(tdate));
+        } catch (ParseException e) {
+        }
+        dto.setNote(note);
+        dto.setCountedOnReport(counted_on_report);
+        dto.setInsertDate(insert_date);
+        dto.setLastUpdate(last_update);
+        dto.setStatus(status);
+        return dto;
+    }
+
     /**
      * Used to resolve relations
      */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
+
     /**
      * Used for active entity operations.
      */
     @Generated(hash = 947191939)
     private transient TransactionDao myDao;
 
-    @Generated(hash = 1404437688)
+    @Generated(hash = 1860488464)
     public Transaction(Long id, Long server_id, Long ledger_id, Long group_id,
-                       double balance, String tdate, String note, int counted_on_report,
+                       double balance, String tdate, String note, boolean counted_on_report,
                        Long insert_date, Long last_update, int status) {
         this.id = id;
         this.server_id = server_id;
@@ -68,6 +104,12 @@ public class Transaction {
     @Generated(hash = 750986268)
     public Transaction() {
     }
+
+    @Generated(hash = 811996760)
+    private transient Long ledger__resolvedKey;
+
+    @Generated(hash = 921422356)
+    private transient Long transactionGroup__resolvedKey;
 
     public Long getId() {
         return this.id;
@@ -125,11 +167,11 @@ public class Transaction {
         this.note = note;
     }
 
-    public int getCounted_on_report() {
+    public boolean getCounted_on_report() {
         return this.counted_on_report;
     }
 
-    public void setCounted_on_report(int counted_on_report) {
+    public void setCounted_on_report(boolean counted_on_report) {
         this.counted_on_report = counted_on_report;
     }
 
@@ -156,9 +198,6 @@ public class Transaction {
     public void setStatus(int status) {
         this.status = status;
     }
-
-    @Generated(hash = 811996760)
-    private transient Long ledger__resolvedKey;
 
     /**
      * To-one relationship, resolved on first access.
@@ -192,9 +231,6 @@ public class Transaction {
             ledger__resolvedKey = ledger_id;
         }
     }
-
-    @Generated(hash = 921422356)
-    private transient Long transactionGroup__resolvedKey;
 
     /**
      * To-one relationship, resolved on first access.

@@ -1,6 +1,8 @@
 package project.baonq.service;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import java.util.List;
 
@@ -9,6 +11,7 @@ import project.baonq.enumeration.TransactionStatus;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
+import project.baonq.model.TransactionGroup;
 
 
 public class TransactionService extends Service {
@@ -38,6 +41,24 @@ public class TransactionService extends Service {
 
     public List<Transaction> getByLedgerId(Long ledger_id) {
         return transactionDAO.getTransactionByLedgerId(ledger_id);
+    }
+
+    public Long getLastUpdateTime() {
+        SharedPreferences sharedPreferences = application.getSharedPreferences("sync", Context.MODE_PRIVATE);
+        return sharedPreferences.getLong(TransactionSyncService.TRANC_LASTUPDATE, Long.parseLong("0"));
+    }
+
+    public Long getLastUpdateTimeFromDb() {
+        Transaction transaction = transactionDAO.findLastUpdateGroup();
+        if (transaction != null) {
+            return transaction.getLast_update();
+        } else {
+            return Long.parseLong("0");
+        }
+    }
+
+    public void insertOrUpdate(List<Transaction> groups) {
+        transactionDAO.insertOrUpdate(groups);
     }
 
 }

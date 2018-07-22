@@ -43,9 +43,9 @@ public class TransactionGroupDAO extends DAO {
 
     public List<TransactionGroup> insertOrUpdate(List<TransactionGroup> groups) {
         if (groups != null && !groups.isEmpty()) {
-            TransactionGroupDao ledgerDao = getDaoSession().getTransactionGroupDao();
+            TransactionGroupDao groupDao = getDaoSession().getTransactionGroupDao();
             for (TransactionGroup group : groups) {
-                long id = ledgerDao.insertOrReplace(group);
+                long id = groupDao.insertOrReplace(group);
                 group.setId(id);
             }
             return groups;
@@ -61,6 +61,11 @@ public class TransactionGroupDAO extends DAO {
         } else {
             return new LinkedList<>();
         }
+    }
+
+    public TransactionGroup findByServerId(Long id) {
+            return getDaoSession().getTransactionGroupDao().queryBuilder()
+                    .where(TransactionGroupDao.Properties.Server_id.eq(id)).unique();
     }
 
     public List<TransactionGroup> findByIds(List<Long> ids) {

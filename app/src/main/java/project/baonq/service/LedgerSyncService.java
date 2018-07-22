@@ -31,10 +31,14 @@ public class LedgerSyncService extends LedgerService implements Runnable {
     private LedgerDAO ledgerDAO;
     public String ledgerUrl;
     public static final String LEDGER_LASTUPDATE = "ledger_lastUpdate";
+    private TransactionGroupSyncService transactionGroupSyncService;
+    private TransactionSyncService transactionSyncService;
 
     public LedgerSyncService(Application application) {
         super(application);
         ledgerDAO = new LedgerDAO(application);
+        transactionGroupSyncService = new TransactionGroupSyncService(application);
+        transactionSyncService = new TransactionSyncService(application);
         Resources resources = application.getBaseContext().getResources();
         ledgerUrl = resources.getString(R.string.server_name)
                 + resources.getString(R.string.get_create_update_ledger_url);
@@ -53,7 +57,8 @@ public class LedgerSyncService extends LedgerService implements Runnable {
                 updateLedgerAction.doAction();
                 //fetch after
                 fetchLedgerAction.doAction();
-                new TransactionGroupSyncService(application).run();
+                transactionGroupSyncService.run();
+                transactionSyncService.run();
             } catch (Exception e) {
                 e.printStackTrace();
             }

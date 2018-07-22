@@ -18,5 +18,6 @@
     <string name="check_read_notification_url">/noti/read</string>
     <string name="get_create_update_ledger_url">/ledger</string>
     <string name="get_create_update_tranc_group_url">/tranc_group</string>
+    <string name="get_create_update_tranc_url">/transaction</string>
 
 </resources>
