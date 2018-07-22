@@ -1,19 +1,17 @@
 package project.baonq.service;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Properties;
 
 import project.baonq.dto.UserDto;
 import project.baonq.menu.R;
@@ -23,10 +21,9 @@ public class AuthenticationService extends BaseAuthService {
     private static String loginUrl;
     private static String logoutUrl;
     private static String registerUrl;
-    private Context context;
 
     public AuthenticationService(Context context) {
-        this.context = context;
+        super(context);
         Resources resources = context.getResources();
         loginUrl = resources.getString(R.string.server_name)
                 + resources.getString(R.string.login_url);
@@ -45,6 +42,7 @@ public class AuthenticationService extends BaseAuthService {
         URL url = new URL(loginUrl);
         HttpURLConnection conn = buildBasicConnection(url);
         conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
         BufferedReader in = null;
         try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream());) {
             //write parameter to request
@@ -78,11 +76,13 @@ public class AuthenticationService extends BaseAuthService {
         HttpURLConnection conn = buildBasicConnection(url);
         conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
         conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
         BufferedReader in = null;
         ObjectMapper om = new ObjectMapper();
-        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream());) {
+        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(wr, "UTF-8"));) {
             //write parameter to request
-            wr.writeBytes(om.writeValueAsString(user));
+            writer.write(om.writeValueAsString(user));
             //read response value
             if (conn.getResponseCode() == 200) {
                 in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -127,30 +127,5 @@ public class AuthenticationService extends BaseAuthService {
         return getJwt() != null && !"".equals(getJwt());
     }
 
-    private void loadAuthenticationInfo() {
-        String jwt = null;
-        setJwt(null);
-        setUser(null);
-        SharedPreferences sharedPreferences =
-                context.getSharedPreferences("auth", Context.MODE_PRIVATE);
-        jwt = sharedPreferences.getString("jwt", null);
-        if (jwt != null && !"".equals(jwt)) {
-            setJwt(jwt);
-            setUser(getUserFromToken(jwt));
-        }
-    }
-
-    private void saveAuthenticationInfo(String jwt) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("auth", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        if ("".equals(jwt) || jwt == null) {
-            setJwt(null);
-            editor.remove("jwt");
-        } else {
-            setJwt(jwt);
-            editor.putString("jwt", jwt);
-        }
-        editor.commit();
-    }
 
 }

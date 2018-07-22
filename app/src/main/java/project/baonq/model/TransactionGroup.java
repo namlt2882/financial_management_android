@@ -1,5 +1,6 @@
 package project.baonq.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.greenrobot.greendao.annotation.Entity;
@@ -20,23 +21,33 @@ public class TransactionGroup {
     @JsonProperty("server_id")
     private Long server_id;
 
+    @JsonIgnore
     private Long ledger_id;
+    
     @ToOne(joinProperty = "ledger_id")
     private Ledger ledger;
-
+    @JsonIgnore
     private int parent_group_id;
 
     private String name;
-
+    @JsonProperty("transactionType")
     private int transaction_type;
+    @JsonProperty("insertDate")
     private Long insert_date;
+    @JsonProperty("lastUpdate")
     private Long last_update;
 
     private int status;
-
+    @JsonIgnore
     private Long group_id;
+    @JsonIgnore
     @ToMany(referencedJoinProperty = "group_id")
     private List<Transaction> transaction;
+
+
+    public Ledger ledgerWithoutContext(){
+        return ledger;
+    }
     /**
      * Used to resolve relations
      */

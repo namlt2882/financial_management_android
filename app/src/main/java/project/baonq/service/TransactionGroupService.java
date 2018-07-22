@@ -1,38 +1,74 @@
 package project.baonq.service;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 
-import org.greenrobot.greendao.query.QueryBuilder;
+import java.util.List;
 
 import project.baonq.dao.TransactionGroupDAO;
 import project.baonq.enumeration.TransactionGroupStatus;
-import project.baonq.enumeration.TransactionStatus;
-import project.baonq.model.DaoSession;
-import project.baonq.model.Transaction;
 import project.baonq.model.TransactionGroup;
 import project.baonq.model.TransactionGroupDao;
 
 public class TransactionGroupService extends Service {
 
+    private TransactionGroupDAO groupDAO;
+
     public TransactionGroupService(Application application) {
         super(application);
+        groupDAO = new TransactionGroupDAO(application);
     }
 
-    public Long addTransactionGroup(Long ledgerId, String name, int transactionType, int status) {
+    public Long addTransactionGroup(Long ledgerId, String name, int transactionType) {
         TransactionGroup transactionGroup = new TransactionGroup();
         transactionGroup.setLedger_id(ledgerId);
         transactionGroup.setName(name);
         transactionGroup.setTransaction_type(transactionType);
-        transactionGroup.setStatus(status);
         transactionGroup.setStatus(TransactionGroupStatus.ENABLE.getStatus());
-        return new TransactionGroupDAO(application).addTransactionGroup(transactionGroup);
+        Long lastUpdate = System.currentTimeMillis();
+        transactionGroup.setInsert_date(lastUpdate);
+        transactionGroup.setLast_update(lastUpdate);
+        return groupDAO.addTransactionGroup(transactionGroup);
     }
 
     public Long getTransactionGroupID(Long ledger_id, int transaction_type, String name) {
-        return new TransactionGroupDAO(application).getTransactionGroupID(ledger_id, transaction_type, name);
+        return groupDAO.getTransactionGroupID(ledger_id, transaction_type, name);
     }
 
     public TransactionGroup getTransactionGroupByID(Long id) {
-        return new TransactionGroupDAO(application).getTransactionGroupByID(id);
+        return groupDAO.getTransactionGroupByID(id);
+    }
+
+    public Long getLastUpdateTime() {
+        SharedPreferences sharedPreferences = application.getSharedPreferences("sync", Context.MODE_PRIVATE);
+        return sharedPreferences.getLong(TransactionGroupSyncService.TRANC_GROUP_LASTUPDATE, Long.parseLong("0"));
+    }
+
+    public Long getLastUpdateTimeFromDb() {
+        TransactionGroup group = new TransactionGroupDAO(application).findLastUpdateGroup();
+        if (group != null) {
+            return group.getLast_update();
+        } else {
+            return Long.parseLong("0");
+        }
+    }
+
+    public void insertOrUpdate(List<TransactionGroup> groups) {
+        groupDAO.insertOrUpdate(groups);
+    }
+
+    public List<TransactionGroup> getAll() {
+        TransactionGroupDao transactionGroupDao = new TransactionGroupDAO(application)
+                .getDaoSession().getTransactionGroupDao();
+        return transactionGroupDao.loadAll();
+    }
+
+    public List<TransactionGroup> findExpenseGroupByLedgerId(Long id) {
+        return groupDAO.findExpenseGroupByLedgerId(id);
+    }
+
+    public List<TransactionGroup> findIncomeGroupByLedgerId(Long id) {
+        return groupDAO.findIncomeGroupByLedgerId(id);
     }
 }

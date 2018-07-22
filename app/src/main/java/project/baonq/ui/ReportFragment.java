@@ -91,7 +91,7 @@ public class ReportFragment extends Fragment {
 
     private void getDataForPie(Long ledger_id, int typeAspect) {
         Application application = mainActivity.getApplication();
-        List<Transaction> transactionList = new TransactionService(application).getTransactionByLedgerId(ledger_id);
+        List<Transaction> transactionList = new TransactionService(application).getByLedgerId(ledger_id);
         nameList = new ArrayList<>();
         valueList = new ArrayList<>();
         for (Transaction item : transactionList) {
