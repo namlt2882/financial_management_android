@@ -101,4 +101,9 @@ public class TransactionGroupDAO extends DAO {
                         TransactionGroupDao.Properties.Transaction_type.eq(TransactionGroupType.INCOME.getType()))
                 .list();
     }
+
+    public TransactionGroup findById(Long id) {
+        return getDaoSession().getTransactionGroupDao().queryBuilder()
+                .where(TransactionGroupDao.Properties.Id.eq(id)).unique();
+    }
 }

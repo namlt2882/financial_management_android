@@ -71,4 +71,8 @@ public class TransactionGroupService extends Service {
     public List<TransactionGroup> findIncomeGroupByLedgerId(Long id) {
         return groupDAO.findIncomeGroupByLedgerId(id);
     }
+
+    public TransactionGroup findById(Long id) {
+        return groupDAO.findById(id);
+    }
 }

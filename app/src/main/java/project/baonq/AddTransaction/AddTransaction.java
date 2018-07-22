@@ -3,16 +3,21 @@ package project.baonq.AddTransaction;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -23,12 +28,14 @@ import java.util.List;
 import java.util.Locale;
 
 import project.baonq.model.Ledger;
+import project.baonq.model.TransactionGroup;
 import project.baonq.service.App;
 import project.baonq.menu.R;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
 import project.baonq.service.LedgerService;
+import project.baonq.service.TransactionGroupService;
 import project.baonq.service.TransactionService;
 import project.baonq.ui.MainActivity;
 import project.baonq.util.ConvertUtil;
@@ -38,183 +45,193 @@ import static android.widget.Toast.LENGTH_SHORT;
 public class AddTransaction extends AppCompatActivity {
     final Calendar myCalendar = Calendar.getInstance();
     private TransactionService transactionService;
-    private String txtNote;
-    private String txtDate;
-    private String balance;
+    private LedgerService ledgerService;
+    private TransactionGroupService groupService;
     private Long ledgerId;
-    private Long catId;
+    private Long groupId;
+    private DatePickerDialog.OnDateSetListener date;
+    private Ledger ledger;
+    private TransactionGroup group;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        setTheme(R.style.NormalSizeAppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_transaction);
+        initActionBar();
+        initMenuActivities();
         transactionService = new TransactionService(getApplication());
-
-        Button btn = null;
-        btn = findViewById(R.id.btnCategory);
-        btn.setText("Select category");
-        EditText txt = findViewById(R.id.txtDate);
-        txt.setFocusable(false);
-        txt.setBackgroundResource(android.R.color.transparent);
-        ((EditText) findViewById(R.id.nmAmount)).setBackgroundResource(android.R.color.transparent);
-        ((EditText) findViewById(R.id.nmAmount)).setTextSize(50);
-        ((EditText) findViewById(R.id.txtNote)).setBackgroundResource(android.R.color.transparent);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ledgerId != null) {
-                    Intent intent = new Intent(AddTransaction.this, SelectCategory.class);
-                    intent.putExtra("ledgerId", ledgerId);
-                    saveData();
-                    startActivity(intent);
-                }
-            }
-        });
-
-
-        EditText edittext = findViewById(R.id.txtDate);
-        final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
-
+        ledgerService = new LedgerService(getApplication());
+        groupService = new TransactionGroupService(getApplication());
+        date = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear,
                                   int dayOfMonth) {
-                // TODO Auto-generated method stub
                 myCalendar.set(Calendar.YEAR, year);
                 myCalendar.set(Calendar.MONTH, monthOfYear);
                 myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 updateLabel();
             }
-
         };
 
-        edittext.setOnClickListener(new View.OnClickListener() {
+        EditText txt = findViewById(R.id.txtDate);
+        txt.setFocusable(false);
+        txt.setBackgroundResource(android.R.color.transparent);
+        ((EditText) findViewById(R.id.nmAmount)).setBackgroundResource(android.R.color.transparent);
+        ((EditText) findViewById(R.id.txtNote)).setBackgroundResource(android.R.color.transparent);
+        removeData();
+    }
 
+    public Long getLedgerId() {
+        SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
+        String walletIdString = pre.getString("walletId", "");
+        if (!walletIdString.equals("")) {
+            ledgerId = Long.parseLong(walletIdString);
+            ledger = ledgerService.findById(ledgerId);
+        } else {
+            ledgerId = null;
+            ledger = null;
+        }
+        return ledgerId;
+    }
+
+    public Long getGroupId() {
+        SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
+        String groupIdString = pre.getString("catId", "");
+
+        if (!groupIdString.equals("")) {
+            groupId = Long.parseLong(groupIdString);
+            group = groupService.findById(groupId);
+        } else {
+            groupId = null;
+            group = null;
+        }
+        return groupId;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (getLedgerId() != null) {
+            ((Button) findViewById(R.id.btnWallet)).setText(ledger.getName());
+        } else {
+            ((Button) findViewById(R.id.btnWallet)).setText("Chọn ví");
+        }
+        if (getGroupId() != null) {
+            ((Button) findViewById(R.id.btnCategory)).setText(group.getName());
+        } else {
+            ((Button) findViewById(R.id.btnCategory)).setText("Chọn nhóm");
+        }
+    }
+
+    private void initActionBar() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FFFFFF")));
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View mCustomView = layoutInflater.inflate(R.layout.activity_notification_sub_layout, null);
+        actionBar.setCustomView(mCustomView);
+    }
+
+    private void initMenuActivities() {
+        TextView txtCancel = (TextView) findViewById(R.id.btnCloseNotification);
+        txtCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
-                new DatePickerDialog(AddTransaction.this, date, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-            }
-        });
-
-
-        btn = findViewById(R.id.btnWallet);
-        btn.setText("Select wallet");
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(AddTransaction.this, ChooseLedger.class);
-                startActivity(intent);
-                saveData();
-            }
-        });
-
-        btn = findViewById(R.id.btnCurrency);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText tmp = (EditText) findViewById(R.id.nmAmount);
-                String txtNote = ((EditText) findViewById(R.id.txtNote))
-                        .getText().toString();
-                String date = ((EditText) findViewById(R.id.txtDate)).getText().toString();
-
-                if (tmp.getText().toString().isEmpty() || txtNote.isEmpty() || date.isEmpty()) {
-                    new AlertDialog.Builder(AddTransaction.this)
-                            .setTitle("Oops")
-                            .setMessage("Please fill all field")
-                            .setNegativeButton("OK", null)
-                            .show();
-                } else {
-                    double amount = Double.parseDouble(tmp.getText().toString());
-                    transactionService.addTransaction(ledgerId, catId, amount, date, txtNote);
-                    finish();
-                }
                 removeData();
+                finish();
             }
         });
+        TextView txtTitle = (TextView) findViewById(R.id.txtTittle);
+        txtTitle.setText("");
+        TextView txtSave = (TextView) findViewById(R.id.btnCheckAllNotification);
+        txtSave.setText("Lưu");
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, 0, 0, 0);
+        txtSave.setLayoutParams(params);
+        txtSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickToSave();
+            }
+        });
+    }
 
-        loadData();
-        Intent intent = AddTransaction.this.getIntent();
-        Long number = intent.getLongExtra("LedgerId", 0);
-        if (number != 0) {
-            ((Button) findViewById(R.id.btnWallet)).setText(String.valueOf(number));
-            ledgerId = number;
-        }
-        number = intent.getLongExtra("catId", 0);
-        if (number != 0) {
-            ((Button) findViewById(R.id.btnCategory)).setText(String.valueOf(number));
-            catId = number;
-        }
+    private void clickToSave() {
+        EditText txtAmount = (EditText) findViewById(R.id.nmAmount);
+        String txtNote = ((EditText) findViewById(R.id.txtNote))
+                .getText().toString();
+        String date = ((EditText) findViewById(R.id.txtDate)).getText().toString();
 
+        if (txtAmount.getText().toString().isEmpty() || date.isEmpty() ||
+                getLedgerId() == null || getGroupId() == null) {
+            new AlertDialog.Builder(AddTransaction.this)
+                    .setTitle("Oops")
+                    .setMessage("Xin điền vào tất cả các trường!")
+                    .setNegativeButton("OK", null)
+                    .show();
+        } else {
+            double amount = Double.parseDouble(txtAmount.getText().toString());
+            if (amount <= 0) {
+                new AlertDialog.Builder(AddTransaction.this)
+                        .setTitle("Oops")
+                        .setMessage("Số tiền luôn là dương!")
+                        .setNegativeButton("OK", null)
+                        .show();
+            } else {
+                transactionService
+                        .addTransaction(getLedgerId(), getGroupId(), amount, date, txtNote);
+                removeData();
+                finish();
+            }
+        }
+    }
+
+    public void clickToChooseWallet(View view) {
+        removeData();
+        Intent intent = new Intent(this, ChooseLedger.class);
+        startActivity(intent);
+    }
+
+    public void clickToChooseCatogory(View view) {
+        if (getLedgerId() != null) {
+            //remove category id before choose
+            SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
+            SharedPreferences.Editor editor = pre.edit();
+            editor.remove("catId");
+            editor.commit();
+            Intent intent = new Intent(this, SelectCategory.class);
+            intent.putExtra("ledgerId", ledgerId);
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Xin chọn ví trước", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void clickToPickDate(View view) {
+        new DatePickerDialog(this, date, myCalendar
+                .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                myCalendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     private void updateLabel() {
-        String myFormat = "MM/dd/yy"; //In which you need put here
+        String myFormat = "MM/dd/yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
         EditText txt = findViewById(R.id.txtDate);
         txt.setText(sdf.format(myCalendar.getTime()));
     }
 
-
-    public void saveData() {
-        SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
-        SharedPreferences.Editor editor = pre.edit();
-
-        EditText tmp = (EditText) findViewById(R.id.nmAmount);
-        txtNote = ((EditText) findViewById(R.id.txtNote))
-                .getText().toString();
-        if (txtNote != null) {
-            editor.putString("Note", txtNote);
-        }
-        txtDate = ((EditText) findViewById(R.id.txtDate)).getText().toString();
-        if (txtDate != null) editor.putString("Date", txtDate);
-
-        if (tmp.getText().toString() != null && tmp.getText().toString() != "") {
-            editor.putString("balance", tmp.getText().toString());
-        }
-        String text = ((Button) findViewById(R.id.btnWallet)).getText().toString();
-        editor.putString("walletId", text);
-        text = ((Button) findViewById(R.id.btnCategory)).getText().toString();
-        editor.putString("catId", text);
-        editor.commit();
-    }
-
-    public void loadData() {
-        SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
-        SharedPreferences.Editor editor = pre.edit();
-        txtNote = pre.getString("Note", "");
-        ((EditText) findViewById(R.id.txtNote)).setText(txtNote);
-        txtDate = pre.getString("Date", "");
-        ((EditText) findViewById(R.id.txtDate)).setText(txtDate);
-        balance = pre.getString("balance", "0");
-        ((EditText) findViewById(R.id.nmAmount)).setText(balance);
-        if (pre.getString("walletId", "") != "Select wallet" && pre.getString("walletId", "") != "") {
-            ledgerId = Long.parseLong(pre.getString("walletId", "0"));
-            ((Button) findViewById(R.id.btnWallet)).setText(pre.getString("walletId", ""));
-            Log.i("Ledger", pre.getString("walletId", "0"));
-        }
-        if (pre.getString("catId", "") != "Select category" && pre.getString("catId", "") != "") {
-            catId = Long.parseLong(pre.getString("catId", "0"));
-            ((Button) findViewById(R.id.btnCategory)).setText(pre.getString("catId", ""));
-            Log.i("Cat", pre.getString("catId", "0"));
-        }
-    }
-
     public void removeData() {
         SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
         SharedPreferences.Editor editor = pre.edit();
-        editor.remove("Note");
-        editor.remove("Date");
-        editor.remove("balance");
         editor.remove("catId");
         editor.remove("walletId");
         editor.commit();
     }
 }
-
-
-
-
-
