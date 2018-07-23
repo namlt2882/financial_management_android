@@ -1,15 +1,19 @@
 package project.baonq.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -30,6 +34,8 @@ public class LedgeChoosenActivity extends AppCompatActivity {
     TransactionGroupService transactionGroupService;
     LedgerService ledgerService;
     TransactionService transactionService;
+    String totalCashGlobal;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.NormalSizeAppTheme);
@@ -58,8 +64,29 @@ public class LedgeChoosenActivity extends AppCompatActivity {
     }
 
     private void initLayout() {
+        initElement();
         initAddLedgeText();
         loadDataFromSessionDao();
+    }
+
+    private void initElement() {
+        CardView cardView = findViewById(R.id.cardCashSum);
+        ImageView imageView = findViewById(R.id.imageCheck);
+        if (MainActivity.ledger_id == null) {
+            imageView.setVisibility(View.VISIBLE);
+        } else {
+            imageView.setVisibility(View.INVISIBLE);
+        }
+        cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LedgeChoosenActivity.this, MainActivity.class);
+                MainActivity.ledger_id = null;
+                MainActivity.my_money = totalCashGlobal;
+                setResult(RESULT_OK);
+                finish();
+            }
+        });
     }
 
     private void initAddLedgeText() {
@@ -73,7 +100,7 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         });
     }
 
-    private void loadDataFromSessionDao() {
+    public void loadDataFromSessionDao() {
         List<Ledger> ledgerList = getLedgerList();
         double totalLedgerCash = 0;
         String currency = "";
@@ -120,10 +147,17 @@ public class LedgeChoosenActivity extends AppCompatActivity {
     }
 
     private void createNewRowData(final Ledger ledger, double sum) {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View mainView = layoutInflater.inflate(R.layout.activity_main, null);
         View submitLayout = getLayoutInflater().inflate(R.layout.add_ledge_submit_layout, null);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         layoutParams.setMargins(0, 2, 0, 0);
         submitLayout.setLayoutParams(layoutParams);
+        ImageView imageCheck = (ImageView) submitLayout.findViewById(R.id.imageCheck);
+        if (MainActivity.ledger_id != null && MainActivity.ledger_id.compareTo(ledger.getId()) == 0) {
+            imageCheck.setVisibility(View.VISIBLE);
+        }
+
         TextView txtTitle = submitLayout.findViewById(R.id.txtTittle);
         TextView txtCash = submitLayout.findViewById(R.id.txtCash);
         if (sum < 0) {
@@ -132,10 +166,21 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         }
         txtTitle.setText(ledger.getName());
         String currentBalanceFormat = ConvertUtil.convertCashFormat(sum);
-        txtCash.setText(currentBalanceFormat + ConvertUtil.convertCurrency(ledger.getCurrency()));
+        String totalCash = currentBalanceFormat + ConvertUtil.convertCurrency(ledger.getCurrency());
+        txtCash.setText(totalCash);
+        submitLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LedgeChoosenActivity.this, MainActivity.class);
+                MainActivity.ledger_id = ledger.getId();
+                MainActivity.my_money = totalCash;
+                setResult(RESULT_OK);
+                finish();
+            }
+        });
 
         //create image button
-        createImageButton(ledger, sum, submitLayout);
+        //createImageButton(ledger, sum, submitLayout);
 
         LinearLayout contentLedgeChosenLayout = (LinearLayout) findViewById(R.id.contentLedgerChosen);
         contentLedgeChosenLayout.addView(submitLayout);
@@ -148,7 +193,8 @@ public class LedgeChoosenActivity extends AppCompatActivity {
             totalLedgerCash = Math.abs(totalLedgerCash);
         }
         String totalCash = ConvertUtil.convertCashFormat(totalLedgerCash);
-        txtLedgerCashSum.setText(totalCash + currency);
+        totalCashGlobal = totalCash + currency;
+        txtLedgerCashSum.setText(totalCashGlobal);
     }
 
     private void createImageButton(final Ledger ledger, final double sum, View submitLayout) {

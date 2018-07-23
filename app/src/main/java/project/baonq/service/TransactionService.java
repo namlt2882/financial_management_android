@@ -40,4 +40,8 @@ public class TransactionService extends Service {
         return transactionDAO.getTransactionByLedgerId(ledger_id);
     }
 
+    public List<Transaction> getAll() {
+        return transactionDAO.getAll();
+    }
+
 }

@@ -14,6 +14,8 @@ public class ConvertUtil {
         switch (currency) {
             case "VNĐ":
                 return "đ";
+            case "VND":
+                return "đ";
             case "Dollar":
                 return "$";
             case "Euro":

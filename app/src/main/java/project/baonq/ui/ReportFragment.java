@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
@@ -17,22 +18,32 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import project.baonq.menu.R;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionGroup;
 import project.baonq.service.TransactionGroupService;
 import project.baonq.service.TransactionService;
+import project.baonq.util.ConvertUtil;
 
 
 public class ReportFragment extends Fragment {
     MainActivity mainActivity;
     List<String> nameList;
     List<Double> valueList;
+    HashMap<String, Double> hm;
+    HashMap<String, Double> hmExpand;
     Long startTime;
     Long endTime;
+    Long ledger_id;
 
     public ReportFragment() {
         // Required empty public constructor
@@ -62,20 +73,37 @@ public class ReportFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         startTime = mainActivity.startTime;
         endTime = mainActivity.endTime;
-        getDataForPie(2L, 1);
-        PieChart chartIncome = (PieChart) getView().findViewById(R.id.inComePieChart);
-        setUpPieChart(valueList, nameList, chartIncome);
-        getDataForPie(2L, 2);
-        PieChart chartExpand = (PieChart) getView().findViewById(R.id.expandPieChart);
-        setUpPieChart(valueList, nameList, chartExpand);
-
+        ledger_id = MainActivity.ledger_id;
+        if (startTime != null && endTime != null) {
+            getDataForPie(ledger_id, 1);
+            PieChart chartIncome = (PieChart) getView().findViewById(R.id.inComePieChart);
+            TextView txtIncome = (TextView) getView().findViewById(R.id.txtIncomeBalance);
+            setUpPieChart(hm ,chartIncome);
+            setUpTotal(txtIncome);
+            getDataForPie(ledger_id, 2);
+            PieChart chartExpand = (PieChart) getView().findViewById(R.id.expandPieChart);
+            TextView txtExpand = (TextView) getView().findViewById(R.id.txtExpandBalance);
+            setUpPieChart(hm, chartExpand);
+            setUpTotal(txtExpand);
+        }
     }
 
-    private void setUpPieChart(List<Double> value, List<String> key, PieChart pieChart) {
-        List<PieEntry> pieEntries = new ArrayList<>();
-        for (int i = 0; i < value.size(); i++) {
+    private void setUpTotal(TextView textView) {
+        if (hm.isEmpty()) {
+            textView.setText("0.00đ");
+        }
+        float total = 0;
 
-            pieEntries.add(new PieEntry(Float.parseFloat(value.get(i).toString()), key.get(i)));
+        for(String key: hm.keySet()){
+            total += hm.get(key);
+        }
+        textView.setText(ConvertUtil.convertCashFormat(total) + ConvertUtil.convertCurrency("VNĐ"));
+    }
+
+    private void setUpPieChart(HashMap<String, Double> map, PieChart pieChart) {
+        List<PieEntry> pieEntries = new ArrayList<>();
+        for (Map.Entry<String, Double> entry : map.entrySet()) {
+            pieEntries.add(new PieEntry(Float.parseFloat(entry.getValue().toString()), entry.getKey()));
         }
 
         PieDataSet dataSet = new PieDataSet(pieEntries, "");
@@ -90,22 +118,46 @@ public class ReportFragment extends Fragment {
     }
 
     private void getDataForPie(Long ledger_id, int typeAspect) {
+        hm = new HashMap<>();
         Application application = mainActivity.getApplication();
-        List<Transaction> transactionList = new TransactionService(application).getByLedgerId(ledger_id);
-        nameList = new ArrayList<>();
-        valueList = new ArrayList<>();
+        List<Transaction> transactionList;
+        if(ledger_id != null){
+            transactionList = new TransactionService(application).getByLedgerId(ledger_id);
+        }else{
+            transactionList = new TransactionService(application).getAll();
+        }
+
         for (Transaction item : transactionList) {
-            Long groupId = item.getGroup_id();
-            TransactionGroup transactionGroup = new TransactionGroupService(application).getTransactionGroupByID(groupId);
-            int type = transactionGroup.getTransaction_type();
-            if (type == typeAspect) {
-                nameList.add(transactionGroup.getName());
-                valueList.add(item.getBalance());
+            if (compareTransaction(item) != null) {
+                Long groupId = item.getGroup_id();
+                TransactionGroup transactionGroup = new TransactionGroupService(application).getTransactionGroupByID(groupId);
+                int type = transactionGroup.getTransaction_type();
+                if (type == typeAspect) {
+                    String key = transactionGroup.getName();
+                    if (hm.containsKey(key)) {
+                        Double value = hm.get(key);
+                        value += item.getBalance();
+                        hm.replace(key, value);
+                    } else {
+                        hm.put(key, item.getBalance());
+                    }
+                }
             }
         }
     }
 
     private Transaction compareTransaction(Transaction transaction) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+        Long dateInMili = 0L;
+        try {
+            Date date = dateFormat.parse(transaction.getTdate());
+            dateInMili = date.getTime();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (dateInMili.compareTo(startTime) >= 0 && dateInMili.compareTo(endTime) <= 0) {
+            return transaction;
+        }
         return null;
     }
 }

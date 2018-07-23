@@ -42,6 +42,7 @@ import project.baonq.service.App;
 import project.baonq.service.AuthenticationService;
 import project.baonq.service.LedgerSyncService;
 import project.baonq.service.NotificationService;
+import project.baonq.util.ConvertUtil;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -50,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
     public static Long startTime;
     public static Long endTime;
     public static Long ledger_id;
+    public static String my_money;
+    public static String txtDateHistory;
     AuthenticationService authService;
     Thread notificationService;
     LedgerSyncService ledgerSyncService;
@@ -65,8 +68,18 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
+
+//        ((App) getApplication()).getDaoSession().getLedgerDao().deleteAll();
+//        ((App) getApplication()).getDaoSession().getTransactionDao().deleteAll();
+//        ((App) getApplication()).getDaoSession().getTransactionGroupDao().deleteAll();
+
         //set date picker
-        setActionBarLayout("Chọn ngày");
+        if(txtDateHistory == null){
+            setActionBarLayout("Chọn ngày");
+        }else {
+            setActionBarLayout(txtDateHistory);
+        }
+
         //set date picker
         initDatepicker();
         //set float action button
@@ -169,7 +182,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 List<Date> dateList = calendar.getSelectedDates();
-                setActionBarLayout("Từ : " + dateformat.format(dateList.get(0)) + " đến  " + dateformat.format(dateList.get(dateList.size() - 1)));
+                txtDateHistory = "Từ : " + dateformat.format(dateList.get(0)) + " đến  " + dateformat.format(dateList.get(dateList.size() - 1));
+                setActionBarLayout(txtDateHistory);
                 initDatepicker();
                 startTime = atStartOfDay(dateList.get(0));
                 endTime = atEndOfDay(dateList.get(dateList.size() - 1));
@@ -241,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    private void setActionBarLayout(String edtDateText) {
+    public void setActionBarLayout(String edtDateText) {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         LayoutInflater mInflater = LayoutInflater.from(this);
@@ -250,21 +264,45 @@ public class MainActivity extends AppCompatActivity {
         TextView mCashTextView = (TextView) mCustomView.findViewById(R.id.txtCash);
         Button mEdtDate = (Button) mCustomView.findViewById(R.id.editDate);
         CircleImageView circleImage = (CircleImageView) mCustomView.findViewById(R.id.circleImage);
+        if(MainActivity.ledger_id == null){
+            circleImage.setImageResource(R.drawable.global_icon);
+        }else {
+            circleImage.setImageResource(R.drawable.wallet);
+        }
         circleImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, LedgeChoosenActivity.class);
                 intent.putExtra("ledger_id", ledger_id);
-                startActivity(intent);
+                startActivityForResult(intent,1);
             }
         });
         mTitleTextView.setText("Tiền của tôi:");
-        mCashTextView.setText("2,000,000 đ");
+        if(my_money != null){
+            mCashTextView.setText(my_money);
+        }else {
+            mCashTextView.setText("0,00đ");
+        }
         mEdtDate.setText(edtDateText);
 
         actionBar.setCustomView(mCustomView);
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FFFFFF")));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1){
+            if(resultCode == RESULT_OK){
+                if(txtDateHistory != null){
+                    setActionBarLayout(txtDateHistory);
+                }else {
+                    setActionBarLayout("Chọn ngày");
+                }
+                initDatepicker();
+            }
+        }
     }
 
     private Long atStartOfDay(Date date) {
