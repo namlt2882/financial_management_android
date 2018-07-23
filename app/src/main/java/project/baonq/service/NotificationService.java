@@ -12,8 +12,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import project.baonq.dao.NotificationDAO;
@@ -29,6 +31,7 @@ public class NotificationService extends Service implements Runnable {
     public String getNotificationLastUpdateUrl;
     public String checkreadNotificationUrl;
     private NotificationDAO notificationDAO;
+    private List<Consumer> toDoIfHasNewNotification = new LinkedList<>();
 
     public NotificationService(Application application) {
         super(application);
@@ -40,6 +43,10 @@ public class NotificationService extends Service implements Runnable {
                 + resources.getString(R.string.get_notification_lastUpdate_url);
         checkreadNotificationUrl = resources.getString(R.string.server_name)
                 + resources.getString(R.string.check_read_notification_url);
+    }
+
+    public void addNewNotificationConsumer(Consumer consumer) {
+        toDoIfHasNewNotification.add(consumer);
     }
 
     public Long getServerLastUpdate() throws Exception {
@@ -109,6 +116,8 @@ public class NotificationService extends Service implements Runnable {
         return notificationDAO.findByLastUpdate(lastUpdate);
     }
 
+    private boolean hasNew = false;
+
     public void syncWithLocal(List<Notification> syncData) {
         //get server id
         List<Long> serverIds = syncData.stream()
@@ -124,6 +133,9 @@ public class NotificationService extends Service implements Runnable {
             Notification tmp = map.get(originalNotification.getServer_id());
             tmp.setId(originalNotification.getId());
         });
+        if (localData.size() < syncData.size()) {
+            hasNew = true;
+        }
     }
 
     @Override
@@ -172,8 +184,16 @@ public class NotificationService extends Service implements Runnable {
         public void afterSynchronize() {
             Notification[] syncData = (Notification[]) getSyncData();
             List<Notification> syncDataList = Arrays.asList(syncData);
-            notificationService.syncWithLocal(syncDataList);
-            notificationService.insertOrUpdate(syncDataList);
+            if (!syncDataList.isEmpty()) {
+                notificationService.syncWithLocal(syncDataList);
+                notificationService.insertOrUpdate(syncDataList);
+                if (notificationService.hasNew) {
+                    //do task if has new notification
+                    notificationService
+                            .toDoIfHasNewNotification.forEach(consumer -> consumer.accept(null));
+                    notificationService.hasNew = false;
+                }
+            }
         }
 
         @Override

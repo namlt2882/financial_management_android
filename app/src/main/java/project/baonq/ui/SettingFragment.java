@@ -13,18 +13,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import project.baonq.menu.R;
+import project.baonq.model.User;
 import project.baonq.service.App;
 import project.baonq.service.AuthenticationService;
 import project.baonq.service.LedgerSyncService;
 
 public class SettingFragment extends Fragment {
     AuthenticationService authenticationService;
+
     public SettingFragment() {
     }
 
-    // TODO: Rename and change types and number of parameters
     public static SettingFragment newInstance() {
         SettingFragment fragment = new SettingFragment();
         return fragment;
@@ -52,9 +54,15 @@ public class SettingFragment extends Fragment {
                 new LedgerSyncService(getActivity().getApplication()).run();
                 clickToLogout();
                 ((App) getActivity().getApplication()).removeDb();
+                authenticationService.clearAllPreferenceData();
                 ((MainActivity) getActivity()).restartApp();
             }
         });
+        User user = authenticationService.getUser();
+        if (user != null) {
+            TextView txtSettingName = settingLayout.findViewById(R.id.txtSettingName);
+            txtSettingName.setText(user.getLastName() + " " + user.getFirstName());
+        }
         return settingLayout;
     }
 

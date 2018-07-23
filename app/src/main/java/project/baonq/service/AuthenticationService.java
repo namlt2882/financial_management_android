@@ -18,9 +18,11 @@ import project.baonq.menu.R;
 import project.baonq.model.User;
 
 public class AuthenticationService extends BaseAuthService {
-    private static String loginUrl;
-    private static String logoutUrl;
-    private static String registerUrl;
+    private String loginUrl;
+    private String logoutUrl;
+    private String registerUrl;
+
+    private static final ObjectMapper om = new ObjectMapper();
 
     public AuthenticationService(Context context) {
         super(context);
@@ -64,10 +66,10 @@ public class AuthenticationService extends BaseAuthService {
         jwt = jwt.substring(1, jwt.length() - 1);
         System.out.println(jwt);
         //save authentication info to file
-        saveAuthenticationInfo(jwt);
+        saveJWT(jwt);
+        getUser();
         return jwt;
     }
-
 
     public User register(UserDto user) throws Exception {
         User result = null;
@@ -78,7 +80,6 @@ public class AuthenticationService extends BaseAuthService {
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
         BufferedReader in = null;
-        ObjectMapper om = new ObjectMapper();
         try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
              BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(wr, "UTF-8"));) {
             //write parameter to request
@@ -120,7 +121,7 @@ public class AuthenticationService extends BaseAuthService {
 //                in.close();
 //            }
 //        }
-        saveAuthenticationInfo("");
+        saveJWT("");
     }
 
     public boolean isLoggedIn() {

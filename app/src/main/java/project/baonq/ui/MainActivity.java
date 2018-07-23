@@ -1,6 +1,7 @@
 package project.baonq.ui;
 
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private Ledger ledger;
     private double sumledgerMoney = 0;
     private View mCustomView;
+    public static Activity activity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +68,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         authService = new AuthenticationService(this);
         ledgerSyncService = new LedgerSyncService(getApplication());
+        activity = this;
+        ledgerSyncService.addConsumer(c -> {
+            activity.runOnUiThread(() -> {
+                updateTitle();
+            });
+        });
         transactionService = new TransactionService(getApplication());
         if (!authService.isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
@@ -87,16 +95,25 @@ public class MainActivity extends AppCompatActivity {
         if (GET_NOTIFICATION) {
             if (authService.isLoggedIn() && notificationService == null) {
                 System.out.println("INIT NOTIFICATION SERVICE-------");
-                notificationService = new Thread(new NotificationService(getApplication()));
+                NotificationService service = new NotificationService(getApplication());
+                service.addNewNotificationConsumer(c -> {
+                    activity.runOnUiThread(() -> {
+                        Toast.makeText(activity, "You has new notification!", Toast.LENGTH_SHORT).show();
+                    });
+                });
+                notificationService = new Thread(service);
                 notificationService.start();
             }
         }
+        updateTitle();
+    }
+
+    private void updateTitle() {
         TextView mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
         TextView mCashTextView = (TextView) mCustomView.findViewById(R.id.txtCash);
         mTitleTextView.setText(getLedgerName());
         mCashTextView.setText(getLedgerSum());
     }
-
 
     public void restartApp() {
         AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);

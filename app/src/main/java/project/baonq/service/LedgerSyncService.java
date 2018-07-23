@@ -15,8 +15,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import project.baonq.dao.LedgerDAO;
@@ -33,6 +35,7 @@ public class LedgerSyncService extends LedgerService implements Runnable {
     public static final String LEDGER_LASTUPDATE = "ledger_lastUpdate";
     private TransactionGroupSyncService transactionGroupSyncService;
     private TransactionSyncService transactionSyncService;
+    List<Consumer> toDoAfterSync = new LinkedList<>();
 
     public LedgerSyncService(Application application) {
         super(application);
@@ -42,6 +45,10 @@ public class LedgerSyncService extends LedgerService implements Runnable {
         Resources resources = application.getBaseContext().getResources();
         ledgerUrl = resources.getString(R.string.server_name)
                 + resources.getString(R.string.get_create_update_ledger_url);
+    }
+
+    public void addConsumer(Consumer consumer) {
+        toDoAfterSync.add(consumer);
     }
 
     @Override
@@ -59,6 +66,7 @@ public class LedgerSyncService extends LedgerService implements Runnable {
                 fetchLedgerAction.doAction();
                 transactionGroupSyncService.run();
                 transactionSyncService.run();
+                toDoAfterSync.forEach(consumer -> consumer.accept(null));
             } catch (Exception e) {
                 e.printStackTrace();
             }
