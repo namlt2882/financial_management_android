@@ -49,7 +49,7 @@ public class LedgerService extends Service {
         origin.setName(ledger.getName());
         origin.setCounted_on_report(ledger.getCounted_on_report());
         origin.setLast_update(System.currentTimeMillis());
-        ledgerDAO.updateLedger(ledger);
+        ledgerDAO.updateLedger(origin);
     }
 
     public List<Ledger> getAll() {
