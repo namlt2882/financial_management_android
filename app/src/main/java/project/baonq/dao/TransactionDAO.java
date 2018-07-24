@@ -25,6 +25,8 @@ public class TransactionDAO extends DAO {
         return transactionDao.insert(transaction);
     }
 
+
+
     public void updateTransaction(Transaction transaction) {
         DaoSession daoSession = getDaoSession();
         TransactionDao transactionDao = daoSession.getTransactionDao();
@@ -55,6 +57,12 @@ public class TransactionDAO extends DAO {
     public Transaction findLastUpdateGroup() {
         return getDaoSession().getTransactionDao().queryBuilder()
                 .orderDesc(TransactionDao.Properties.Last_update).limit(1).unique();
+    }
+    public Transaction findById(Long id){
+        DaoSession daoSession = getDaoSession();
+        TransactionDao transactionDao = daoSession.getTransactionDao();
+        Transaction result = transactionDao.queryBuilder().where(TransactionDao.Properties.Id.eq(id)).unique();
+        return result;
     }
 
     public List<Transaction> insertOrUpdate(List<Transaction> groups) {

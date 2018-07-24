@@ -37,6 +37,15 @@ public class TransactionService extends Service {
         return transactionDAO.addTransaction(transaction);
     }
 
+    public void updateTransaction(Transaction transaction) {
+        //insert date and last update time
+        long insert_date = System.currentTimeMillis();
+        transaction.setLast_update(insert_date);
+        //status
+        transaction.setStatus(TransactionStatus.ENABLE.getStatus());
+        transactionDAO.updateTransaction(transaction);
+    }
+
     public List<Transaction> getByLedgerId(Long ledger_id) {
         return transactionDAO.getTransactionByLedgerId(ledger_id);
     }
@@ -70,5 +79,6 @@ public class TransactionService extends Service {
     public List<Transaction> getAll() {
         return transactionDAO.getAll();
     }
-
+    public Transaction getTransactionByID(Long id){
+        System.out.println(id);return  null;}
 }

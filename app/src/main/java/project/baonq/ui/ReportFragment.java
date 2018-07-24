@@ -41,8 +41,8 @@ public class ReportFragment extends Fragment {
     List<Double> valueList;
     HashMap<String, Double> hm;
     HashMap<String, Double> hmExpand;
-    Long startTime;
-    Long endTime;
+    Long startTime = MainActivity.dateFrom.getTime();
+    Long endTime= MainActivity.dateTo.getTime();
     Long ledger_id;
 
     public ReportFragment() {
@@ -71,8 +71,23 @@ public class ReportFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        startTime = mainActivity.startTime;
-        endTime = mainActivity.endTime;
+//        startTime = mainActivity.startTime;
+//        endTime = mainActivity.endTime;
+        String first1 = String.valueOf(MainActivity.dateFrom.getMonth() + 1) + "/" + String.valueOf(MainActivity.dateFrom.getDate()) + "/" + String.valueOf(MainActivity.dateFrom.getYear());
+        String last1 = String.valueOf(MainActivity.dateTo.getMonth() + 1) + "/" + String.valueOf(MainActivity.dateTo.getDate()) + "/" + String.valueOf(MainActivity.dateTo.getYear());
+        Date dateFirst = null;
+        Date dateLast = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        try {
+            dateFirst = sdf.parse(first1);
+            dateLast = sdf.parse(last1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String s = dateFirst.toString();
+        startTime  = dateFirst.getTime();
+        endTime = dateLast.getTime();
         ledger_id = MainActivity.ledger_id;
         if (startTime != null && endTime != null) {
             getDataForPie(ledger_id, 1);

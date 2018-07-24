@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import project.baonq.dao.TransactionDAO;
 import project.baonq.model.Ledger;
 import project.baonq.model.TransactionGroup;
 import project.baonq.service.App;
@@ -53,11 +54,15 @@ public class AddTransaction extends AppCompatActivity {
     private DatePickerDialog.OnDateSetListener date;
     private Ledger ledger;
     private TransactionGroup group;
+    private Long isUpdate = 0L;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         setTheme(R.style.NormalSizeAppTheme);
         super.onCreate(savedInstanceState);
+        Intent intent = this.getIntent();
+        isUpdate = intent.getLongExtra("transactionID",0L);
+
         setContentView(R.layout.activity_add_transaction);
         initActionBar();
         initMenuActivities();
@@ -81,6 +86,23 @@ public class AddTransaction extends AppCompatActivity {
         ((EditText) findViewById(R.id.nmAmount)).setBackgroundResource(android.R.color.transparent);
         ((EditText) findViewById(R.id.txtNote)).setBackgroundResource(android.R.color.transparent);
         removeData();
+        if (isUpdate != 0L) {
+            initEditLayout();
+        }
+    }
+
+    private void initEditLayout(){
+        Transaction e = new TransactionDAO(this.getApplication()).findById(isUpdate);
+        ledgerId = (e.getLedger_id());
+        groupId= (e.getGroup_id());
+        SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pre.edit();
+        editor.putString("walletId",ledgerId.toString());
+        editor.putString("catId",groupId.toString());
+        editor.commit();
+        ((EditText)findViewById(R.id.nmAmount)).setText(String.valueOf(e.getBalance()));
+        ((EditText)findViewById(R.id.txtNote)).setText(String.valueOf(e.getNote()));
+        ((EditText)findViewById(R.id.txtDate)).setText(String.valueOf(e.getTdate()));
     }
 
     public Long getLedgerId() {
@@ -158,9 +180,47 @@ public class AddTransaction extends AppCompatActivity {
         txtSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                clickToSave();
+                if (isUpdate == 0L) {clickToSave();}
+                else {clickToUpdate();}
             }
         });
+    }
+
+    private void clickToUpdate() {
+        EditText txtAmount = (EditText) findViewById(R.id.nmAmount);
+        String txtNote = ((EditText) findViewById(R.id.txtNote))
+                .getText().toString();
+        String date = ((EditText) findViewById(R.id.txtDate)).getText().toString();
+
+        if (txtAmount.getText().toString().isEmpty() || date.isEmpty() ||
+                getLedgerId() == null || getGroupId() == null) {
+            new AlertDialog.Builder(AddTransaction.this)
+                    .setTitle("Oops")
+                    .setMessage("Xin điền vào tất cả các trường!")
+                    .setNegativeButton("OK", null)
+                    .show();
+        } else {
+            double amount = Double.parseDouble(txtAmount.getText().toString());
+            if (amount <= 0) {
+                new AlertDialog.Builder(AddTransaction.this)
+                        .setTitle("Oops")
+                        .setMessage("Số tiền luôn là dương!")
+                        .setNegativeButton("OK", null)
+                        .show();
+            } else {
+                Transaction e = new TransactionDAO(this.getApplication()).findById(isUpdate);
+                e.setGroup_id(getGroupId());
+                e.setLedger_id(getLedgerId());
+                e.setBalance(amount);
+                e.setTdate(date);
+                e.setNote(txtNote);
+                transactionService
+                        .updateTransaction(e);
+                removeData();
+                setResult(RESULT_OK);
+                finish();
+            }
+        }
     }
 
     private void clickToSave() {
