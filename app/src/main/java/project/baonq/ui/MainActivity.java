@@ -79,9 +79,6 @@ public class MainActivity extends AppCompatActivity {
         }else {
             setActionBarLayout(txtDateHistory);
         }
-
-        //set date picker
-        initDatepicker();
         //set float action button
         initFloatActionButton();
         //set botttom navigation bar activities
@@ -137,24 +134,6 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
-    private void initDatepicker() {
-        final Button edtDate = (Button) findViewById(R.id.editDate);
-        edtDate.getBackground().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
-        final View mView = getLayoutInflater().inflate(R.layout.date_range_dialog, null);
-        AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-        mDialogBuilder.setView(mView);
-        final AlertDialog dialog = mDialogBuilder.create();
-        createDatePicker(mView, dialog);
-        edtDate.clearFocus();
-        edtDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.show();
-                edtDate.clearFocus();
-            }
-        });
-    }
-
     private void createDatePicker(final View mView, final AlertDialog dialog) {
         final Calendar nextYear = Calendar.getInstance();
         nextYear.add(Calendar.YEAR, 10);
@@ -184,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
                 List<Date> dateList = calendar.getSelectedDates();
                 txtDateHistory = "Từ : " + dateformat.format(dateList.get(0)) + " đến  " + dateformat.format(dateList.get(dateList.size() - 1));
                 setActionBarLayout(txtDateHistory);
-                initDatepicker();
                 startTime = atStartOfDay(dateList.get(0));
                 endTime = atEndOfDay(dateList.get(dateList.size() - 1));
                 dialog.hide();
@@ -262,7 +240,6 @@ public class MainActivity extends AppCompatActivity {
         View mCustomView = mInflater.inflate(R.layout.activity_main_menu_layout, null);
         TextView mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
         TextView mCashTextView = (TextView) mCustomView.findViewById(R.id.txtCash);
-        Button mEdtDate = (Button) mCustomView.findViewById(R.id.editDate);
         CircleImageView circleImage = (CircleImageView) mCustomView.findViewById(R.id.circleImage);
         if(MainActivity.ledger_id == null){
             circleImage.setImageResource(R.drawable.global_icon);
@@ -283,7 +260,6 @@ public class MainActivity extends AppCompatActivity {
         }else {
             mCashTextView.setText("0,00đ");
         }
-        mEdtDate.setText(edtDateText);
 
         actionBar.setCustomView(mCustomView);
         actionBar.setDisplayShowCustomEnabled(true);
@@ -300,7 +276,6 @@ public class MainActivity extends AppCompatActivity {
                 }else {
                     setActionBarLayout("Chọn ngày");
                 }
-                initDatepicker();
             }
         }
     }
