@@ -112,7 +112,7 @@ public class ReportFragment extends Fragment {
         PieData pieData = new PieData(dataSet);
         PieChart chart = pieChart;
         chart.getDescription().setEnabled(false);
-        chart.getLegend().setEnabled(false);
+        chart.getLegend().setEnabled(true);
         chart.setData(pieData);
         chart.invalidate();
     }
@@ -147,10 +147,11 @@ public class ReportFragment extends Fragment {
     }
 
     private Transaction compareTransaction(Transaction transaction) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH);
         Long dateInMili = 0L;
         try {
-            Date date = dateFormat.parse(transaction.getTdate());
+            String tmp = transaction.getTdate().toString().replace("//", "/");
+            Date date = dateFormat.parse(tmp);
             dateInMili = date.getTime();
         } catch (Exception e) {
             e.printStackTrace();

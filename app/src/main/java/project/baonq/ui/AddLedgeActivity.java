@@ -37,7 +37,7 @@ public class AddLedgeActivity extends AppCompatActivity {
 
     private boolean isUpdate = false;
     private Long id = null;
-    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd//yyyy");
     TransactionGroupService transactionGroupService;
     TransactionService transactionService;
     LedgerService ledgerService;
