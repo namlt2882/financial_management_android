@@ -68,7 +68,7 @@ public class LedgeChoosenActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        checkRow(getCurrentLedgerId());
+        //checkRow(getCurrentLedgerId());
     }
 
     @Override

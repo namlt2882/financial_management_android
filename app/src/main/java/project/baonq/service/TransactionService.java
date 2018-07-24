@@ -8,10 +8,8 @@ import java.util.List;
 
 import project.baonq.dao.TransactionDAO;
 import project.baonq.enumeration.TransactionStatus;
-import project.baonq.model.DaoSession;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
-import project.baonq.model.TransactionGroup;
 
 
 public class TransactionService extends Service {
@@ -59,6 +57,18 @@ public class TransactionService extends Service {
 
     public void insertOrUpdate(List<Transaction> groups) {
         transactionDAO.insertOrUpdate(groups);
+    }
+
+    private Transaction getTransactionNeedForUpdate(Long ledger_id, Long group_id) {
+        TransactionDao transactionDao = ((App) application).getDaoSession().getTransactionDao();
+        return transactionDao.queryBuilder()
+                .where(TransactionDao.Properties.Ledger_id.eq(ledger_id), TransactionDao.Properties.Group_id.eq(group_id))
+                .unique();
+    }
+
+    public List<Transaction> getAll() {
+        TransactionDao transactionDao = ((App) application).getDaoSession().getTransactionDao();
+        return transactionDao.loadAll();
     }
 
 }

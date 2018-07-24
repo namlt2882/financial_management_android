@@ -43,6 +43,7 @@ import project.baonq.util.ConvertUtil;
 import static android.widget.Toast.LENGTH_SHORT;
 
 public class AddTransaction extends AppCompatActivity {
+
     final Calendar myCalendar = Calendar.getInstance();
     private TransactionService transactionService;
     private LedgerService ledgerService;
