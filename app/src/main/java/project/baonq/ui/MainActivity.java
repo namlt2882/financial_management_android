@@ -8,7 +8,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,16 +20,21 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.savvi.rangedatepicker.CalendarPickerView;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -42,6 +49,7 @@ import project.baonq.service.App;
 import project.baonq.service.AuthenticationService;
 import project.baonq.service.LedgerSyncService;
 import project.baonq.service.NotificationService;
+import project.baonq.service.RecyclerItemClickListener;
 import project.baonq.service.TransactionService;
 import project.baonq.util.ConvertUtil;
 
@@ -65,6 +73,16 @@ public class MainActivity extends AppCompatActivity {
     public static Activity activity;
     public Fragment currentFragment;
     BottomNavigationView bottomNavigationView;
+
+
+    /////////////////////////////////////
+    private ArrayList<String> mItems;
+    private RecyclerView mRecentRecyclerView;
+    private LinearLayoutManager mRecentLayoutManager;
+    private RecyclerView.Adapter<CustomViewHolder> mAdapter;
+    public static Date dateFrom = new Date(LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1, 1);
+    public static Date dateTo = new Date(LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1, 31);
+    //////////////////////////////////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,7 +182,8 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
-    private void createDatePicker(final View mView, final AlertDialog dialog) {
+
+    private void testDatePicker(final View mView, final AlertDialog dialog) {
         final Calendar nextYear = Calendar.getInstance();
         nextYear.add(Calendar.YEAR, 10);
 
@@ -216,6 +235,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setFragmentBottomNavigationBarActivities() {
+        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
+        bottomNavigationView.setBackgroundColor(Color.parseColor("#ffffff"));
+        bottomNavigationView.setItemTextColor(ColorStateList.valueOf(Color.parseColor("#7f7f7f")));
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -223,15 +245,15 @@ public class MainActivity extends AppCompatActivity {
                 switch (item.getItemId()) {
                     case R.id.action_item1:
                         selectedFragment = LedgeFragment.newInstance();
-                        setCurrentFragment(selectedFragment);
+//                        setCurrentFragment(selectedFragment);
                         break;
                     case R.id.action_item2:
                         selectedFragment = ReportFragment.newInstance();
-                        setCurrentFragment(selectedFragment);
+//                        setCurrentFragment(selectedFragment);
                         break;
                     case R.id.action_item4:
                         selectedFragment = SettingFragment.newInstance();
-                        setCurrentFragment(selectedFragment);
+//                        setCurrentFragment(selectedFragment);
                         break;
                 }
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -254,9 +276,13 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         LayoutInflater mInflater = LayoutInflater.from(this);
-        View mCustomView = mInflater.inflate(R.layout.activity_main_menu_layout, null);
+        mCustomView = mInflater.inflate(R.layout.activity_main_menu_layout, null);
         TextView mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
         TextView mCashTextView = (TextView) mCustomView.findViewById(R.id.txtCash);
+
+        initData();
+        initRecyclerView();
+
         CircleImageView circleImage = (CircleImageView) mCustomView.findViewById(R.id.circleImage);
         if (ledger_id == null) {
             circleImage.setImageResource(R.drawable.global_icon);
@@ -322,5 +348,120 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.frame_layout, currentFragment);
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+///RecyclerView /////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    public Date getDateFrom() {
+
+        return dateFrom;
+    }
+
+    private void initData() {
+        mItems = new ArrayList<String>();
+        mItems.add("THIS YEAR");
+        mItems.add("LAST 3 MONTHS");
+        mItems.add("LAST MONTH");
+        mItems.add("THIS MONTH");
+        mItems.add("FUTURE");
+    }
+
+    private void initRecyclerView() {
+
+        mRecentRecyclerView = (RecyclerView) mCustomView.findViewById(R.id.recentrecyclerView);
+        mRecentRecyclerView.setHasFixedSize(true);
+        mRecentLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mRecentRecyclerView.setLayoutManager(mRecentLayoutManager);
+
+
+        mAdapter = new RecyclerView.Adapter<CustomViewHolder>() {
+            @Override
+            public CustomViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+                View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.wrap_recycler_item
+                        , viewGroup, false);
+                return new CustomViewHolder(view);
+            }
+
+            @Override
+            public void onBindViewHolder(CustomViewHolder viewHolder, int i) {
+                viewHolder.noticeSubject.setText(mItems.get(i));
+            }
+
+            @Override
+            public int getItemCount() {
+                return mItems.size();
+            }
+
+        };
+
+        mRecentRecyclerView.setAdapter(mAdapter);
+        Log.i("QEE", String.valueOf(mRecentRecyclerView.getLayoutManager().getItemCount()));
+
+        mRecentRecyclerView.scrollToPosition(4);
+        mRecentRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, mRecentRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        resetRecycler(1);
+                        ((TextView) view.findViewById(R.id.recyclerItem)).setTypeface(null, Typeface.BOLD);
+                        ((TextView) view.findViewById(R.id.recyclerItem)).setTextColor(Color.parseColor("#ccced1"));
+                        String tabString = ((TextView) view.findViewById(R.id.recyclerItem)).getText().toString();
+                        setDate(tabString);
+                        mRecentRecyclerView.scrollToPosition(position);
+
+                    }
+
+                    @Override
+                    public void onLongItemClick(View view, int position) {
+                        // do whatever
+                    }
+                })
+        );
+
+
+        // ((TextView)mRecentLayoutManager.findViewByPosition(0).findViewById(R.id.recyclerItem)).setTypeface(null, Typeface.BOLD);
+    }
+
+    public void setDate(String nameTab) {
+        if (nameTab.equals("FUTURE")) {
+            dateFrom = new Date(LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1, LocalDate.now().getDayOfMonth() + 1);
+            dateTo = new Date(LocalDate.now().getYear() + 100, 2, 1);
+        }
+        if (nameTab.equals("THIS MONTH")) {
+            dateFrom = new Date(LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1, 1);
+            dateTo = new Date(LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1, 31);
+        }
+        if (nameTab.equals("LAST MONTH")) {
+            dateFrom = new Date(LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1 - 1, 1);
+            dateTo = new Date(LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1 - 1, 31);
+        }
+        if (nameTab.equals("LAST 3 MONTHS")) {
+            dateFrom = new Date(LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1 - 2, 1);
+            dateTo = new Date(LocalDate.now().getYear(), LocalDate.now().getMonthValue() - 1, 31);
+
+        }
+        if (nameTab.equals("THIS YEAR")) {
+            dateFrom = new Date(LocalDate.now().getYear(), 1 - 1, 1);
+            dateTo = new Date(LocalDate.now().getYear(), 12 - 1, 31);
+            Log.i("fro1m", dateTo.toString());
+        }
+    }
+
+    private class CustomViewHolder extends RecyclerView.ViewHolder {
+        private TextView noticeSubject;
+
+        public CustomViewHolder(View itemView) {
+            super(itemView);
+
+            noticeSubject = (TextView) itemView.findViewById(R.id.recyclerItem);
+        }
+    }
+
+    private void resetRecycler(int tab) {
+
+        for (int i = 0; i < 6; i++)
+            if (mRecentLayoutManager.findViewByPosition(i) != null) {
+                ((TextView) mRecentLayoutManager.findViewByPosition(i).findViewById(R.id.recyclerItem)).setTypeface(null, Typeface.NORMAL);
+                ((TextView) mRecentLayoutManager.findViewByPosition(i).findViewById(R.id.recyclerItem)).setTextColor(Color.parseColor("#f7f8f9"));
+            }
     }
 }
