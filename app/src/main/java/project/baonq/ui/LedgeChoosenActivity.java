@@ -9,18 +9,19 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import project.baonq.enumeration.Currency;
 import project.baonq.enumeration.TransactionGroupType;
 import project.baonq.menu.R;
 import project.baonq.model.Ledger;
@@ -31,15 +32,17 @@ import project.baonq.service.TransactionGroupService;
 import project.baonq.service.TransactionService;
 import project.baonq.util.ConvertUtil;
 
+import static project.baonq.util.ConvertUtil.convertCurrency;
+import static project.baonq.util.ConvertUtil.formatMoney;
+
 public class LedgeChoosenActivity extends AppCompatActivity {
     private final static int LAYOUT_INFO = 1;
     private final static int LAYOUT_UPDATE = 2;
     TransactionGroupService transactionGroupService;
     LedgerService ledgerService;
     TransactionService transactionService;
-    public static String MAIN_PREFERENCE = "main_preference";
-    private Map<Long, View> layoutList = new HashMap<>();
     private View cardSumLayout;
+    String totalCashGlobal;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,13 +50,6 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ledge_choosen_layout);
         cardSumLayout = findViewById(R.id.cardSumLayout);
-        layoutList.put(Long.parseLong("0"), cardSumLayout);
-        cardSumLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkRow(null);
-            }
-        });
         transactionGroupService = new TransactionGroupService(getApplication());
         ledgerService = new LedgerService(getApplication());
         transactionService = new TransactionService(getApplication());
@@ -83,8 +79,29 @@ public class LedgeChoosenActivity extends AppCompatActivity {
     }
 
     private void initLayout() {
+        initElement();
         initAddLedgeText();
         loadDataFromSessionDao();
+    }
+
+    private void initElement() {
+        CardView cardView = findViewById(R.id.cardCashSum);
+        ImageView imageView = findViewById(R.id.imageCheck);
+        if (MainActivity.ledger_id == null) {
+            imageView.setVisibility(View.VISIBLE);
+        } else {
+            imageView.setVisibility(View.INVISIBLE);
+        }
+        cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LedgeChoosenActivity.this, MainActivity.class);
+                MainActivity.ledger_id = null;
+                MainActivity.my_money = totalCashGlobal;
+                setResult(RESULT_OK);
+                finish();
+            }
+        });
     }
 
     private void initAddLedgeText() {
@@ -98,52 +115,46 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         });
     }
 
-    private void loadDataFromSessionDao() {
-        List<Ledger> ledgerList = getLedgerList();
+    public void loadDataFromSessionDao() {
+        List<Ledger> ledgerList = ledgerService.getAll();
         double totalLedgerCash = 0;
         String currency = "";
         //in case this is not have any ledger
         if (ledgerList != null && !ledgerList.isEmpty()) {
-            currency = ConvertUtil.convertCurrency(ledgerList.get(0).getCurrency());
+            currency = convertCurrency(ledgerList.get(0).getCurrency());
         }
-
         for (Ledger ledger : ledgerList) {
             List<Transaction> transactionList = transactionService.getByLedgerId(ledger.getId());
             double transactionSum = 0;
             if (transactionList != null) {
-                transactionSum = sumOfTransaction(transactionList);
+                transactionSum = LedgerService.sumOfTransaction(transactionList);
             }
             createNewRowData(ledger, transactionSum);
             totalLedgerCash += transactionSum;
         }
+        double finalTmp = totalLedgerCash;
+        cardSumLayout.setOnClickListener(v -> {
+            MainActivity.ledger_id = null;
+            MainActivity.ledgerName = "Tổng cộng";
+            MainActivity.my_money = formatMoney(finalTmp) + convertCurrency(Currency.VND.name());
+            setResult(RESULT_OK);
+            finish();
+        });
         setTotalLedgerCash(totalLedgerCash, currency);
     }
 
-    public static double sumOfTransaction(List<Transaction> transactionList) {
-        double sum = 0;
-        for (Transaction item : transactionList) {
-            TransactionGroup transactionGroup = item.getTransactionGroup();
-            int transactionGrouptype = transactionGroup.getTransaction_type();
-            if (transactionGrouptype == TransactionGroupType.EXPENSE.getType()) {
-                sum -= item.getBalance();
-            }
-            if (transactionGrouptype == TransactionGroupType.INCOME.getType()) {
-                sum += item.getBalance();
-            }
-        }
-        return sum;
-    }
-
-    private List<Ledger> getLedgerList() {
-        List<Ledger> ledgerList = ledgerService.getAll();
-        return ledgerList;
-    }
-
     private void createNewRowData(final Ledger ledger, double sum) {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View mainView = layoutInflater.inflate(R.layout.activity_main, null);
         View submitLayout = getLayoutInflater().inflate(R.layout.add_ledge_submit_layout, null);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         layoutParams.setMargins(0, 2, 0, 0);
         submitLayout.setLayoutParams(layoutParams);
+        ImageView imageCheck = (ImageView) submitLayout.findViewById(R.id.imageCheck);
+        if (MainActivity.ledger_id != null && MainActivity.ledger_id.compareTo(ledger.getId()) == 0) {
+            imageCheck.setVisibility(View.VISIBLE);
+        }
+
         TextView txtTitle = submitLayout.findViewById(R.id.txtTittle);
         TextView txtCash = submitLayout.findViewById(R.id.txtCash);
         if (sum < 0) {
@@ -151,64 +162,25 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         }
         txtTitle.setText(ledger.getName());
         String currentBalanceFormat = formatMoney(sum);
-        txtCash.setText(currentBalanceFormat + ConvertUtil.convertCurrency(ledger.getCurrency()));
-
-        //create image button
-        createImageButton(ledger, sum, submitLayout);
-
-        LinearLayout contentLedgeChosenLayout = (LinearLayout) findViewById(R.id.contentLedgerChosen);
+        String totalCash = currentBalanceFormat + convertCurrency(ledger.getCurrency());
+        txtCash.setText(totalCash);
         submitLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkRow(ledger.getId());
+                MainActivity.ledger_id = ledger.getId();
+                MainActivity.ledgerName = ledger.getName();
+                MainActivity.my_money = totalCash;
+                setResult(RESULT_OK);
+                finish();
             }
         });
+
+        //create image button
+        createImageButton(ledger, sum, submitLayout);
+        LinearLayout contentLedgeChosenLayout = (LinearLayout) findViewById(R.id.contentLedgerChosen);
         contentLedgeChosenLayout.addView(submitLayout);
-        layoutList.put(ledger.getId(), submitLayout);
-        if (ledger.getId() == getCurrentLedgerId()) {
-            checkRow(ledger.getId());
-        }
     }
 
-    private void checkRow(Long id) {
-        changeCurrentLedgerId(id);
-        uncheckAllRow();
-        View view = cardSumLayout;
-        if (id != null) {
-            view = layoutList.get(id);
-        }
-        GradientDrawable gradientDrawable = new GradientDrawable();
-        gradientDrawable.setStroke(4, getResources().getColor(R.color.color_red));
-        view.setBackground(gradientDrawable);
-    }
-
-    private void uncheckAllRow() {
-        layoutList.values().stream().forEach(view -> {
-            GradientDrawable gradientDrawable = new GradientDrawable();
-            gradientDrawable.setColor(Color.parseColor("#FFFFFF"));
-            view.setBackground(gradientDrawable);
-        });
-    }
-
-    private void changeCurrentLedgerId(Long id) {
-        SharedPreferences sharedPreferences = getSharedPreferences(MAIN_PREFERENCE, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        if (id != null) {
-            editor.putLong("curLedgerId", id);
-        } else {
-            editor.remove("curLedgerId");
-        }
-        editor.commit();
-    }
-
-    private Long getCurrentLedgerId() {
-        SharedPreferences sharedPreferences = getSharedPreferences(MAIN_PREFERENCE, MODE_PRIVATE);
-        Long rs = sharedPreferences.getLong("curLedgerId", Long.parseLong("0"));
-        if (rs == 0L) {
-            return null;
-        }
-        return rs;
-    }
 
     private void setTotalLedgerCash(double totalLedgerCash, String currency) {
         TextView txtLedgerCashSum = (TextView) findViewById(R.id.txtLedgerCashSum);
@@ -217,11 +189,10 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         }
         String totalCash = formatMoney(totalLedgerCash);
         txtLedgerCashSum.setText(totalCash + currency);
+        totalCashGlobal = totalCash + currency;
+        txtLedgerCashSum.setText(totalCashGlobal);
     }
 
-    public String formatMoney(double amount) {
-        return (amount < 0 ? "-" : "") + ConvertUtil.convertCashFormat(Math.abs(amount));
-    }
 
     private void createImageButton(final Ledger ledger, final double sum, View submitLayout) {
         ImageButton imageButton = new ImageButton(this);

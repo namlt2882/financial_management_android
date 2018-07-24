@@ -41,6 +41,7 @@ public class TransactionService extends Service {
         return transactionDAO.getTransactionByLedgerId(ledger_id);
     }
 
+
     public Long getLastUpdateTime() {
         SharedPreferences sharedPreferences = application.getSharedPreferences("sync", Context.MODE_PRIVATE);
         return sharedPreferences.getLong(TransactionSyncService.TRANC_LASTUPDATE, Long.parseLong("0"));
@@ -67,8 +68,7 @@ public class TransactionService extends Service {
     }
 
     public List<Transaction> getAll() {
-        TransactionDao transactionDao = ((App) application).getDaoSession().getTransactionDao();
-        return transactionDao.loadAll();
+        return transactionDAO.getAll();
     }
 
 }

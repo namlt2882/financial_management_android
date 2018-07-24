@@ -57,7 +57,13 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 String jwt = authenticationService.login(username, password);
                 if (authenticationService.isLoggedIn()) {
-                    authenticationService.getUser();
+                    new Thread(() -> {
+                        try {
+                            authenticationService.getUserInfoFromServer();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
                     finish();
                 } else {
                     setErrorMessage("Wrong username and password");

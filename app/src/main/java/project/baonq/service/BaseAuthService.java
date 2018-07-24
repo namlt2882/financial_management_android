@@ -51,6 +51,8 @@ public class BaseAuthService {
                 in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
                 throw new Exception(read(in));
             }
+            this.user = user;
+            saveUserInfoToPreference(user);
             return user;
         } finally {
             if (in != null) {
@@ -91,16 +93,7 @@ public class BaseAuthService {
     }
 
     public User getUser() {
-        if (((App) context.getApplicationContext()).isNetworkConnected()) {
-            try {
-                user = getUserInfoFromServer();
-                saveUserInfoToPreference(user);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            loadAuthenticationInfo();
-        }
+        loadAuthenticationInfo();
         return user;
     }
 
@@ -179,7 +172,7 @@ public class BaseAuthService {
         editor.remove("insertDate");
         editor.remove("lastUpdate");
         editor.commit();
-        sharedPreferences  = context.getSharedPreferences("sync",Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences("sync", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         editor.remove("tranc_group_lastUpdate");
         editor.remove("tranc_lastUpdate");

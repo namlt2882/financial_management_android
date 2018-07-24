@@ -60,7 +60,6 @@ public class LedgeFragment extends Fragment {
 
         View wrap_transaction = getLayoutInflater().inflate(R.layout.wrap_transaction_layout, null);
         LinearLayout layout_in_wrapLayout = (LinearLayout) wrap_transaction.findViewById(R.id.wrap_transaction);
-        ;
 
         wrap_transaction = getLayoutInflater().inflate(R.layout.wrap_transaction_layout, null);
         View transactionLayout = getLayoutInflater().inflate(R.layout.transaction_info, null);
@@ -128,5 +127,9 @@ public class LedgeFragment extends Fragment {
                 }
             }
         }
+    }
+
+    private void initElement() {
+
     }
 }

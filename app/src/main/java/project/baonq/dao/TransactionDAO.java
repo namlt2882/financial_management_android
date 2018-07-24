@@ -1,6 +1,7 @@
 package project.baonq.dao;
 
 import android.app.Application;
+import android.database.Cursor;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,10 +31,16 @@ public class TransactionDAO extends DAO {
         transactionDao.update(transaction);
     }
 
-    public List<Transaction> getTransactionByLedgerId(Long ledger_id){
+    public List<Transaction> getTransactionByLedgerId(Long ledger_id) {
         DaoSession daoSession = getDaoSession();
         TransactionDao transactionDao = daoSession.getTransactionDao();
         return transactionDao.queryBuilder().where(TransactionDao.Properties.Ledger_id.eq(ledger_id)).list();
+    }
+
+    public List<Transaction> getAll() {
+        DaoSession daoSession = getDaoSession();
+        TransactionDao transactionDao = daoSession.getTransactionDao();
+        return transactionDao.loadAll();
     }
 
     public Transaction getTransactionNeedForUpdate(Long ledger_id, Long group_id) {

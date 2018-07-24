@@ -51,7 +51,7 @@ public class SettingFragment extends Fragment {
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new LedgerSyncService(getActivity().getApplication()).run();
+                new Thread(new LedgerSyncService(getActivity().getApplication())).start();
                 clickToLogout();
                 ((App) getActivity().getApplication()).removeDb();
                 authenticationService.clearAllPreferenceData();

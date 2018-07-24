@@ -28,9 +28,9 @@
         <activity android:name="project.baonq.AddTransaction.SelectCategory" />
         <activity android:name="project.baonq.AddTransaction.ChooseLedger" />
         <activity android:name="project.baonq.ui.NotificationActivity" />
-        <activity android:name="project.baonq.ui.NotificationDetailActivity"></activity>
-        <activity android:name="project.baonq.AddTransaction.AddCategory"></activity>
-
+        <activity android:name="project.baonq.ui.NotificationDetailActivity" />
+        <activity android:name="project.baonq.AddTransaction.AddCategory" />
+        <activity android:name="project.baonq.ui.FragmentReportDetailActivity"></activity>
     </application>
 
 </manifest>
