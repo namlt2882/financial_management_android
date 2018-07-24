@@ -1,6 +1,7 @@
 package project.baonq.ui;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,11 +37,12 @@ import project.baonq.service.TransactionService;
 
 public class LedgeFragment extends Fragment {
 
-    private Long ledgerId = 0L;
+    private Long ledgerId = MainActivity.ledger_id;
     private DaoSession daoSession;
     private List<Transaction> list = null;
     public Date dateTo = MainActivity.dateTo;
     public Date dateFrom = MainActivity.dateFrom;
+    private int countTransaction = 0;
 
     public LedgeFragment() {
         // Required empty public constructor
@@ -84,7 +87,7 @@ public class LedgeFragment extends Fragment {
             totalInDay += item.getBalance();
             ((TextView) tmp.findViewById(R.id.txtAmount)).setText(String.valueOf(item.getBalance()));
             ((TextView) tmp.findViewById(R.id.txtAmount))
-                    .setTextColor(Color.parseColor("#00ff00"));
+                    .setTextColor(Color.parseColor("#42e320"));
         } else {
             totalInDay -= item.getBalance();
             ((TextView) tmp.findViewById(R.id.txtAmount))
@@ -125,7 +128,7 @@ public class LedgeFragment extends Fragment {
             if (checkInRange(item.getTdate(), dateFrom, dateTo) != 1 || item.getStatus() != 1) {
                 continue;
             }
-            if (ledgerId == 0L || ledgerId == item.getLedger_id()) {
+            if (ledgerId == null || ledgerId == item.getLedger_id()) {
                 //neu chua co wrap_transaction_layout
                 if (!item.getTdate().equals(tmp)) {
                     tmp = item.getTdate();
@@ -136,13 +139,13 @@ public class LedgeFragment extends Fragment {
                 //them transactionLayout vao wraptransactionlayout
                 transactionLayout = getLayoutInflater().inflate(R.layout.transaction_info, null);
                 layout_in_wrapLayout.addView(getTransactionLayout(transactionLayout, item, r));
-
+                countTransaction++;
 
                 ///add wraplayout vao man hinh
                 if (i == (list.size() - 1) || !list.get(i + 1).getTdate().equals(tmp)) {
                     ((TextView) layout_in_wrapLayout.findViewById(R.id.textView4)).setText(String.valueOf(totalInDay));
                     if (totalInDay > 0) {
-                        ((TextView) layout_in_wrapLayout.findViewById(R.id.textView4)).setTextColor(Color.parseColor("#00ff00"));
+                        ((TextView) layout_in_wrapLayout.findViewById(R.id.textView4)).setTextColor(Color.parseColor("#42e320"));
                     } else {
                         ((TextView) layout_in_wrapLayout.findViewById(R.id.textView4)).setTextColor(Color.parseColor("#ff0000"));
                     }
@@ -151,6 +154,17 @@ public class LedgeFragment extends Fragment {
                     linearLayout.addView(getLayoutInflater().inflate(R.layout.gray_bar, null));
                 }
             }
+        }
+        if (countTransaction == 0) {
+            TextView ppp = new TextView(getActivity());
+            ppp.setText("No transaction found!");
+            LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
+            ppp.setLayoutParams(param);
+            ppp.setTextColor(Color.parseColor("#4286f4"));
+            ppp.setGravity(Gravity.CENTER | Gravity.BOTTOM);
+            linearLayout.addView(ppp);
         }
         return view;
     }

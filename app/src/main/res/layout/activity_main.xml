@@ -59,9 +59,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/colorPrimary"
-        app:itemIconTint="@color/colorAccent"
+        app:itemIconTint="#757575"
         app:itemTextColor="@color/colorWhite"
-        app:menu="@menu/bottom_navigation_item" >
+        app:menu="@menu/bottom_navigation_item">
 
     </android.support.design.widget.BottomNavigationView>
 </RelativeLayout>
