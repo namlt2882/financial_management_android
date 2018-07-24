@@ -88,7 +88,9 @@ public class AddLedgeActivity extends AppCompatActivity {
 
     private void initFormElement() {
         final TextView txtCurentBalance = findViewById(R.id.txtCurrentBalance);
-        txtCurentBalance.setText("0");
+        if(!isUpdate){
+            txtCurentBalance.setText("0");
+        }
     }
 
     private void loadUpdateForm() {
@@ -186,6 +188,7 @@ public class AddLedgeActivity extends AppCompatActivity {
             });
         } else {
             txtTitle.setText("Cập nhật ví");
+            edtCurrentBalance.setEnabled(false);
             txtSubmit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

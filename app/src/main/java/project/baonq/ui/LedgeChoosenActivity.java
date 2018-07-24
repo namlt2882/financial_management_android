@@ -180,7 +180,7 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         });
 
         //create image button
-        //createImageButton(ledger, sum, submitLayout);
+        createImageButton(ledger, sum, submitLayout);
 
         LinearLayout contentLedgeChosenLayout = (LinearLayout) findViewById(R.id.contentLedgerChosen);
         contentLedgeChosenLayout.addView(submitLayout);
