@@ -2,6 +2,7 @@ package project.baonq.ui;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,13 +10,17 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.text.DateFormat;
@@ -40,7 +45,8 @@ public class ReportFragment extends Fragment {
     List<String> nameList;
     List<Double> valueList;
     HashMap<String, Double> hm;
-    HashMap<String, Double> hmExpand;
+    public static HashMap<String, Double> hmIncome;
+    public static HashMap<String, Double> hmExpand;
     Long startTime;
     Long endTime;
     Long ledger_id;
@@ -71,21 +77,64 @@ public class ReportFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        startTime = mainActivity.startTime;
-        endTime = mainActivity.endTime;
+        initDateFromMain();
+        initChart();
         ledger_id = MainActivity.ledger_id;
         if (startTime != null && endTime != null) {
-            getDataForPie(ledger_id, 1);
+            hmIncome = getDataForPie(ledger_id, 1);
             PieChart chartIncome = (PieChart) getView().findViewById(R.id.inComePieChart);
             TextView txtIncome = (TextView) getView().findViewById(R.id.txtIncomeBalance);
-            setUpPieChart(hm ,chartIncome);
+            setUpPieChart(hmIncome, chartIncome);
             setUpTotal(txtIncome);
-            getDataForPie(ledger_id, 2);
+
+            hmExpand = getDataForPie(ledger_id, 2);
             PieChart chartExpand = (PieChart) getView().findViewById(R.id.expandPieChart);
             TextView txtExpand = (TextView) getView().findViewById(R.id.txtExpandBalance);
-            setUpPieChart(hm, chartExpand);
+            setUpPieChart(hmExpand, chartExpand);
             setUpTotal(txtExpand);
         }
+    }
+
+    private void initChart() {
+        PieChart chartIncome = (PieChart) getView().findViewById(R.id.inComePieChart);
+        bindPieChartEvent(chartIncome, 1);
+        PieChart chartExpand = (PieChart) getView().findViewById(R.id.expandPieChart);
+        bindPieChartEvent(chartExpand, 2);
+    }
+
+    private void bindPieChartEvent(PieChart pieChart, int transactionGroup) {
+        pieChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                Intent intent = new Intent(getContext(), ReportDetail.class);
+                intent.putExtra("transactionGroup", transactionGroup);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onNothingSelected() {
+                Intent intent = new Intent(getContext(), ReportDetail.class);
+                intent.putExtra("transactionGroup", transactionGroup);
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void initDateFromMain() {
+        String first1 = String.valueOf(MainActivity.dateFrom.getMonth() + 1) + "/" + String.valueOf(MainActivity.dateFrom.getDate()) + "/" + String.valueOf(MainActivity.dateFrom.getYear());
+        String last1 = String.valueOf(MainActivity.dateTo.getMonth() + 1) + "/" + String.valueOf(MainActivity.dateTo.getDate()) + "/" + String.valueOf(MainActivity.dateTo.getYear());
+        Date dateFirst = null;
+        Date dateLast = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        try {
+            dateFirst = sdf.parse(first1);
+            dateLast = sdf.parse(last1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String s = dateFirst.toString();
+        startTime = dateFirst.getTime();
+        endTime = dateLast.getTime();
     }
 
     private void setUpTotal(TextView textView) {
@@ -94,7 +143,7 @@ public class ReportFragment extends Fragment {
         }
         float total = 0;
 
-        for(String key: hm.keySet()){
+        for (String key : hm.keySet()) {
             total += hm.get(key);
         }
         textView.setText(ConvertUtil.convertCashFormat(total) + ConvertUtil.convertCurrency("VNĐ"));
@@ -117,13 +166,13 @@ public class ReportFragment extends Fragment {
         chart.invalidate();
     }
 
-    private void getDataForPie(Long ledger_id, int typeAspect) {
+    private HashMap<String, Double> getDataForPie(Long ledger_id, int typeAspect) {
         hm = new HashMap<>();
         Application application = mainActivity.getApplication();
         List<Transaction> transactionList;
-        if(ledger_id != null){
+        if (ledger_id != null) {
             transactionList = new TransactionService(application).getByLedgerId(ledger_id);
-        }else{
+        } else {
             transactionList = new TransactionService(application).getAll();
         }
 
@@ -144,6 +193,7 @@ public class ReportFragment extends Fragment {
                 }
             }
         }
+        return hm;
     }
 
     private Transaction compareTransaction(Transaction transaction) {

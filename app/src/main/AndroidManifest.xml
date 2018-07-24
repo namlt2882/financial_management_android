@@ -30,7 +30,8 @@
         <activity android:name="project.baonq.ui.NotificationActivity" />
         <activity android:name="project.baonq.ui.NotificationDetailActivity" />
         <activity android:name="project.baonq.AddTransaction.AddCategory" />
-        <activity android:name="project.baonq.ui.FragmentReportDetailActivity"></activity>
+        <activity android:name="project.baonq.ui.FragmentReportDetailActivity" />
+        <activity android:name="project.baonq.ui.ReportDetail"></activity>
     </application>
 
 </manifest>

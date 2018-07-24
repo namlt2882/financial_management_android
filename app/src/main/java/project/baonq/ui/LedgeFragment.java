@@ -121,7 +121,6 @@ public class LedgeFragment extends Fragment {
         LinearLayout layout_in_wrapLayout = (LinearLayout) wrap_transaction.findViewById(R.id.wrap_transaction);
 
         View transactionLayout = null;
-
         for (int i = 0; i < list.size(); i++) {
             Transaction item = list.get(i);
             TransactionGroup r = new TransactionGroupService(((App) getActivity().getApplication())).getTransactionGroupByID(list.get(i).getGroup_id());

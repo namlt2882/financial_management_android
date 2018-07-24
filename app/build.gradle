@@ -48,3 +48,7 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:+'
     implementation 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
 }
+
+dependencies {
+    implementation 'com.android.support.constraint:constraint-layout:+'
+}
