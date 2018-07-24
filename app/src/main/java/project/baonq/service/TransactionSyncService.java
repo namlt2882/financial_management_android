@@ -23,6 +23,7 @@ import project.baonq.dao.TransactionDAO;
 import project.baonq.dto.LedgerTransaction;
 import project.baonq.dto.TransactionDto;
 import project.baonq.menu.R;
+import project.baonq.model.DaoSession;
 import project.baonq.model.Ledger;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionGroup;
@@ -291,8 +292,12 @@ public class TransactionSyncService extends TransactionService implements Runnab
                     ObjectMapper om = new ObjectMapper();
                     try (OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");) {
                         //write to request body
+                        final DaoSession daoSession = ((App)groupSyncService.application).getDaoSession();
                         String entity = om.writeValueAsString(updatableTransactions.stream()
-                                .map(transaction -> transaction.dto()).collect(Collectors.toList()));
+                                .map(transaction -> {
+                                    transaction.__setDaoSession(daoSession);
+                                    return transaction.dto();
+                                }).collect(Collectors.toList()));
                         wr.write(entity);
                         wr.flush();
                         conn.connect();
