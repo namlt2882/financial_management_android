@@ -1,6 +1,7 @@
 package project.baonq.ui;
 
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -439,7 +441,19 @@ public class MainActivity extends AppCompatActivity {
                         String tabString = ((TextView)view.findViewById(R.id.recyclerItem)).getText().toString();
                         setDate(tabString);
                         mRecentRecyclerView.scrollToPosition(position);
+                        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
+                        MenuItem tmp = bottomNavigationView.getMenu().getItem(0);
+                        android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
 
+                        //reset data in ledgerfragment
+                        Fragment selectedFragment = LedgeFragment.newInstance();
+                        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                        transaction.replace(R.id.frame_layout, selectedFragment);
+                        transaction.addToBackStack(null);
+                        transaction.commit();
+//                        Intent intent = getIntent();
+//                        finish();
+//                        startActivity(intent);
                     }
 
                     @Override public void onLongItemClick(View view, int position) {
