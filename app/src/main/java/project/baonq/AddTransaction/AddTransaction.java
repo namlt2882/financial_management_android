@@ -188,6 +188,7 @@ public class AddTransaction extends AppCompatActivity {
                 transactionService
                         .addTransaction(getLedgerId(), getGroupId(), amount, date, txtNote);
                 removeData();
+                setResult(RESULT_OK);
                 finish();
             }
         }
