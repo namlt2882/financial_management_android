@@ -197,6 +197,9 @@ public class ReportFragment extends Fragment {
     }
 
     private Transaction compareTransaction(Transaction transaction) {
+        if ((startTime > endTime)) {
+            endTime = Long.MAX_VALUE;
+        }
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH);
         Long dateInMili = 0L;
         try {

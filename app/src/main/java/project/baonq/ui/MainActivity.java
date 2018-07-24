@@ -101,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
                 setActionBarLayout();
                 if (getCurrentFragment() instanceof LedgeFragment) {
                     setCurrentFragment(LedgeFragment.newInstance());
+                } else if (getCurrentFragment() instanceof ReportFragment) {
+                    setCurrentFragment(ReportFragment.newInstance());
                 }
             });
         });
@@ -118,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
         initFloatActionButton();
         //set botttom navigation bar activities
         setFragmentBottomNavigationBarActivities();
-
 
 
     }
@@ -173,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AddTransaction.class);
                 removeData();
-                startActivityForResult(intent,1);
+                startActivityForResult(intent, 1);
             }
         });
     }
@@ -319,6 +320,8 @@ public class MainActivity extends AppCompatActivity {
                 setActionBarLayout();
                 if (getCurrentFragment() instanceof LedgeFragment) {
                     setCurrentFragment(LedgeFragment.newInstance());
+                } else if (getCurrentFragment() instanceof ReportFragment) {
+                    setCurrentFragment(ReportFragment.newInstance());
                 }
             }
         }
@@ -395,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onBindViewHolder(CustomViewHolder viewHolder, int i) {
                 viewHolder.noticeSubject.setText(mItems.get(i));
-                if (mItems.get(i).toString().equals("THIS MONTH")){
+                if (mItems.get(i).toString().equals("THIS MONTH")) {
                     viewHolder.noticeSubject.setText(mItems.get(i));
                     viewHolder.noticeSubject.setTypeface(null, Typeface.BOLD);
                     viewHolder.noticeSubject.setTextColor(Color.parseColor("#ccced1"));
@@ -424,7 +427,6 @@ public class MainActivity extends AppCompatActivity {
                         mRecentRecyclerView.scrollToPosition(position);
 
 
-
                         //reset data in ledgerfragment
                         Fragment selectedFragment = LedgeFragment.newInstance();
                         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -442,7 +444,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
         );
-
 
 
         // ((TextView)mRecentLayoutManager.findViewByPosition(0).findViewById(R.id.recyclerItem)).setTypeface(null, Typeface.BOLD);
