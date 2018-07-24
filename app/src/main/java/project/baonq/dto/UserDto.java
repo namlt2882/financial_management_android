@@ -2,6 +2,8 @@ package project.baonq.dto;
 
 import java.util.Date;
 
+import project.baonq.model.User;
+
 public class UserDto {
     private String username;
     private String password;
@@ -10,6 +12,17 @@ public class UserDto {
     private Date birthday;
     private Date insertDate = new Date();
     private Date lastUpdate = new Date();
+
+    public User user() {
+        User rs = new User();
+        rs.setUsername(username);
+        rs.setFirstName(firstName);
+        rs.setLastName(lastName);
+        rs.setBirthday(birthday);
+        rs.setInsertDate(insertDate);
+        rs.setLastUpdate(lastUpdate);
+        return rs;
+    }
 
     public String getUsername() {
         return username;

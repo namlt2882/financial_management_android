@@ -1,6 +1,8 @@
 package project.baonq.AddTransaction;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -59,9 +61,11 @@ public class ExpenseFragment extends Fragment {
                 txt.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(getActivity(), AddTransaction.class);
-                        intent.putExtra("catId", list.get(finalI).getId());
-                        startActivity(intent);
+                        SharedPreferences pre = getActivity().getSharedPreferences("transaction_data", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = pre.edit();
+                        editor.putString("catId", list.get(finalI).getId() + "");
+                        editor.commit();
+                        getActivity().finish();
                     }
                 });
                 layout.addView(txt);

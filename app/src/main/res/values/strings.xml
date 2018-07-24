@@ -9,7 +9,7 @@
     <string name="item_4">Mở rộng</string>
 
     <!--Server info-->
-    <string name="server_name">http://192.168.0.107:9999/api</string>
+    <string name="server_name">http://192.168.190.2:9999/api</string>
     <string name="login_url">/login</string>
     <string name="logout_url">/logout</string>
     <string name="register_url">/register</string>
@@ -18,5 +18,7 @@
     <string name="check_read_notification_url">/noti/read</string>
     <string name="get_create_update_ledger_url">/ledger</string>
     <string name="get_create_update_tranc_group_url">/tranc_group</string>
+    <string name="get_create_update_tranc_url">/transaction</string>
+    <string name="get_user_url">/user</string>
 
 </resources>

@@ -26,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
         if (authenticationService.isLoggedIn()) {
             finish();
         }
-        System.out.println("Original JWT: " + BaseAuthService.getJwt());
+        System.out.println("Original JWT: " + authenticationService.getJwt());
         //if user has not been logged in
         setContentView(R.layout.activity_login);
         getSupportActionBar().hide();
@@ -56,7 +56,14 @@ public class LoginActivity extends AppCompatActivity {
             String password = ((TextView) findViewById(R.id.txtLoginPassword)).getText().toString();
             try {
                 String jwt = authenticationService.login(username, password);
-                if (jwt != null) {
+                if (authenticationService.isLoggedIn()) {
+                    new Thread(() -> {
+                        try {
+                            authenticationService.getUserInfoFromServer();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
                     finish();
                 } else {
                     setErrorMessage("Wrong username and password");

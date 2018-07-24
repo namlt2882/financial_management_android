@@ -19,8 +19,8 @@ public class LedgerTransaction implements Serializable {
 
     @JsonProperty("server_id")
     private Long serverId;
-
-    private List<Transaction> transactions = new LinkedList<>();
+    @JsonProperty("transactions")
+    private List<TransactionDto> transactionDtos = new LinkedList<>();
 
     public Long getServerId() {
         return serverId;
@@ -30,11 +30,11 @@ public class LedgerTransaction implements Serializable {
         this.serverId = serverId;
     }
 
-    public List<Transaction> getTransactions() {
-        return transactions;
+    public List<TransactionDto> getTransactionDtos() {
+        return transactionDtos;
     }
 
-    public void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
+    public void setTransactionDtos(List<TransactionDto> transactionDtos) {
+        this.transactionDtos = transactionDtos;
     }
 }

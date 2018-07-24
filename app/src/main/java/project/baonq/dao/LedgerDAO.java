@@ -9,6 +9,8 @@ import project.baonq.model.DaoSession;
 import project.baonq.model.Ledger;
 import project.baonq.model.LedgerDao;
 
+
+
 public class LedgerDAO extends DAO {
 
     public LedgerDAO(Application application) {
@@ -33,6 +35,12 @@ public class LedgerDAO extends DAO {
         DaoSession daoSession = getDaoSession();
         LedgerDao ledgerDao = daoSession.getLedgerDao();
         return ledgerDao.loadAll();
+    }
+
+    public Ledger getledgerById(Long id) {
+        DaoSession daoSession = getDaoSession();
+        LedgerDao ledgerDao = daoSession.getLedgerDao();
+        return ledgerDao.load(id);
     }
 
     public List<Ledger> insertOrUpdate(List<Ledger> ledgers) {

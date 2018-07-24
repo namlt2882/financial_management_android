@@ -1,6 +1,7 @@
 package project.baonq.ui;
 
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -8,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,7 +22,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,25 +31,40 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import project.baonq.AddTransaction.AddTransaction;
+import project.baonq.enumeration.Currency;
 import project.baonq.menu.R;
+import project.baonq.model.Ledger;
 import project.baonq.service.App;
 import project.baonq.service.AuthenticationService;
 import project.baonq.service.LedgerSyncService;
 import project.baonq.service.NotificationService;
+import project.baonq.service.TransactionService;
+import project.baonq.util.ConvertUtil;
+
+import static project.baonq.util.ConvertUtil.convertCurrency;
 
 
 public class MainActivity extends AppCompatActivity {
     CalendarPickerView calendar;
-    Button button;
+    public static Long startTime;
+    public static Long endTime;
+    public static Long ledger_id = null;
+    public static String my_money = "0,00đ";
+    public static String ledgerName;
     AuthenticationService authService;
     Thread notificationService;
     LedgerSyncService ledgerSyncService;
     public static final boolean GET_NOTIFICATION = false;
+    private TransactionService transactionService;
+    private double sumledgerMoney = 0;
+    private View mCustomView;
+    public static Activity activity;
+    public Fragment currentFragment;
+    BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,14 +72,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         authService = new AuthenticationService(this);
         ledgerSyncService = new LedgerSyncService(getApplication());
+        activity = this;
+        ledgerSyncService.addConsumer(c -> {
+            activity.runOnUiThread(() -> {
+                updateTitle();
+                setActionBarLayout();
+                if (getCurrentFragment() instanceof LedgeFragment) {
+                    setCurrentFragment(LedgeFragment.newInstance());
+                }
+            });
+        });
+        transactionService = new TransactionService(getApplication());
+        bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
         if (!authService.isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
+        //update value hold name and amount
+        updateTitle();
         //set date picker
-        setActionBarLayout("Chọn ngày");
-        //set date picker
-        initDatepicker();
+        setActionBarLayout();
         //set float action button
         initFloatActionButton();
         //set botttom navigation bar activities
@@ -78,12 +104,29 @@ public class MainActivity extends AppCompatActivity {
         if (GET_NOTIFICATION) {
             if (authService.isLoggedIn() && notificationService == null) {
                 System.out.println("INIT NOTIFICATION SERVICE-------");
-                notificationService = new Thread(new NotificationService(getApplication()));
+                NotificationService service = new NotificationService(getApplication());
+                service.addNewNotificationConsumer(c -> {
+                    activity.runOnUiThread(() -> {
+                        Toast.makeText(activity, "You has new notification!", Toast.LENGTH_SHORT).show();
+                    });
+                });
+                notificationService = new Thread(service);
                 notificationService.start();
             }
         }
     }
 
+    private void updateTitle() {
+        if (ledger_id != null) {
+            Ledger ledger = ledgerSyncService.findById(ledger_id);
+            ledgerName = ledger.getName();
+            my_money = formatMoney(ledgerSyncService.findSumOfLedger(ledger))
+                    + convertCurrency(ledger.getCurrency());
+        } else {
+            ledgerName = "Tổng cộng";
+            my_money = formatMoney(ledgerSyncService.findSumOfLedgers()) + convertCurrency(Currency.VND.name());
+        }
+    }
 
     public void restartApp() {
         AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -121,25 +164,7 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
-    private void initDatepicker() {
-        final Button edtDate = (Button) findViewById(R.id.editDate);
-        edtDate.getBackground().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
-        final View mView = getLayoutInflater().inflate(R.layout.date_range_dialog, null);
-        AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-        mDialogBuilder.setView(mView);
-        final AlertDialog dialog = mDialogBuilder.create();
-        testDatePicker(mView, dialog);
-        edtDate.clearFocus();
-        edtDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.show();
-                edtDate.clearFocus();
-            }
-        });
-    }
-
-    private void testDatePicker(final View mView, final AlertDialog dialog) {
+    private void createDatePicker(final View mView, final AlertDialog dialog) {
         final Calendar nextYear = Calendar.getInstance();
         nextYear.add(Calendar.YEAR, 10);
 
@@ -147,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
         lastYear.add(Calendar.YEAR, -10);
 
         calendar = (CalendarPickerView) mView.findViewById(R.id.calendar_view);
-        button = (Button) mView.findViewById(R.id.get_selected_dates);
         ArrayList<Integer> list = new ArrayList<>();
         list.add(0);
 
@@ -155,74 +179,23 @@ public class MainActivity extends AppCompatActivity {
         //this array use for high line important date
         ArrayList<Date> arrayList = new ArrayList<>();
         final SimpleDateFormat dateformat = new SimpleDateFormat("dd-MM-yyyy");
-//        try {
-//            String strdate = "";
-//            String strdate2 = "";
-//            Date newdate = dateformat.parse(strdate);
-//            Date newdate2 = dateformat.parse(strdate2);
-//            arrayList.add(newdate);
-//            arrayList.add(newdate2);
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
         calendar.init(lastYear.getTime(), nextYear.getTime(), new SimpleDateFormat("MM, YYYY", Locale.getDefault())) //
                 .inMode(CalendarPickerView.SelectionMode.RANGE) //
                 .withSelectedDate(new Date())
                 .withDeactivateDates(list)
                 .withHighlightedDates(arrayList);
-
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                List<Date> dateList = calendar.getSelectedDates();
-                setActionBarLayout("Từ : " + dateformat.format(dateList.get(0)) + " đến  " + dateformat.format(dateList.get(dateList.size() - 1)));
-                initDatepicker();
-                dialog.hide();
-            }
-        });
-
     }
-
-//    private void initDatePicker() {
-//        final EditText datePicker = (EditText) findViewById(R.id.editDate);
-//        final Calendar calendar = Calendar.getInstance();
-//        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-//
-//        //set date picker event
-//        datePicker.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                setdatePickerDialog(datePicker, calendar, simpleDateFormat);
-//            }
-//        });
-//        //set date when load page in first time
-//        datePicker.setText(simpleDateFormat.format(calendar.getTime()));
-//
-//    }
-//
-//    private void setdatePickerDialog(final EditText datePicker, final Calendar calendar, final SimpleDateFormat simpleDateFormat) {
-//        int day = calendar.get(Calendar.DATE);
-//        int month = calendar.get(Calendar.MONTH);
-//        int year = calendar.get(Calendar.YEAR);
-//
-//        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-//            @Override
-//            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-//                calendar.set(year, month, dayOfMonth);
-//                datePicker.setText(simpleDateFormat.format(calendar.getTime()));
-//            }
-//        }, year, month, day);
-//        datePickerDialog.show();
-//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         final MenuItem btnViewNotification = menu.findItem(R.id.btnViewNotification);
-        btnViewNotification.getActionView().setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
-            startActivity(intent);
+        btnViewNotification.getActionView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
+                startActivity(intent);
+            }
         });
         return true;
     }
@@ -243,8 +216,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setFragmentBottomNavigationBarActivities() {
-        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
-
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -252,12 +223,15 @@ public class MainActivity extends AppCompatActivity {
                 switch (item.getItemId()) {
                     case R.id.action_item1:
                         selectedFragment = LedgeFragment.newInstance();
+                        setCurrentFragment(selectedFragment);
                         break;
                     case R.id.action_item2:
                         selectedFragment = ReportFragment.newInstance();
+                        setCurrentFragment(selectedFragment);
                         break;
                     case R.id.action_item4:
                         selectedFragment = SettingFragment.newInstance();
+                        setCurrentFragment(selectedFragment);
                         break;
                 }
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -267,36 +241,86 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-
+        currentFragment = LedgeFragment.newInstance();
         //Manually displaying the first fragment - one time only
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_layout, LedgeFragment.newInstance());
+        transaction.replace(R.id.frame_layout, currentFragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
 
-    private void setActionBarLayout(String edtDateText) {
+
+    private void setActionBarLayout() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         LayoutInflater mInflater = LayoutInflater.from(this);
         View mCustomView = mInflater.inflate(R.layout.activity_main_menu_layout, null);
         TextView mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
         TextView mCashTextView = (TextView) mCustomView.findViewById(R.id.txtCash);
-        Button mEdtDate = (Button) mCustomView.findViewById(R.id.editDate);
         CircleImageView circleImage = (CircleImageView) mCustomView.findViewById(R.id.circleImage);
+        if (ledger_id == null) {
+            circleImage.setImageResource(R.drawable.global_icon);
+        } else {
+            circleImage.setImageResource(R.drawable.wallet);
+        }
         circleImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, LedgeChoosenActivity.class);
-                startActivity(intent);
+                intent.putExtra("ledger_id", ledger_id);
+                startActivityForResult(intent, 1);
             }
         });
-        mTitleTextView.setText("Tiền của tôi:");
-        mCashTextView.setText("2,000,000 đ");
-        mEdtDate.setText(edtDateText);
-
+        mTitleTextView.setText(ledgerName);
+        mCashTextView.setText(my_money);
         actionBar.setCustomView(mCustomView);
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FFFFFF")));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                setActionBarLayout();
+            }
+        }
+    }
+
+    public String formatMoney(double amount) {
+        return (amount < 0 ? "-" : "") + ConvertUtil.convertCashFormat(Math.abs(amount));
+    }
+
+    private Long atStartOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+    }
+
+    private Long atEndOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        return calendar.getTimeInMillis();
+    }
+
+    public Fragment getCurrentFragment() {
+        return currentFragment;
+    }
+
+    public void setCurrentFragment(Fragment currentFragment) {
+        this.currentFragment = currentFragment;
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, currentFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }

@@ -2,6 +2,8 @@ package project.baonq.util;
 
 import java.text.DecimalFormat;
 
+import project.baonq.enumeration.Currency;
+
 public class ConvertUtil {
 
     public static String convertCashFormat(double number) {
@@ -12,7 +14,7 @@ public class ConvertUtil {
 
     public static String convertCurrency(String currency) {
         switch (currency) {
-            case "VNĐ":
+            case "VND":
                 return "đ";
             case "Dollar":
                 return "$";
@@ -21,5 +23,9 @@ public class ConvertUtil {
             default:
                 return "";
         }
+    }
+
+    public static String formatMoney(double amount) {
+        return (amount < 0 ? "-" : "") + ConvertUtil.convertCashFormat(Math.abs(amount));
     }
 }

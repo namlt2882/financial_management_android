@@ -46,7 +46,7 @@ public class TransactionGroupService extends Service {
     }
 
     public Long getLastUpdateTimeFromDb() {
-        TransactionGroup group = new TransactionGroupDAO(application).findLastUpdateGroup();
+        TransactionGroup group = groupDAO.findLastUpdateGroup();
         if (group != null) {
             return group.getLast_update();
         } else {
@@ -70,5 +70,13 @@ public class TransactionGroupService extends Service {
 
     public List<TransactionGroup> findIncomeGroupByLedgerId(Long id) {
         return groupDAO.findIncomeGroupByLedgerId(id);
+    }
+
+    public TransactionGroup findById(Long id) {
+        return groupDAO.findById(id);
+    }
+
+    public TransactionGroup findByServerId(Long id) {
+        return groupDAO.findByServerId(id);
     }
 }
