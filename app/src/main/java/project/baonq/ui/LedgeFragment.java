@@ -101,13 +101,21 @@ public class LedgeFragment extends Fragment {
                 Log.i("Click on transaction", String.valueOf(item.getId()));
                 Intent intent = new Intent(getActivity(), AddTransaction.class);
                 intent.putExtra("transactionID", item.getId());
-                startActivity(intent);
+                startActivityForResult(intent, 1);
             }
         });
         return tmp;
     }
 
     private double totalInDay = 0;
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).onActivityResult(requestCode, resultCode, data);
+        }
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

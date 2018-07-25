@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     AuthenticationService authService;
     Thread notificationService;
     LedgerSyncService ledgerSyncService;
-    public static final boolean GET_NOTIFICATION = false;
+    public static final boolean GET_NOTIFICATION = true;
     private TransactionService transactionService;
     private double sumledgerMoney = 0;
     private View mCustomView;
@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (getCurrentFragment() instanceof ReportFragment) {
                     setCurrentFragment(ReportFragment.newInstance());
                 }
+                Toast.makeText(activity, "Finish sync with server!", Toast.LENGTH_SHORT).show();
             });
         });
         transactionService = new TransactionService(getApplication());
@@ -232,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.btnSynchonize:
                 if (((App) getApplication()).isNetworkConnected()) {
+                    Toast.makeText(activity, "Start to sync!", Toast.LENGTH_SHORT).show();
                     new Thread(ledgerSyncService).start();
                 } else {
                     Toast.makeText(this, "Network is not available to sync!", Toast.LENGTH_SHORT).show();
