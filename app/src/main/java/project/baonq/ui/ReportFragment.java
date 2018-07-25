@@ -177,7 +177,7 @@ public class ReportFragment extends Fragment {
         }
 
         for (Transaction item : transactionList) {
-            if (compareTransaction(item) != null) {
+            if (compareTransaction(item) != null && !item.getCounted_on_report()) {
                 Long groupId = item.getGroup_id();
                 TransactionGroup transactionGroup = new TransactionGroupService(application).getTransactionGroupByID(groupId);
                 int type = transactionGroup.getTransaction_type();
