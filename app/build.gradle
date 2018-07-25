@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "project.baonq.menu"
-        minSdkVersion 26
+        minSdkVersion 18
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -47,4 +47,8 @@ dependencies {
 dependencies {
     implementation 'com.android.support.constraint:constraint-layout:+'
     implementation 'net.zetetic:android-database-sqlcipher:3.5.7@aar'
+}
+
+dependencies {
+    implementation 'com.android.support.constraint:constraint-layout:+'
 }

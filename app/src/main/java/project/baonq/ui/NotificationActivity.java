@@ -133,6 +133,7 @@ public class NotificationActivity extends AppCompatActivity {
             b.putString("content",notification.getContent());
             intent.putExtras(b);
             startActivity(intent);
+            notiView.setBackgroundColor(Color.parseColor("#CCCCCC"));
         });
     }
 

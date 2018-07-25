@@ -46,9 +46,11 @@ public class AuthenticationService extends BaseAuthService {
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
         BufferedReader in = null;
-        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream());) {
+        try (OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");) {
             //write parameter to request
-            wr.writeBytes("username=" + username + "&password=" + password);
+            wr.write("username=" + username + "&password=" + password);
+            wr.flush();
+            conn.connect();
             //read response value
             if (conn.getResponseCode() == 200) {
                 in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -80,10 +82,11 @@ public class AuthenticationService extends BaseAuthService {
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
         BufferedReader in = null;
-        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
-             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(wr, "UTF-8"));) {
+        try (OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream(), "UTF-8");) {
             //write parameter to request
-            writer.write(om.writeValueAsString(user));
+            wr.write(om.writeValueAsString(user));
+            wr.flush();
+            conn.connect();
             //read response value
             if (conn.getResponseCode() == 200) {
                 in = new BufferedReader(new InputStreamReader(conn.getInputStream()));

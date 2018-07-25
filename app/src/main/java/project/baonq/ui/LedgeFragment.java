@@ -101,13 +101,21 @@ public class LedgeFragment extends Fragment {
                 Log.i("Click on transaction", String.valueOf(item.getId()));
                 Intent intent = new Intent(getActivity(), AddTransaction.class);
                 intent.putExtra("transactionID", item.getId());
-                startActivity(intent);
+                startActivityForResult(intent, 1);
             }
         });
         return tmp;
     }
 
     private double totalInDay = 0;
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).onActivityResult(requestCode, resultCode, data);
+        }
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -117,11 +125,10 @@ public class LedgeFragment extends Fragment {
         sortListByTdate();
         String tmp = "";
         LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.loadTransaction);
-        View wrap_transaction = getLayoutInflater().inflate(R.layout.wrap_transaction_layout, null);
-        LinearLayout layout_in_wrapLayout = (LinearLayout) wrap_transaction.findViewById(R.id.wrap_transaction);
+        View wrap_transaction = null;
+        LinearLayout layout_in_wrapLayout = null;
 
         View transactionLayout = null;
-
         for (int i = 0; i < list.size(); i++) {
             Transaction item = list.get(i);
             TransactionGroup r = new TransactionGroupService(((App) getActivity().getApplication())).getTransactionGroupByID(list.get(i).getGroup_id());
@@ -140,7 +147,6 @@ public class LedgeFragment extends Fragment {
                 transactionLayout = getLayoutInflater().inflate(R.layout.transaction_info, null);
                 layout_in_wrapLayout.addView(getTransactionLayout(transactionLayout, item, r));
                 countTransaction++;
-
                 ///add wraplayout vao man hinh
                 if (i == (list.size() - 1) || !list.get(i + 1).getTdate().equals(tmp)) {
                     ((TextView) layout_in_wrapLayout.findViewById(R.id.textView4)).setText(String.valueOf(totalInDay));
@@ -152,8 +158,22 @@ public class LedgeFragment extends Fragment {
                     totalInDay = 0;
                     linearLayout.addView(wrap_transaction);
                     linearLayout.addView(getLayoutInflater().inflate(R.layout.gray_bar, null));
+                    wrap_transaction = null;
                 }
             }
+
+        }
+        if (wrap_transaction != null) {
+            ((TextView) layout_in_wrapLayout.findViewById(R.id.textView4)).setText(String.valueOf(totalInDay));
+            if (totalInDay > 0) {
+                ((TextView) layout_in_wrapLayout.findViewById(R.id.textView4)).setTextColor(Color.parseColor("#42e320"));
+            } else {
+                ((TextView) layout_in_wrapLayout.findViewById(R.id.textView4)).setTextColor(Color.parseColor("#ff0000"));
+            }
+            totalInDay = 0;
+            linearLayout.addView(wrap_transaction);
+            linearLayout.addView(getLayoutInflater().inflate(R.layout.gray_bar, null));
+            wrap_transaction = null;
         }
         if (countTransaction == 0) {
             TextView ppp = new TextView(getActivity());

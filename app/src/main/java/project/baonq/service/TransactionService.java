@@ -37,6 +37,20 @@ public class TransactionService extends Service {
         return transactionDAO.addTransaction(transaction);
     }
 
+    public void updateTransaction(Transaction transaction) {
+        Transaction origin = new TransactionDAO(application).findById(transaction.getId());
+        origin.setGroup_id(transaction.getGroup_id());
+        origin.setLedger_id(transaction.getLedger_id());
+        origin.setBalance(transaction.getBalance());
+        origin.setTdate(transaction.getTdate());
+        origin.setNote(transaction.getNote());
+//        origin.setCounted_on_report(transaction.getCounted_on_report());
+        //insert date and last update time
+        long lastUpdate = System.currentTimeMillis();
+        origin.setLast_update(lastUpdate);
+        transactionDAO.updateTransaction(origin);
+    }
+
     public List<Transaction> getByLedgerId(Long ledger_id) {
         return transactionDAO.getTransactionByLedgerId(ledger_id);
     }
@@ -71,4 +85,8 @@ public class TransactionService extends Service {
         return transactionDAO.getAll();
     }
 
+    public Transaction getTransactionByID(Long id) {
+        System.out.println(id);
+        return null;
+    }
 }

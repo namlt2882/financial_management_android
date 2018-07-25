@@ -16,6 +16,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     AuthenticationService authService;
     Thread notificationService;
     LedgerSyncService ledgerSyncService;
-    public static final boolean GET_NOTIFICATION = false;
+    public static final boolean GET_NOTIFICATION = true;
     private TransactionService transactionService;
     private double sumledgerMoney = 0;
     private View mCustomView;
@@ -100,7 +101,10 @@ public class MainActivity extends AppCompatActivity {
                 setActionBarLayout();
                 if (getCurrentFragment() instanceof LedgeFragment) {
                     setCurrentFragment(LedgeFragment.newInstance());
+                } else if (getCurrentFragment() instanceof ReportFragment) {
+                    setCurrentFragment(ReportFragment.newInstance());
                 }
+                Toast.makeText(activity, "Finish sync with server!", Toast.LENGTH_SHORT).show();
             });
         });
         transactionService = new TransactionService(getApplication());
@@ -117,6 +121,8 @@ public class MainActivity extends AppCompatActivity {
         initFloatActionButton();
         //set botttom navigation bar activities
         setFragmentBottomNavigationBarActivities();
+
+
     }
 
     @Override
@@ -169,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AddTransaction.class);
                 removeData();
-                startActivityForResult(intent,1);
+                startActivityForResult(intent, 1);
             }
         });
     }
@@ -227,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.btnSynchonize:
                 if (((App) getApplication()).isNetworkConnected()) {
+                    Toast.makeText(activity, "Start to sync!", Toast.LENGTH_SHORT).show();
                     new Thread(ledgerSyncService).start();
                 } else {
                     Toast.makeText(this, "Network is not available to sync!", Toast.LENGTH_SHORT).show();
@@ -315,6 +322,8 @@ public class MainActivity extends AppCompatActivity {
                 setActionBarLayout();
                 if (getCurrentFragment() instanceof LedgeFragment) {
                     setCurrentFragment(LedgeFragment.newInstance());
+                } else if (getCurrentFragment() instanceof ReportFragment) {
+                    setCurrentFragment(ReportFragment.newInstance());
                 }
             }
         }
@@ -391,6 +400,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onBindViewHolder(CustomViewHolder viewHolder, int i) {
                 viewHolder.noticeSubject.setText(mItems.get(i));
+                if (mItems.get(i).toString().equals("THIS MONTH")) {
+                    viewHolder.noticeSubject.setText(mItems.get(i));
+                    viewHolder.noticeSubject.setTypeface(null, Typeface.BOLD);
+                    viewHolder.noticeSubject.setTextColor(Color.parseColor("#ccced1"));
+                }
             }
 
             @Override
@@ -401,9 +415,9 @@ public class MainActivity extends AppCompatActivity {
         };
 
         mRecentRecyclerView.setAdapter(mAdapter);
-        Log.i("QEE", String.valueOf(mRecentRecyclerView.getLayoutManager().getItemCount()));
 
         mRecentRecyclerView.scrollToPosition(4);
+
         mRecentRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, mRecentRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
@@ -413,9 +427,7 @@ public class MainActivity extends AppCompatActivity {
                         String tabString = ((TextView) view.findViewById(R.id.recyclerItem)).getText().toString();
                         setDate(tabString);
                         mRecentRecyclerView.scrollToPosition(position);
-                        BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
-                        MenuItem tmp = bottomNavigationView.getMenu().getItem(0);
-                        android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+
 
                         //reset data in ledgerfragment
                         Fragment selectedFragment = LedgeFragment.newInstance();
