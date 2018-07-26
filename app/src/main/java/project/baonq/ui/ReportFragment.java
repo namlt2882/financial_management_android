@@ -162,6 +162,7 @@ public class ReportFragment extends Fragment {
         PieChart chart = pieChart;
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(true);
+        chart.setDrawSliceText(false);
         chart.setData(pieData);
         chart.invalidate();
     }
@@ -171,9 +172,9 @@ public class ReportFragment extends Fragment {
         Application application = mainActivity.getApplication();
         List<Transaction> transactionList;
         if (ledger_id != null) {
-            transactionList = new TransactionService(application).getByLedgerId(ledger_id);
+            transactionList = new TransactionService(application).getActiveByLedgerId(ledger_id);
         } else {
-            transactionList = new TransactionService(application).getAll();
+            transactionList = new TransactionService(application).getAllActive();
         }
 
         for (Transaction item : transactionList) {

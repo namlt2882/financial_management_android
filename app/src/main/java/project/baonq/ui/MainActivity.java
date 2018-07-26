@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         activity = this;
         ledgerSyncService.addConsumer(c -> {
             activity.runOnUiThread(() -> {
-                updateTitle();
+                refreshTitleData();
                 setActionBarLayout();
                 if (getCurrentFragment() instanceof LedgeFragment) {
                     setCurrentFragment(LedgeFragment.newInstance());
@@ -116,15 +116,13 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         }
         //update value hold name and amount
-        updateTitle();
+        refreshTitleData();
         //set date picker
         setActionBarLayout();
         //set float action button
         initFloatActionButton();
         //set botttom navigation bar activities
         setFragmentBottomNavigationBarActivities();
-
-
     }
 
     @Override
@@ -144,18 +142,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         setActionBarLayout();
-    }
-
-    private void updateTitle() {
-        if (ledger_id != null) {
-            Ledger ledger = ledgerSyncService.findById(ledger_id);
-            ledgerName = ledger.getName();
-            my_money = formatMoney(ledgerSyncService.findSumOfLedger(ledger))
-                    + convertCurrency(ledger.getCurrency());
-        } else {
-            ledgerName = "Tổng cộng";
-            my_money = formatMoney(ledgerSyncService.findSumOfLedgers()) + convertCurrency(Currency.VND.name());
-        }
     }
 
     public void restartApp() {
@@ -322,23 +308,31 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 || requestCode == TRANSACTION_ACTION) {
             if (resultCode == RESET_TITLE) {
-                Ledger ledger = ledgerSyncService.findById(ledger_id);
-                if (ledger != null) {
-                    ledgerName = ledger.getName();
-                } else {
-                    ledgerName = "Tổng cộng";
-                }
-                double total = ledgerSyncService.findSumOfLedger(ledger_id);
-                my_money = formatMoney(total) + convertCurrency(Currency.VND.name());
+                refreshTitleData();
             }
             if (resultCode == RESULT_OK || resultCode == RESET_TITLE || requestCode == TRANSACTION_ACTION) {
                 setActionBarLayout();
-                if (getCurrentFragment() instanceof LedgeFragment) {
-                    setCurrentFragment(LedgeFragment.newInstance());
-                } else if (getCurrentFragment() instanceof ReportFragment) {
-                    setCurrentFragment(ReportFragment.newInstance());
-                }
+                refreshFragment();
             }
+        }
+    }
+
+    public void refreshTitleData() {
+        Ledger ledger = ledgerSyncService.findById(ledger_id);
+        if (ledger != null) {
+            ledgerName = ledger.getName();
+        } else {
+            ledgerName = "Tổng cộng";
+        }
+        double total = ledgerSyncService.findSumOfLedger(ledger_id);
+        my_money = formatMoney(total) + convertCurrency(Currency.VND.name());
+    }
+
+    public void refreshFragment() {
+        if (getCurrentFragment() instanceof LedgeFragment) {
+            setCurrentFragment(LedgeFragment.newInstance());
+        } else if (getCurrentFragment() instanceof ReportFragment) {
+            setCurrentFragment(ReportFragment.newInstance());
         }
     }
 
@@ -395,13 +389,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initRecyclerView() {
-
         mRecentRecyclerView = (RecyclerView) mCustomView.findViewById(R.id.recentrecyclerView);
         mRecentRecyclerView.setHasFixedSize(true);
         mRecentLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mRecentRecyclerView.setLayoutManager(mRecentLayoutManager);
-
-
         mAdapter = new RecyclerView.Adapter<CustomViewHolder>() {
             @Override
             public CustomViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
@@ -416,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mItems.get(i).toString().equals("THIS MONTH")) {
                     viewHolder.noticeSubject.setText(mItems.get(i));
                     viewHolder.noticeSubject.setTypeface(null, Typeface.BOLD);
-                    viewHolder.noticeSubject.setTextColor(Color.parseColor("#ccced1"));
+                    viewHolder.noticeSubject.setTextColor(Color.parseColor("#000000"));
                 }
             }
 
@@ -426,31 +417,19 @@ public class MainActivity extends AppCompatActivity {
             }
 
         };
-
         mRecentRecyclerView.setAdapter(mAdapter);
-
         mRecentRecyclerView.scrollToPosition(4);
-
         mRecentRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, mRecentRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
                         resetRecycler(1);
                         ((TextView) view.findViewById(R.id.recyclerItem)).setTypeface(null, Typeface.BOLD);
-                        ((TextView) view.findViewById(R.id.recyclerItem)).setTextColor(Color.parseColor("#ccced1"));
+                        ((TextView) view.findViewById(R.id.recyclerItem)).setTextColor(Color.parseColor("#000000"));
                         String tabString = ((TextView) view.findViewById(R.id.recyclerItem)).getText().toString();
                         setDate(tabString);
                         mRecentRecyclerView.scrollToPosition(position);
-
-
-                        //reset data in ledgerfragment
-                        Fragment selectedFragment = LedgeFragment.newInstance();
-                        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                        transaction.replace(R.id.frame_layout, selectedFragment);
-                        transaction.addToBackStack(null);
-                        transaction.commit();
-//                        Intent intent = getIntent();
-//                        finish();
-//                        startActivity(intent);
+                        //reset data in fragment
+                        refreshFragment();
                     }
 
                     @Override
@@ -459,7 +438,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
         );
-
 
         // ((TextView)mRecentLayoutManager.findViewByPosition(0).findViewById(R.id.recyclerItem)).setTypeface(null, Typeface.BOLD);
     }
@@ -500,11 +478,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void resetRecycler(int tab) {
-
         for (int i = 0; i < 6; i++)
             if (mRecentLayoutManager.findViewByPosition(i) != null) {
                 ((TextView) mRecentLayoutManager.findViewByPosition(i).findViewById(R.id.recyclerItem)).setTypeface(null, Typeface.NORMAL);
-                ((TextView) mRecentLayoutManager.findViewByPosition(i).findViewById(R.id.recyclerItem)).setTextColor(Color.parseColor("#f7f8f9"));
+                ((TextView) mRecentLayoutManager.findViewByPosition(i).findViewById(R.id.recyclerItem)).setTextColor(Color.parseColor("#FF989292"));
             }
     }
 }
