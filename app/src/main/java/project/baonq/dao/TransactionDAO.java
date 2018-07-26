@@ -33,10 +33,15 @@ public class TransactionDAO extends DAO {
         transactionDao.update(transaction);
     }
 
-    public List<Transaction> getTransactionByLedgerId(Long ledger_id) {
+    public List<Transaction> getByLedgerId(Long ledger_id) {
         DaoSession daoSession = getDaoSession();
         TransactionDao transactionDao = daoSession.getTransactionDao();
         return transactionDao.queryBuilder().where(TransactionDao.Properties.Ledger_id.eq(ledger_id)).list();
+    }
+    public List<Transaction> getActiveByLedgerId(Long ledger_id) {
+        return getDaoSession().getTransactionDao().queryBuilder()
+                .where(TransactionDao.Properties.Status.eq(TransactionStatus.ENABLE.getStatus()),
+                        TransactionDao.Properties.Ledger_id.eq(ledger_id)).list();
     }
 
     public List<Transaction> getAll() {
