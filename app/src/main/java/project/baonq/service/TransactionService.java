@@ -52,7 +52,11 @@ public class TransactionService extends Service {
     }
 
     public List<Transaction> getByLedgerId(Long ledger_id) {
-        return transactionDAO.getTransactionByLedgerId(ledger_id);
+        return transactionDAO.getByLedgerId(ledger_id);
+    }
+
+    public List<Transaction> getActiveByLedgerId(Long ledger_id) {
+        return transactionDAO.getActiveByLedgerId(ledger_id);
     }
 
 
