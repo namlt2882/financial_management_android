@@ -1,10 +1,8 @@
 package project.baonq.ui;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
@@ -12,26 +10,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import project.baonq.enumeration.Currency;
-import project.baonq.enumeration.TransactionGroupType;
 import project.baonq.menu.R;
 import project.baonq.model.Ledger;
 import project.baonq.model.Transaction;
-import project.baonq.model.TransactionGroup;
 import project.baonq.service.LedgerService;
 import project.baonq.service.TransactionGroupService;
 import project.baonq.service.TransactionService;
-import project.baonq.util.ConvertUtil;
 
+import static project.baonq.ui.MainActivity.RESET_TITLE;
 import static project.baonq.util.ConvertUtil.convertCurrency;
 import static project.baonq.util.ConvertUtil.formatMoney;
 
@@ -43,7 +39,8 @@ public class LedgeChoosenActivity extends AppCompatActivity {
     TransactionService transactionService;
     private View cardSumLayout;
     String totalCashGlobal;
-
+    List<View> layoutList;
+    private TextView txtClose;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.NormalSizeAppTheme);
@@ -53,8 +50,10 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         transactionGroupService = new TransactionGroupService(getApplication());
         ledgerService = new LedgerService(getApplication());
         transactionService = new TransactionService(getApplication());
+        layoutList = new LinkedList<>();
         //set init for action bar
         initActionBar();
+        txtClose = (TextView) findViewById(R.id.closeLedge);
         //set init for menu action
         initMenuAction();
         //set init layout element
@@ -71,10 +70,20 @@ public class LedgeChoosenActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == LAYOUT_INFO || requestCode == LAYOUT_UPDATE) {
-            if (resultCode == RESULT_OK) {
-                finish();
-                startActivity(getIntent());
+            if (resultCode == RESET_TITLE) {
+                layoutList.forEach(view -> {
+                    ((ViewGroup) view.getParent()).removeView(view);
+                });
+                layoutList = new LinkedList<>();
+                initLayout();
             }
+            txtClose.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    setResult(RESET_TITLE);
+                    finish();
+                }
+            });
         }
     }
 
@@ -179,6 +188,7 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         createImageButton(ledger, sum, submitLayout);
         LinearLayout contentLedgeChosenLayout = (LinearLayout) findViewById(R.id.contentLedgerChosen);
         contentLedgeChosenLayout.addView(submitLayout);
+        layoutList.add(submitLayout);
     }
 
 
@@ -228,11 +238,13 @@ public class LedgeChoosenActivity extends AppCompatActivity {
         actionBar.setCustomView(customView);
     }
 
+
+
     private void initMenuAction() {
-        TextView txtClose = (TextView) findViewById(R.id.closeLedge);
         txtClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                setResult(RESULT_OK);
                 finish();
             }
         });

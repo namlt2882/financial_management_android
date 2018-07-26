@@ -85,8 +85,23 @@ public class TransactionService extends Service {
         return transactionDAO.getAll();
     }
 
+    public List<Transaction> getAllActive() {
+        return transactionDAO.getAllActive();
+    }
+
     public Transaction getTransactionByID(Long id) {
         System.out.println(id);
         return null;
+    }
+
+    public boolean deleteTransaction(Long id) {
+        Transaction transaction = transactionDAO.findById(id);
+        if (transaction != null) {
+            transaction.setStatus(TransactionStatus.DISABLE.getStatus());
+            transaction.setLast_update(System.currentTimeMillis());
+            transactionDAO.updateTransaction(transaction);
+            return true;
+        } else
+            return false;
     }
 }

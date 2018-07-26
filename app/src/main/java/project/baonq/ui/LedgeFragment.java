@@ -34,6 +34,8 @@ import project.baonq.service.App;
 import project.baonq.service.TransactionGroupService;
 import project.baonq.service.TransactionService;
 
+import static project.baonq.ui.MainActivity.TRANSACTION_ACTION;
+
 
 public class LedgeFragment extends Fragment {
 
@@ -101,7 +103,7 @@ public class LedgeFragment extends Fragment {
                 Log.i("Click on transaction", String.valueOf(item.getId()));
                 Intent intent = new Intent(getActivity(), AddTransaction.class);
                 intent.putExtra("transactionID", item.getId());
-                startActivityForResult(intent, 1);
+                startActivityForResult(intent, TRANSACTION_ACTION);
             }
         });
         return tmp;
@@ -121,7 +123,7 @@ public class LedgeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.ledge_fragment_layout, container, false);
         daoSession = ((App) getActivity().getApplication()).getDaoSession();
-        list = new TransactionService(getActivity().getApplication()).getAll();
+        list = new TransactionService(getActivity().getApplication()).getAllActive();
         sortListByTdate();
         String tmp = "";
         LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.loadTransaction);

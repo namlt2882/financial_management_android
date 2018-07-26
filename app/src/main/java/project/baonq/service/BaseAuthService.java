@@ -77,8 +77,8 @@ public class BaseAuthService {
         if (authenticated) {
             conn.setRequestProperty("Authorization", jwt);
         }
-        conn.setReadTimeout(10000);
-        conn.setConnectTimeout(15000);
+        conn.setReadTimeout(60000);
+        conn.setConnectTimeout(60000);
         conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
         conn.setRequestProperty("charset", "utf-8");
         return conn;

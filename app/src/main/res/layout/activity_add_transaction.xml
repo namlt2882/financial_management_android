@@ -39,8 +39,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:ems="6"
-                android:textSize="35dp"
-                android:inputType="numberDecimal" />
+                android:inputType="numberDecimal"
+                android:textSize="35dp" />
 
             <Button
                 android:id="@+id/btnCurrency"
@@ -65,9 +65,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/darker_gray"
+            android:onClick="clickToChooseWallet"
             android:textSize="18dp"
             app:layout_column="1"
-            android:onClick="clickToChooseWallet"
             app:layout_row="4" />
 
         <TextView
@@ -85,10 +85,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/darker_gray"
+            android:onClick="clickToChooseCatogory"
             android:textSize="18dp"
             app:layout_column="1"
-            app:layout_row="1"
-            android:onClick="clickToChooseCatogory"/>
+            app:layout_row="1" />
 
         <TextView
             android:layout_width="match_parent"
@@ -107,8 +107,8 @@
             android:ems="10"
             android:hint="select date"
             android:inputType="date"
-            app:layout_column="1"
             android:onClick="clickToPickDate"
+            app:layout_column="1"
             app:layout_row="3" />
 
         <TextView
@@ -128,6 +128,18 @@
             android:hint="Note"
             android:inputType="text" />
 
-
+        <Button
+            android:id="@+id/btnDeleteTransaction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorWhite"
+            android:background="@android:color/holo_red_light"
+            android:onClick="clickToDeleteTransaction"
+            android:visibility="invisible"
+            android:textSize="18dp"
+            android:text="Delete"
+            app:layout_column="1"
+            app:layout_row="1"
+            android:layout_marginBottom="20dp"/>
     </LinearLayout>
 </ScrollView>

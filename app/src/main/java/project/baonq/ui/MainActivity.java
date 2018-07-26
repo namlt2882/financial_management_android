@@ -61,6 +61,8 @@ import static project.baonq.util.ConvertUtil.convertCurrency;
 
 
 public class MainActivity extends AppCompatActivity {
+    public static final int TRANSACTION_ACTION = 10;
+    public static final int RESET_TITLE = 10;
     CalendarPickerView calendar;
     public static Long startTime;
     public static Long endTime;
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     AuthenticationService authService;
     Thread notificationService;
     LedgerSyncService ledgerSyncService;
-    public static final boolean GET_NOTIFICATION = true;
+    public static final boolean GET_NOTIFICATION = false;
     private TransactionService transactionService;
     private double sumledgerMoney = 0;
     private View mCustomView;
@@ -141,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 notificationService.start();
             }
         }
+        setActionBarLayout();
     }
 
     private void updateTitle() {
@@ -175,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AddTransaction.class);
                 removeData();
-                startActivityForResult(intent, 1);
+                startActivityForResult(intent, TRANSACTION_ACTION);
             }
         });
     }
@@ -244,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setFragmentBottomNavigationBarActivities() {
+    public void setFragmentBottomNavigationBarActivities() {
         BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
         bottomNavigationView.setBackgroundColor(Color.parseColor("#ffffff"));
         bottomNavigationView.setItemTextColor(ColorStateList.valueOf(Color.parseColor("#7f7f7f")));
@@ -282,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void setActionBarLayout() {
+    public void setActionBarLayout() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         LayoutInflater mInflater = LayoutInflater.from(this);
@@ -317,8 +320,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
+        if (requestCode == 1 || requestCode == TRANSACTION_ACTION) {
+            if (resultCode == RESET_TITLE) {
+                Ledger ledger = ledgerSyncService.findById(ledger_id);
+                if (ledger != null) {
+                    ledgerName = ledger.getName();
+                } else {
+                    ledgerName = "Tổng cộng";
+                }
+                double total = ledgerSyncService.findSumOfLedger(ledger_id);
+                my_money = formatMoney(total) + convertCurrency(Currency.VND.name());
+            }
+            if (resultCode == RESULT_OK || resultCode == RESET_TITLE || requestCode == TRANSACTION_ACTION) {
                 setActionBarLayout();
                 if (getCurrentFragment() instanceof LedgeFragment) {
                     setCurrentFragment(LedgeFragment.newInstance());

@@ -1,6 +1,7 @@
 package project.baonq.AddTransaction;
 
 import android.app.DatePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -42,6 +43,8 @@ import project.baonq.ui.MainActivity;
 import project.baonq.util.ConvertUtil;
 
 import static android.widget.Toast.LENGTH_SHORT;
+import static project.baonq.ui.MainActivity.RESET_TITLE;
+import static project.baonq.ui.MainActivity.ledger_id;
 
 public class AddTransaction extends AppCompatActivity {
 
@@ -61,7 +64,7 @@ public class AddTransaction extends AppCompatActivity {
         setTheme(R.style.NormalSizeAppTheme);
         super.onCreate(savedInstanceState);
         Intent intent = this.getIntent();
-        isUpdate = intent.getLongExtra("transactionID",0L);
+        isUpdate = intent.getLongExtra("transactionID", 0L);
 
         setContentView(R.layout.activity_add_transaction);
         initActionBar();
@@ -88,21 +91,23 @@ public class AddTransaction extends AppCompatActivity {
         removeData();
         if (isUpdate != 0L) {
             initEditLayout();
+            Button button = findViewById(R.id.btnDeleteTransaction);
+            button.setVisibility(View.VISIBLE);
         }
     }
 
-    private void initEditLayout(){
+    private void initEditLayout() {
         Transaction e = new TransactionDAO(this.getApplication()).findById(isUpdate);
         ledgerId = (e.getLedger_id());
-        groupId= (e.getGroup_id());
+        groupId = (e.getGroup_id());
         SharedPreferences pre = getSharedPreferences("transaction_data", MODE_PRIVATE);
         SharedPreferences.Editor editor = pre.edit();
-        editor.putString("walletId",ledgerId.toString());
-        editor.putString("catId",groupId.toString());
+        editor.putString("walletId", ledgerId.toString());
+        editor.putString("catId", groupId.toString());
         editor.commit();
-        ((EditText)findViewById(R.id.nmAmount)).setText(String.valueOf(e.getBalance()));
-        ((EditText)findViewById(R.id.txtNote)).setText(String.valueOf(e.getNote()));
-        ((EditText)findViewById(R.id.txtDate)).setText(String.valueOf(e.getTdate()));
+        ((EditText) findViewById(R.id.nmAmount)).setText(String.valueOf(e.getBalance()));
+        ((EditText) findViewById(R.id.txtNote)).setText(String.valueOf(e.getNote()));
+        ((EditText) findViewById(R.id.txtDate)).setText(String.valueOf(e.getTdate()));
     }
 
     public Long getLedgerId() {
@@ -180,8 +185,11 @@ public class AddTransaction extends AppCompatActivity {
         txtSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isUpdate == 0L) {clickToSave();}
-                else {clickToUpdate();}
+                if (isUpdate == 0L) {
+                    clickToSave();
+                } else {
+                    clickToUpdate();
+                }
             }
         });
     }
@@ -217,7 +225,7 @@ public class AddTransaction extends AppCompatActivity {
                 e.setNote(txtNote);
                 transactionService.updateTransaction(e);
                 removeData();
-                setResult(RESULT_OK);
+                setResult(RESET_TITLE);
                 finish();
             }
         }
@@ -248,7 +256,7 @@ public class AddTransaction extends AppCompatActivity {
                 transactionService
                         .addTransaction(getLedgerId(), getGroupId(), amount, date, txtNote);
                 removeData();
-                setResult(RESULT_OK);
+                setResult(RESET_TITLE);
                 finish();
             }
         }
@@ -295,5 +303,24 @@ public class AddTransaction extends AppCompatActivity {
         editor.remove("catId");
         editor.remove("walletId");
         editor.commit();
+    }
+
+    public void clickToDeleteTransaction(View view) {
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Closing Activity")
+                .setMessage("Are you sure to delte this transaction?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (isUpdate != null && isUpdate != 0L) {
+                            transactionService.deleteTransaction(isUpdate);
+                        }
+                        setResult(RESET_TITLE);
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 }

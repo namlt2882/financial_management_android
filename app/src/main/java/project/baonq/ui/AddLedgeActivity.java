@@ -33,6 +33,8 @@ import project.baonq.service.TransactionGroupService;
 import project.baonq.service.TransactionService;
 import project.baonq.util.ConvertUtil;
 
+import static project.baonq.ui.MainActivity.RESET_TITLE;
+
 public class AddLedgeActivity extends AppCompatActivity {
 
     private boolean isUpdate = false;
@@ -181,7 +183,7 @@ public class AddLedgeActivity extends AppCompatActivity {
                             balance = Math.abs(balance);
                             transactionService.addTransaction(ledgerId, groupId, balance, tdate, note);
                         }
-                        setResult(RESULT_OK, intent);
+                        setResult(RESET_TITLE, intent);
                         finish();
                     }
                 }
@@ -199,7 +201,7 @@ public class AddLedgeActivity extends AppCompatActivity {
                     boolean isChecked = cbReport.isChecked();
                     updateLedger(id, name, currency, isChecked);
 //                    updateTransaction(id, 1, "Khác", Double.parseDouble(currentBalance));
-                    setResult(RESULT_OK, intent);
+                    setResult(RESET_TITLE, intent);
                     finish();
                 }
             });
