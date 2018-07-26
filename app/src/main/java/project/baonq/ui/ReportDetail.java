@@ -38,15 +38,14 @@ public class ReportDetail extends AppCompatActivity {
         Intent intent = getIntent();
         int transactionGroup = intent.getIntExtra("transactionGroup", -1);
         initActionBar(transactionGroup);
-        if(transactionGroup ==1){
+        if (transactionGroup == 1) {
             hm = ReportFragment.hmIncome;
-        }else {
+        } else {
             hm = ReportFragment.hmExpand;
         }
 
 
         initChart(hm);
-
 
         for (String key : hm.keySet()) {
             addNewRowData(key, ConvertUtil.convertCashFormat(hm.get(key)) + "đ", transactionGroup);
@@ -58,11 +57,13 @@ public class ReportDetail extends AppCompatActivity {
         View tmpLayout = layoutInflater.inflate(R.layout.fragment_report_detail_sub_layout, null);
         TextView txtGroupName = tmpLayout.findViewById(R.id.txtGroupName);
         TextView txtCash = tmpLayout.findViewById(R.id.txtCash);
+        ImageView imageView = (ImageView) tmpLayout.findViewById(R.id.imageView);
+        imageView.setImageResource(ConvertUtil.mapIcon(key));
         txtGroupName.setText(key);
         txtCash.setText(value);
-        if(transactionGroup == 1){
+        if (transactionGroup == 1) {
             txtCash.setTextColor(getColor(R.color.colorGreen));
-        }else {
+        } else {
             txtCash.setTextColor(getColor(R.color.color_red));
         }
         LinearLayout mainLayout = findViewById(R.id.containAllReport);
@@ -80,15 +81,15 @@ public class ReportDetail extends AppCompatActivity {
         View customView = layoutInflater.inflate(R.layout.ledge_choosen_sub_layout, null);
         TextView textView = customView.findViewById(R.id.ledgeTittle);
         TextView close = customView.findViewById(R.id.closeLedge);
-        close.setOnClickListener(new View.OnClickListener(){
+        close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
-        if(transactionGroup == 1){
+        if (transactionGroup == 1) {
             textView.setText("Thu nhập");
-        }else {
+        } else {
             textView.setText("Chi tiêu");
         }
 
@@ -116,4 +117,5 @@ public class ReportDetail extends AppCompatActivity {
         chart.setData(pieData);
         chart.invalidate();
     }
+
 }

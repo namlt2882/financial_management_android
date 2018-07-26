@@ -10,6 +10,7 @@ import java.util.List;
 import project.baonq.dao.LedgerDAO;
 import project.baonq.enumeration.LedgerStatus;
 import project.baonq.enumeration.TransactionGroupType;
+import project.baonq.enumeration.TransactionStatus;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Ledger;
 import project.baonq.model.LedgerDao;
@@ -27,7 +28,10 @@ public class LedgerService extends Service {
 
 
     public Ledger findById(Long id) {
-        return new LedgerDAO(application).findById(id);
+        if (id != null && id != 0L) {
+            return new LedgerDAO(application).findById(id);
+        }
+        return null;
     }
 
     public Long addLedger(String name, String currency, boolean isReport) {
@@ -102,8 +106,11 @@ public class LedgerService extends Service {
     }
 
     public Double findSumOfLedger(Long id) {
-        Ledger ledger = findById(id);
-        return findSumOfLedger(ledger);
+        if (id != null && id != Long.parseLong("0")) {
+            Ledger ledger = findById(id);
+            return findSumOfLedger(ledger);
+        }
+        return findSumOfLedgers();
     }
 
     public Double findSumOfLedger(Ledger ledger) {
@@ -116,13 +123,15 @@ public class LedgerService extends Service {
     public static double sumOfTransaction(List<Transaction> transactionList) {
         double sum = 0;
         for (Transaction item : transactionList) {
-            TransactionGroup transactionGroup = item.getTransactionGroup();
-            int transactionGrouptype = transactionGroup.getTransaction_type();
-            if (transactionGrouptype == TransactionGroupType.EXPENSE.getType()) {
-                sum -= item.getBalance();
-            }
-            if (transactionGrouptype == TransactionGroupType.INCOME.getType()) {
-                sum += item.getBalance();
+            if (item.getStatus() == TransactionStatus.ENABLE.getStatus()) {
+                TransactionGroup transactionGroup = item.getTransactionGroup();
+                int transactionGrouptype = transactionGroup.getTransaction_type();
+                if (transactionGrouptype == TransactionGroupType.EXPENSE.getType()) {
+                    sum -= item.getBalance();
+                }
+                if (transactionGrouptype == TransactionGroupType.INCOME.getType()) {
+                    sum += item.getBalance();
+                }
             }
         }
         return sum;

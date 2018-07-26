@@ -6,6 +6,7 @@ import android.database.Cursor;
 import java.util.LinkedList;
 import java.util.List;
 
+import project.baonq.enumeration.TransactionStatus;
 import project.baonq.model.DaoSession;
 import project.baonq.model.Transaction;
 import project.baonq.model.TransactionDao;
@@ -26,7 +27,6 @@ public class TransactionDAO extends DAO {
     }
 
 
-
     public void updateTransaction(Transaction transaction) {
         DaoSession daoSession = getDaoSession();
         TransactionDao transactionDao = daoSession.getTransactionDao();
@@ -45,6 +45,11 @@ public class TransactionDAO extends DAO {
         return transactionDao.loadAll();
     }
 
+    public List<Transaction> getAllActive() {
+        return getDaoSession().getTransactionDao().queryBuilder()
+                .where(TransactionDao.Properties.Status.eq(TransactionStatus.ENABLE.getStatus())).list();
+    }
+
     public Transaction getTransactionNeedForUpdate(Long ledger_id, Long group_id) {
         DaoSession daoSession = getDaoSession();
         TransactionDao transactionDao = daoSession.getTransactionDao();
@@ -58,7 +63,8 @@ public class TransactionDAO extends DAO {
         return getDaoSession().getTransactionDao().queryBuilder()
                 .orderDesc(TransactionDao.Properties.Last_update).limit(1).unique();
     }
-    public Transaction findById(Long id){
+
+    public Transaction findById(Long id) {
         DaoSession daoSession = getDaoSession();
         TransactionDao transactionDao = daoSession.getTransactionDao();
         Transaction result = transactionDao.queryBuilder().where(TransactionDao.Properties.Id.eq(id)).unique();
