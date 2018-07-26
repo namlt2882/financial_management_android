@@ -14,21 +14,21 @@ import project.baonq.model.DaoSession;
 
 public class App extends Application {
 
-    private DaoSession daoSession;
     public static final String DATABASE_NAME = "personal_finance.db";
     private ConnectivityManager connectivityManager;
-
+    DaoMaster daoMaster;
     @Override
     public void onCreate() {
         super.onCreate();
         DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, DATABASE_NAME);
         Database db = helper.getWritableDb();
-        daoSession = new DaoMaster(db).newSession();
+        daoMaster = new DaoMaster(db);
+        DaoSession daoSession = daoMaster.newSession();
         QueryBuilder.LOG_SQL = true;
     }
 
     public DaoSession getDaoSession() {
-        return daoSession;
+        return daoMaster.newSession();
     }
 
     public void removeDb() {
