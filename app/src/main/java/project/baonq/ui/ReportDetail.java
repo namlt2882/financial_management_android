@@ -112,6 +112,7 @@ public class ReportDetail extends AppCompatActivity {
         dataSet.setValueTextSize(16);
         PieData pieData = new PieData(dataSet);
         PieChart chart = pieChart;
+        chart.setDrawSliceText(false);
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(true);
         chart.setData(pieData);
