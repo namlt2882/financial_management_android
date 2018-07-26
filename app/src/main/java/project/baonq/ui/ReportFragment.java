@@ -162,6 +162,7 @@ public class ReportFragment extends Fragment {
         PieChart chart = pieChart;
         chart.getDescription().setEnabled(false);
         chart.getLegend().setEnabled(true);
+        chart.setDrawSliceText(false);
         chart.setData(pieData);
         chart.invalidate();
     }
